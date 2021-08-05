@@ -5,24 +5,40 @@ import PackageDescription
 
 let package = Package(
     name: "ShadowSwift",
+    platforms: [
+        .macOS(.v11),
+        .iOS(.v14)],
     products: [
-        // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "ShadowSwift",
             targets: ["ShadowSwift"]),
     ],
     dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
+        .package(url: "https://github.com/OperatorFoundation/Chord.git", from: "0.0.12"),
+        .package(url: "https://github.com/OperatorFoundation/Datable.git", from: "3.0.4"),
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.4.2"),
+        .package(url: "https://github.com/OperatorFoundation/SwiftHexTools.git", from: "1.2.2"),
+        .package(url: "https://github.com/OperatorFoundation/Transmission.git", from: "0.2.3"),
+        .package(url: "https://github.com/OperatorFoundation/Transport.git", from: "2.3.5")
     ],
     targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-        // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "ShadowSwift",
-            dependencies: []),
+            dependencies: [
+                "Chord",
+                "Datable",
+                "Transmission",
+                "Transport",
+                .product(name: "Logging", package: "swift-log")]),
         .testTarget(
             name: "ShadowSwiftTests",
-            dependencies: ["ShadowSwift"]),
-    ]
+            dependencies: [
+                        "Datable",
+                        "ShadowSwift",
+                        "SwiftHexTools",
+                        .product(name: "Logging", package: "swift-log")],
+            exclude: ["Info.plist"]),
+    ],
+    
+    swiftLanguageVersions: [.v5]
 )
