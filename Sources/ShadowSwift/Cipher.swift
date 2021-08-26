@@ -140,8 +140,6 @@ class Cipher
     static func hkdfSHA1(secret: Data, salt: Data, cipherMode: CipherMode) -> Data?
     {
         print("HKDFSHA1")
-        print("\nsecret")
-        print(secret.array)
         print("\nsalt")
         print(salt.array)
         let info = Data(string: "ss-subkey")
