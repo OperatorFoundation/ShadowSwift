@@ -361,7 +361,6 @@ open class ShadowConnection: Transport.Connection
     
     func sendSalt() -> Bool
     {
-        print("Sending Salt : \(salt.array)")
         guard network.write(data: salt)
         else
         {
@@ -379,7 +378,7 @@ open class ShadowConnection: Transport.Connection
         guard let serverSalt = maybeSalt
         else
         {
-            print("We did not receive salt from the server.")
+            self.log.debug("We did not receive salt from the server.")
             return false
         }
         
@@ -428,8 +427,6 @@ open class ShadowConnection: Transport.Connection
             
             return
         }
-        
-        print("Sending address: \(encryptedAddress.count)")
         
         let written = network.write(data: encryptedAddress)
         if written

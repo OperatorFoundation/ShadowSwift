@@ -139,9 +139,6 @@ class Cipher
     
     static func hkdfSHA1(secret: Data, salt: Data, cipherMode: CipherMode) -> Data?
     {
-        print("HKDFSHA1")
-        print("\nsalt")
-        print(salt.array)
         let info = Data(string: "ss-subkey")
         let outputSize = secret.count
         
@@ -149,7 +146,6 @@ class Cipher
         guard iterations <= 255
         else
         {
-            print("Key derviation failure: Too many iterations - \(iterations)")
             return nil
         }
         
@@ -211,7 +207,7 @@ class Cipher
             }
             catch let encryptError
             {
-                print("Error running AESGCM encryption: \(encryptError)")
+                log.error("Error running AESGCM encryption: \(encryptError)")
             }
             
         case .AES_256_GCM:
@@ -224,7 +220,7 @@ class Cipher
             }
             catch let encryptError
             {
-                print("Error running AESGCM encryption: \(encryptError)")
+                log.error("Error running AESGCM encryption: \(encryptError)")
             }
             
         case .CHACHA20_IETF_POLY1305:
@@ -237,7 +233,7 @@ class Cipher
             }
             catch let encryptError
             {
-                print("Error running ChaChaPoly encryption: \(encryptError)")
+                log.error("Error running ChaChaPoly encryption: \(encryptError)")
             }
         }
         
@@ -272,7 +268,7 @@ class Cipher
             }
             catch let decryptError
             {
-                print("Error running AESGCM decryption: \(decryptError)")
+                log.error("Error running AESGCM decryption: \(decryptError)")
                 return nil
             }
         case .AES_256_GCM:
@@ -283,7 +279,7 @@ class Cipher
             }
             catch let decryptError
             {
-                print("Error running AESGCM decryption: \(decryptError)")
+                log.error("Error running AESGCM decryption: \(decryptError)")
                 return nil
             }
         case .CHACHA20_IETF_POLY1305:
@@ -294,7 +290,7 @@ class Cipher
             }
             catch let decryptError
             {
-                print("Error running ChaChaPoly decryption: \(decryptError)")
+                log.error("Error running ChaChaPoly decryption: \(decryptError)")
                 return nil
             }
         }
@@ -307,8 +303,6 @@ class Cipher
         
         // We have 8 bytes, nonce should be 12
         counterData.append(contentsOf: [0, 0, 0, 0])
-        print("Nonce counter data size: \(counterData.count)")
-        print("Nonce counter data: \(counterData[0]), \(counterData[11])")
         
         // We increment our counter every time nonce is used (encrypt/decrypt)
         counter += 1

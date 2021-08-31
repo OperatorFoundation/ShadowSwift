@@ -6,7 +6,6 @@
 //
 
 import Foundation
-
 // FIXME: Logger
 
 class AddressReader
@@ -28,7 +27,6 @@ class AddressReader
         guard let addrType = AddrType(rawValue: Int(buffer[0]))
         else
         {
-            print("Failed to initialize Socks5Addr, AddrType is unknown: \(Int(buffer[0]))")
             return nil
         }
         
@@ -43,7 +41,6 @@ class AddressReader
             guard buffer.count >= addrLength
             else
             {
-                print("Unable to initialize a Socks5Addr. Total data size \(buffer.count) is incorrect for a domain length of \(hostLength)")
                 return nil
             }
             
@@ -61,14 +58,12 @@ class AddressReader
             guard let hostString = String(data: hostData, encoding: .utf8)
                 else
             {
-                print("Unable to resolve domain name host with provided data: \(String(data: addressData, encoding: .utf8) ?? "could not decode data to string for logging")")
                 return nil
             }
             
             guard let portString = String(data: portData, encoding: .utf8)
             else
             {
-                print("Unable to decode portData to string: \(portData)")
                 return nil
             }
             
@@ -81,7 +76,6 @@ class AddressReader
             guard buffer.count >= addressLength
                 else
             {
-                print("Received an IPv4 address with an incorrect length: \(buffer.count)")
                 return nil
             }
             
@@ -96,14 +90,12 @@ class AddressReader
             guard let hostString = String(data: hostData, encoding: .utf8)
             else
             {
-                print("Failed to decode host data into a string: \(hostData)")
                 return nil
             }
             
             guard let portString = String(data: portData, encoding: .utf8)
                 else
             {
-                print("Failed to decode port data into a string: \(portData)")
                 return nil
             }
             
@@ -116,7 +108,6 @@ class AddressReader
             guard buffer.count >= addressLength
             else
             {
-                print("Received an IPv6 address with an incorrect length: \(buffer.count)")
                 return nil
             }
             
@@ -129,14 +120,12 @@ class AddressReader
             guard let hostString = String(data: hostData, encoding: .utf8)
                 else
             {
-                print("Failed to decode host data into a string: \(hostData)")
                 return nil
             }
             
             guard let portString = String(data: portData, encoding: .utf8)
                 else
             {
-                print("Failed to decode port data into a string: \(portData)")
                 return nil
             }
             

@@ -37,9 +37,8 @@ public struct ShadowConfig: Codable
             let decoded = try decoder.decode(ShadowConfig.self, from: data)
             self = decoded
         }
-        catch let decodeError
+        catch
         {
-            print("Error decoding Shadow Config data: \(decodeError)")
             return nil
         }
     }
@@ -53,9 +52,8 @@ public struct ShadowConfig: Codable
             let data = try Data(contentsOf: url)
             self.init(from: data)
         }
-        catch (let error)
+        catch
         {
-            print("Failed to get data from path \(url.path). \nError: \(error)")
             return nil
         }        
     }
