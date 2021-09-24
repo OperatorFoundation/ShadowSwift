@@ -24,9 +24,15 @@
 
     class ShadowSwiftTests: XCTestCase
     {
+        let logger: Logger = Logger(label: "Shadow Logger")
         let testIPString = "159.203.158.90"
         let testPort: UInt16 = 2345
         let plainText = Data(array: [0, 1, 2, 3, 4])
+
+        override static func setUp()
+        {
+            LoggingSystem.bootstrap(StreamLogHandler.standardError)
+        }
         
         func testShadowConnection()
         {
@@ -42,8 +48,7 @@
             }
             
             let logger = Logger(label: "Shadow Logger")
-            LoggingSystem.bootstrap(StreamLogHandler.standardError)
-            
+
             let shadowConfig = ShadowConfig(password: "1234", mode: .CHACHA20_IETF_POLY1305)
             
             let shadowFactory = ShadowConnectionFactory(host: host, port: port, config: shadowConfig, logger: logger)
@@ -91,8 +96,7 @@
             }
             
             let logger = Logger(label: "Shadow Logger")
-            LoggingSystem.bootstrap(StreamLogHandler.standardError)
-            
+
             let shadowConfig = ShadowConfig(password: "1234", mode: .CHACHA20_IETF_POLY1305)
             
             let shadowFactory = ShadowConnectionFactory(host: host, port: port, config: shadowConfig, logger: logger)
@@ -170,7 +174,6 @@
             }
             
             let logger = Logger(label: "Shadow Logger")
-            LoggingSystem.bootstrap(StreamLogHandler.standardError)
             let shadowConfig = ShadowConfig(password: "1234", mode: .CHACHA20_IETF_POLY1305)
             let shadowFactory = ShadowConnectionFactory(host: host, port: port, config: shadowConfig, logger: logger)
             
@@ -268,8 +271,6 @@
                 return
             }
             
-            let logger = Logger(label: "Shadow Logger")
-            LoggingSystem.bootstrap(StreamLogHandler.standardError)
             let shadowConfig = ShadowConfig(password: "1234", mode: .CHACHA20_IETF_POLY1305)
             let shadowFactory = ShadowConnectionFactory(host: host, port: port, config: shadowConfig, logger: logger)
             
@@ -287,7 +288,7 @@
                 switch state
                 {
                 case NWConnection.State.ready:
-                    logger.info("\nConnected state ready\n")
+                        self.logger.info("\nConnected state ready\n")
                     connected.fulfill()
                     
                     shadowConnection.send(content: Data("1234"), contentContext: .defaultMessage, isComplete: true, completion: NWConnection.SendCompletion.contentProcessed(
@@ -296,7 +297,7 @@
                         
                         if let sendError = maybeError
                         {
-                            logger.error("Send Error: \(sendError)")
+                            self.logger.error("Send Error: \(sendError)")
                             XCTFail()
                             return
                         }
@@ -309,14 +310,14 @@
                             
                             if let receiveError = maybeReceiveError
                             {
-                                logger.error("Got a receive error \(receiveError)")
+                                self.logger.error("Got a receive error \(receiveError)")
                                 //XCTFail()
                                 //return
                             }
                             
                             if maybeData != nil
                             {
-                                logger.info("Received data!!")
+                                self.logger.info("Received data!!")
                                 received.fulfill()
                                 
                                 shadowConnection.send(content: "Send2", contentContext: .defaultMessage, isComplete: false, completion: NWConnection.SendCompletion.contentProcessed(
@@ -325,7 +326,7 @@
                                     
                                     if let sendError = maybeSendError
                                     {
-                                        logger.error("Error on 2nd send: \(sendError)")
+                                        self.logger.error("Error on 2nd send: \(sendError)")
                                         XCTFail()
                                         return
                                     }
@@ -338,7 +339,7 @@
                                         
                                         if let error = maybeError
                                         {
-                                            logger.error("Error on 2nd receive: \(error)")
+                                            self.logger.error("Error on 2nd receive: \(error)")
                                             XCTFail()
                                         }
                                         
@@ -355,7 +356,7 @@
                         }
                     }))
                 default:
-                    logger.debug("\nReceived a state other than ready: \(state)\n")
+                        self.logger.debug("\nReceived a state other than ready: \(state)\n")
                     return
                 }
             }
