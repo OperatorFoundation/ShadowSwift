@@ -84,12 +84,14 @@ class Cipher
         
         switch mode
         {
-        case .AES_128_GCM:
-            saltSize = 16
-        case .AES_256_GCM:
-            saltSize = 32
-        case .CHACHA20_IETF_POLY1305:
-            saltSize = 32
+            case .AES_128_GCM:
+                saltSize = 16
+            case .AES_256_GCM:
+                saltSize = 32
+            case .CHACHA20_IETF_POLY1305:
+                saltSize = 32
+            default:
+                return nil
         }
         
         return generateRandomBytes(count: saltSize)
@@ -116,12 +118,14 @@ class Cipher
         
         switch shadowConfig.mode
         {
-        case .AES_128_GCM:
-            keyLength = 16
-        case .AES_256_GCM:
-            keyLength = 32
-        case .CHACHA20_IETF_POLY1305:
-            keyLength = 32
+            case .AES_128_GCM:
+                keyLength = 16
+            case .AES_256_GCM:
+                keyLength = 32
+            case .CHACHA20_IETF_POLY1305:
+                keyLength = 32
+            default:
+                return Data()
         }
         
         while keyBuffer.count < keyLength
@@ -197,44 +201,47 @@ class Cipher
         
         switch mode
         {
-        case .AES_128_GCM:
-            do
-            {
-                let aesGCMNonce = try AES.GCM.Nonce(data: nonce())
-                let sealedBox = try AES.GCM.seal(plaintext, using: key, nonce: aesGCMNonce)
-                cipherText = sealedBox.ciphertext
-                tag = sealedBox.tag
-            }
-            catch let encryptError
-            {
-                log.error("Error running AESGCM encryption: \(encryptError)")
-            }
-            
-        case .AES_256_GCM:
-            do
-            {
-                let aesGCMNonce = try AES.GCM.Nonce(data: nonce())
-                let sealedBox = try AES.GCM.seal(plaintext, using: key, nonce: aesGCMNonce)
-                cipherText = sealedBox.ciphertext
-                tag = sealedBox.tag
-            }
-            catch let encryptError
-            {
-                log.error("Error running AESGCM encryption: \(encryptError)")
-            }
-            
-        case .CHACHA20_IETF_POLY1305:
-            do
-            {
-                let chachaPolyNonce = try ChaChaPoly.Nonce(data: nonce())
-                let sealedBox = try ChaChaPoly.seal(plaintext, using: key, nonce: chachaPolyNonce)
-                cipherText = sealedBox.ciphertext
-                tag = sealedBox.tag
-            }
-            catch let encryptError
-            {
-                log.error("Error running ChaChaPoly encryption: \(encryptError)")
-            }
+            case .AES_128_GCM:
+                do
+                {
+                    let aesGCMNonce = try AES.GCM.Nonce(data: nonce())
+                    let sealedBox = try AES.GCM.seal(plaintext, using: key, nonce: aesGCMNonce)
+                    cipherText = sealedBox.ciphertext
+                    tag = sealedBox.tag
+                }
+                catch let encryptError
+                {
+                    log.error("Error running AESGCM encryption: \(encryptError)")
+                }
+
+            case .AES_256_GCM:
+                do
+                {
+                    let aesGCMNonce = try AES.GCM.Nonce(data: nonce())
+                    let sealedBox = try AES.GCM.seal(plaintext, using: key, nonce: aesGCMNonce)
+                    cipherText = sealedBox.ciphertext
+                    tag = sealedBox.tag
+                }
+                catch let encryptError
+                {
+                    log.error("Error running AESGCM encryption: \(encryptError)")
+                }
+
+            case .CHACHA20_IETF_POLY1305:
+                do
+                {
+                    let chachaPolyNonce = try ChaChaPoly.Nonce(data: nonce())
+                    let sealedBox = try ChaChaPoly.seal(plaintext, using: key, nonce: chachaPolyNonce)
+                    cipherText = sealedBox.ciphertext
+                    tag = sealedBox.tag
+                }
+                catch let encryptError
+                {
+                    log.error("Error running ChaChaPoly encryption: \(encryptError)")
+                }
+            case .DARKSTAR:
+                // FIXME
+                break
         }
         
         return (cipherText, tag)
@@ -260,39 +267,42 @@ class Cipher
     {
         switch mode
         {
-        case .AES_128_GCM:
-            do
-            {
-                let sealedBox = try AES.GCM.SealedBox(nonce: AES.GCM.Nonce(data: nonce()), ciphertext: encrypted, tag: tag)
-                return try AES.GCM.open(sealedBox, using: key)
-            }
-            catch let decryptError
-            {
-                log.error("Error running AESGCM decryption: \(decryptError)")
+            case .AES_128_GCM:
+                do
+                {
+                    let sealedBox = try AES.GCM.SealedBox(nonce: AES.GCM.Nonce(data: nonce()), ciphertext: encrypted, tag: tag)
+                    return try AES.GCM.open(sealedBox, using: key)
+                }
+                catch let decryptError
+                {
+                    log.error("Error running AESGCM decryption: \(decryptError)")
+                    return nil
+                }
+            case .AES_256_GCM:
+                do
+                {
+                    let sealedBox = try AES.GCM.SealedBox(nonce: AES.GCM.Nonce(data: nonce()), ciphertext: encrypted, tag: tag)
+                    return try AES.GCM.open(sealedBox, using: key)
+                }
+                catch let decryptError
+                {
+                    log.error("Error running AESGCM decryption: \(decryptError)")
+                    return nil
+                }
+            case .CHACHA20_IETF_POLY1305:
+                do
+                {
+                    let sealedBox = try ChaChaPoly.SealedBox(nonce: ChaChaPoly.Nonce(data: nonce()), ciphertext: encrypted, tag: tag)
+                    return try ChaChaPoly.open(sealedBox, using: key)
+                }
+                catch let decryptError
+                {
+                    log.error("Error running ChaChaPoly decryption: \(decryptError)")
+                    return nil
+                }
+            case .DARKSTAR:
+                // FIXME
                 return nil
-            }
-        case .AES_256_GCM:
-            do
-            {
-                let sealedBox = try AES.GCM.SealedBox(nonce: AES.GCM.Nonce(data: nonce()), ciphertext: encrypted, tag: tag)
-                return try AES.GCM.open(sealedBox, using: key)
-            }
-            catch let decryptError
-            {
-                log.error("Error running AESGCM decryption: \(decryptError)")
-                return nil
-            }
-        case .CHACHA20_IETF_POLY1305:
-            do
-            {
-                let sealedBox = try ChaChaPoly.SealedBox(nonce: ChaChaPoly.Nonce(data: nonce()), ciphertext: encrypted, tag: tag)
-                return try ChaChaPoly.open(sealedBox, using: key)
-            }
-            catch let decryptError
-            {
-                log.error("Error running ChaChaPoly decryption: \(decryptError)")
-                return nil
-            }
         }
     }
     
@@ -329,5 +339,8 @@ public enum CipherMode: String, Codable
     case AES_128_GCM = "AES-128-GCM"
     case AES_256_GCM = "AES-256-GCM"
     case CHACHA20_IETF_POLY1305 = "CHACHA20-IETF-POLY1305"
+
+    // New cipher mode
+    case DARKSTAR = "DarkStar"
 }
 
