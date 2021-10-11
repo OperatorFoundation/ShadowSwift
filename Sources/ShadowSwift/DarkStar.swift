@@ -16,8 +16,8 @@ let ConfirmationSize = 32
 
 public struct DarkStar
 {
-    let encryptKey: SymmetricKey
-    let decryptKey: SymmetricKey
+    var encryptKey: SymmetricKey!
+    var decryptKey: SymmetricKey!
 
     public init?(serverPersistentPublicKey: P256.KeyAgreement.PublicKey, endpoint: NWEndpoint, connection: Connection)
     {
@@ -36,8 +36,8 @@ public struct DarkStar
         guard let newEncryptKey = DarkStar.createEncryptKey(serverPersistentPublicKey: serverPersistentPublicKey, serverEphemeralPublicKey: serverEphemeralPublicKey, clientEphemeralPrivateKey: clientEphemeralPrivateKey, serverEndpoint: endpoint) else {return nil}
         encryptKey = newEncryptKey
 
-        guard let decryptKey = DarkStar.createDecryptKey(serverPersistentPublicKey: serverPersistentPublicKey, serverEphemeralPublicKey: serverEphemeralPublicKey, clientEphemeralPrivateKey: clientEphemeralPrivateKey, serverEndpoint: endpoint) else {return nil}
-        self.decryptKey = decryptKey
+        guard let newDecryptKey = DarkStar.createDecryptKey(serverPersistentPublicKey: serverPersistentPublicKey, serverEphemeralPublicKey: serverEphemeralPublicKey, clientEphemeralPrivateKey: clientEphemeralPrivateKey, serverEndpoint: endpoint) else {return nil}
+        decryptKey = newDecryptKey
 
         let clientConfirmationCode = DarkStar.generateConfirmationCode(endpoint: endpoint, serverEphemeralPublicKey: serverEphemeralPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey)
 
