@@ -239,9 +239,8 @@ class Cipher
                 {
                     log.error("Error running ChaChaPoly encryption: \(encryptError)")
                 }
-            case .DARKSTAR:
-                // FIXME
-                break
+            default:
+                return nil
         }
         
         return (cipherText, tag)
@@ -300,7 +299,10 @@ class Cipher
                     log.error("Error running ChaChaPoly decryption: \(decryptError)")
                     return nil
                 }
-            case .DARKSTAR:
+            case .DARKSTAR_CLIENT:
+                // FIXME
+                return nil
+            case .DARKSTAR_SERVER:
                 // FIXME
                 return nil
         }
@@ -340,7 +342,8 @@ public enum CipherMode: String, Codable
     case AES_256_GCM = "AES-256-GCM"
     case CHACHA20_IETF_POLY1305 = "CHACHA20-IETF-POLY1305"
 
-    // New cipher mode
-    case DARKSTAR = "DarkStar"
+    // New cipher modes
+    case DARKSTAR_CLIENT = "DarkStarClient"
+    case DARKSTAR_SERVER = "DarkStarServer"
 }
 

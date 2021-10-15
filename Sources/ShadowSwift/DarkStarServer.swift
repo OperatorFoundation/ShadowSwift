@@ -15,6 +15,7 @@ public class DarkStarServer
 {
     let serverNonce: AES.GCM.Nonce
     let clientNonce: AES.GCM.Nonce
+    let sharedKey: SymmetricKey
 
     static public func handleServerConfirmationCode(connection: Connection, sharedKey: SymmetricKey, endpoint: NWEndpoint, serverEphemeralPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Bool
     {
@@ -104,6 +105,7 @@ public class DarkStarServer
 
         // Create shared key
         guard let sharedKey = DarkStarServer.createServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: endpoint) else {return nil}
+        self.sharedKey = sharedKey
 
         // Send server confirmation code
         guard DarkStarServer.handleServerConfirmationCode(connection: connection, sharedKey: sharedKey, endpoint: endpoint, serverEphemeralPublicKey: serverEphemeralPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else {return nil}

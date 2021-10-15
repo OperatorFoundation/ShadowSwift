@@ -62,7 +62,14 @@ open class ShadowConnectionFactory: ConnectionFactory
             return nil
         }
 
-        return ShadowConnection(host: currentHost, port: currentPort, parameters: parameters, config: config, logger: log)
+        if config.mode == .DARKSTAR_CLIENT || config.mode == .DARKSTAR_SERVER
+        {
+            return DarkStarConnection(host: currentHost, port: currentPort, parameters: parameters, config: config, logger: log)
+        }
+        else
+        {
+            return ShadowConnection(host: currentHost, port: currentPort, parameters: parameters, config: config, logger: log)
+        }
     }
 
 //    public init(connection: Connection, config: ShadowConfig, logger: Logger)
