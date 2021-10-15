@@ -488,5 +488,18 @@ return                        }
             return
         }
     }
+
+    func testDarkStarServer()
+    {
+        let privateKey = P256.KeyAgreement.PrivateKey()
+        let privateKeyData = privateKey.rawRepresentation
+        let privateKeyHex = privateKeyData.hex
+
+        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(password: privateKeyHex, mode: .DARKSTAR_SERVER), logger: self.logger) else {return}
+        guard let connection = server.accept() else {return}
+        connection.send(content: "test\n".data, contentContext: NWConnection.ContentContext.defaultMessage, isComplete: true, completion: .contentProcessed({ maybeError in
+            print("Sent!")
+        }))
+    }
 }
 

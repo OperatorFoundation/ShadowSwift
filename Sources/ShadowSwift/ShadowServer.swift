@@ -26,7 +26,7 @@ public class ShadowServer
         self.listener = listener
     }
 
-    func accept() -> ShadowConnection?
+    public func accept() -> ShadowConnection?
     {
         let connection = self.listener.accept()
         let shadow = ShadowConnection(connection: connection, parameters: .tcp, config: self.config, logger: self.log)
