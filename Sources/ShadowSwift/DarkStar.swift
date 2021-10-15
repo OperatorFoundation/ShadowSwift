@@ -21,8 +21,8 @@ let ClientString = "client"
 
 public struct DarkStar
 {
-    let encryptKey: SymmetricKey
-    let decryptKey: SymmetricKey
+    var encryptKey: SymmetricKey!
+    var decryptKey: SymmetricKey!
 
     static public func randomBytes(size: Int) -> Data
     {
