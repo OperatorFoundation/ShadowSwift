@@ -491,15 +491,43 @@ return                        }
 
     func testDarkStarServer()
     {
-        let privateKey = P256.KeyAgreement.PrivateKey()
-        let privateKeyData = privateKey.rawRepresentation
-        let privateKeyHex = privateKeyData.hex
+//        let privateKey = P256.KeyAgreement.PrivateKey()
+//        let privateKeyData = privateKey.derRepresentation
+//        let privateKeyHex = privateKeyData.hex
+        let privateKeyHex = "308187020100301306072a8648ce3d020106082a8648ce3d030107046d306b02010104204a6a7e6c9d15527905d58ef98aa59e2a81a3804f4d40ed1a219db6668d0c42fca144034200044ed5d754928698e5f73de6ff22feb516e146b7fd1a0e6ca466ccb77e2cc324bf3deb2b4df4d7583b521ecd466f37e84b8f7930482ca2a0d18baffd353fb207fd"
+        guard let privateKeyBytes = Data(hex: privateKeyHex) else {return}
+        guard let privateKey = try? P256.KeyAgreement.PrivateKey(derRepresentation: privateKeyBytes) else {return}
+        let publicKey = privateKey.publicKey
 
-        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(password: privateKeyHex, mode: .DARKSTAR_SERVER), logger: self.logger) else {return}
-        guard let connection = server.accept() else {return}
-        connection.send(content: "test\n".data, contentContext: NWConnection.ContentContext.defaultMessage, isComplete: true, completion: .contentProcessed({ maybeError in
-            print("Sent!")
-        }))
+        let publicKeyData = publicKey.derRepresentation
+        let publicKeyHex = publicKeyData.hex
+        print(publicKeyHex)
+
+        let queue = DispatchQueue(label: "Client")
+        queue.async
+        {
+            guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(password: privateKeyHex, mode: .DARKSTAR_SERVER), logger: self.logger) else {return}
+            guard let connection = server.accept() else {return}
+            connection.send(content: "test\n".data, contentContext: NWConnection.ContentContext.defaultMessage, isComplete: true, completion: .contentProcessed({ maybeError in
+                print("Sent!")
+            }))
+        }
+
+        let factory = ShadowConnectionFactory(host: "127.0.0.1", port: 1234, config: ShadowConfig(password: publicKeyHex, mode: .DARKSTAR_CLIENT), logger: self.logger)
+        guard var client = factory.connect(using: .tcp) else {return}
+        client.stateUpdateHandler={
+            state in
+
+            switch state
+            {
+                case .ready:
+                    print("Ready!")
+                default:
+                    return
+            }
+        }
+        let queue2 = DispatchQueue(label: "Client")
+        client.start(queue: queue2)
     }
 }
 

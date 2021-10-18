@@ -11,7 +11,7 @@ import Transmission
 import Network
 import Datable
 
-let P256KeySize = 32
+let P256KeySize = 91 // X.509 DER format
 let ConfirmationSize = 32
 let NonceSize = 32
 
@@ -54,7 +54,7 @@ public struct DarkStar
     {
         let myEphemeralPrivateKey = P256.KeyAgreement.PrivateKey()
         let myEphemeralPublicKey = myEphemeralPrivateKey.publicKey
-        guard let myEphemeralPublicKeyData = myEphemeralPublicKey.compactRepresentation else {return nil}
+        let myEphemeralPublicKeyData = myEphemeralPublicKey.derRepresentation
 
         guard connection.write(data: myEphemeralPublicKeyData) else {return nil}
 
