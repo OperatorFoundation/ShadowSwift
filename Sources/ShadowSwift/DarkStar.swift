@@ -37,8 +37,13 @@ public struct DarkStar
     static public func generateServerConfirmationCode(clientSharedKey: SymmetricKey, endpoint: NWEndpoint, serverEphemeralPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Data?
     {
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else {return nil}
-        guard let serverEphemeralPublicKeyData = serverEphemeralPublicKey.compactRepresentation else {return nil}
-        guard let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation else {return nil}
+        let serverEphemeralPublicKeyData = serverEphemeralPublicKey.derRepresentation
+        let clientEphemeralPublicKeyData = clientEphemeralPublicKey.derRepresentation
+        
+//        print("SCC: \(sharedSecretToData(secret: clientSharedKey))")
+        print("SCC: \(serverIdentifier.hex)")
+        print("SCC: \(serverEphemeralPublicKeyData.hex)")
+        print("SCC: \(clientEphemeralPublicKeyData.hex)")
 
         var hmac = HMAC<SHA256>(key: clientSharedKey)
         hmac.update(data: serverIdentifier)
@@ -74,8 +79,8 @@ public struct DarkStar
         let ecdhData = DarkStar.sharedSecretToData(secret: ecdh)
 
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else {return nil}
-        guard let serverPersistentPublicKeyData = serverPersistentPublicKey.compactRepresentation else {return nil}
-        guard let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation else {return nil}
+        let serverPersistentPublicKeyData = serverPersistentPublicKey.derRepresentation
+        let clientEphemeralPublicKeyData = clientEphemeralPublicKey.derRepresentation
 
         var hash = SHA256()
         hash.update(data: ecdhData)
@@ -103,8 +108,8 @@ public struct DarkStar
         {
             (rawPointer: UnsafeRawBufferPointer) -> Data in
 
-            var result = Data(repeating: 0, count: 8)
-            for index in 0..<8
+            var result = Data(repeating: 0, count: 32)
+            for index in 0..<32
             {
                 result[index] = rawPointer[index]
             }
@@ -142,13 +147,11 @@ public struct DarkStar
                 switch host
                 {
                     case .ipv4(let ipv4):
-                        guard let serverTypeData = ServerType.ipv4.rawValue.maybeNetworkData else {return nil}
                         let ipv4Data = ipv4.rawValue
-                        return serverTypeData + ipv4Data + portData
+                        return ipv4Data + portData
                     case .ipv6(let ipv6):
-                        guard let serverTypeData = ServerType.ipv6.rawValue.maybeNetworkData else {return nil}
                         let ipv6Data = ipv6.rawValue
-                        return serverTypeData + ipv6Data + portData
+                        return ipv6Data + portData
                     default:
                         return nil
                 }
