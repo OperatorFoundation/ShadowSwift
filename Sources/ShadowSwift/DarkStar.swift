@@ -115,6 +115,24 @@ public struct DarkStar
         return data
     }
 
+    static func symmetricKeyToData(key: SymmetricKey) -> Data
+    {
+        let data = key.withUnsafeBytes
+        {
+            (rawPointer: UnsafeRawBufferPointer) -> Data in
+
+            var result = Data(repeating: 0, count: 32)
+            for index in 0..<32
+            {
+                result[index] = rawPointer[index]
+            }
+
+            return result
+        }
+
+        return data
+    }
+
     static func makeServerIdentifier(_ endpoint: NWEndpoint) -> Data?
     {
         switch endpoint
