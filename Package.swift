@@ -39,6 +39,7 @@ let package = Package(
                         "Datable",
                         "ShadowSwift",
                         "SwiftHexTools",
+                        "Chord",
                         .product(name: "Logging", package: "swift-log")],
             exclude: ["Info.plist"]),
     ],

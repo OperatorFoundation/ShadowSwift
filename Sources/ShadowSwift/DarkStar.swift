@@ -10,6 +10,7 @@ import Crypto
 import Transmission
 import Network
 import Datable
+import SwiftHexTools
 
 let P256KeySize = 91 // X.509 DER format
 let ConfirmationSize = 32
@@ -52,7 +53,13 @@ public struct DarkStar
 
     static public func handleMyEphemeralKey(connection: Connection) -> (P256.KeyAgreement.PrivateKey, P256.KeyAgreement.PublicKey)?
     {
-        let myEphemeralPrivateKey = P256.KeyAgreement.PrivateKey()
+        // FIXME - Fixed keys for testing only
+        // let myEphemeralPrivateKey = P256.KeyAgreement.PrivateKey()
+
+        let privateHex = "308187020100301306072a8648ce3d020106082a8648ce3d030107046d306b02010104203b1614c756935c8e13861598369dcc94419dfab6d07533978e8f5fc57b8076a4a144034200044007b3e630c9f146cce11a91d89c4a187c48981737ab5d7d9c95125e5c4e319e684b5b581d735fe04f7112e69a24b52ac68b9843f681a47d1a08f98f6664fbea"
+        let myEphemeralPrivateKeyData = Data(hex: privateHex)!
+        guard let myEphemeralPrivateKey = try? P256.KeyAgreement.PrivateKey(derRepresentation: myEphemeralPrivateKeyData) else {return nil}
+
         let myEphemeralPublicKey = myEphemeralPrivateKey.publicKey
         let myEphemeralPublicKeyData = myEphemeralPublicKey.derRepresentation
 
@@ -86,7 +93,7 @@ public struct DarkStar
     {
         // Receive their ephemeral key
         guard let theirEphemeralPublicKeyData = connection.read(size: P256KeySize) else {return nil}
-        guard let theirEphemeralPublicKey = try? P256.KeyAgreement.PublicKey(compactRepresentation: theirEphemeralPublicKeyData) else {return nil}
+        guard let theirEphemeralPublicKey = try? P256.KeyAgreement.PublicKey(derRepresentation: theirEphemeralPublicKeyData) else {return nil}
         return theirEphemeralPublicKey
     }
 
@@ -139,7 +146,11 @@ public struct DarkStar
 
     static public func handleMyNonce(connection: Connection) -> Data?
     {
-        let nonce = DarkStar.randomBytes(size: NonceSize)
+        // FIXME - Fixed nonce just for testing
+        // let nonce = DarkStar.randomBytes(size: NonceSize)
+
+        let nonce = Data(hex: "aac4b88639421b26e832d6f85f369c2a60258ed4892e84d2f61fe94a21166047")!
+
         guard connection.write(data: nonce) else {return nil}
         return nonce
     }

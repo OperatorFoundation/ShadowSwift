@@ -56,11 +56,13 @@ open class ShadowConnectionFactory: ConnectionFactory
     
     public func connect(using parameters: NWParameters) -> Connection?
     {
-        guard let currentHost = host, let currentPort = port
+        guard let currentHost = self.host, let currentPort = self.port
             else
         {
             return nil
         }
+
+        print(currentHost)
 
         if config.mode == .DARKSTAR_CLIENT || config.mode == .DARKSTAR_SERVER
         {

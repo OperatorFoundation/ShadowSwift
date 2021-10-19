@@ -10,6 +10,7 @@ import Logging
 
 import Datable
 import SwiftHexTools
+import Chord
 
 #if (os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
 import CryptoKit
@@ -503,18 +504,20 @@ return                        }
         let publicKeyHex = publicKeyData.hex
         print(publicKeyHex)
 
+        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(password: privateKeyHex, mode: .DARKSTAR_SERVER), logger: self.logger) else {return}
+
         let queue = DispatchQueue(label: "Client")
         queue.async
         {
-            guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(password: privateKeyHex, mode: .DARKSTAR_SERVER), logger: self.logger) else {return}
             guard let connection = server.accept() else {return}
             connection.send(content: "test\n".data, contentContext: NWConnection.ContentContext.defaultMessage, isComplete: true, completion: .contentProcessed({ maybeError in
                 print("Sent!")
             }))
         }
 
-        let factory = ShadowConnectionFactory(host: "127.0.0.1", port: 1234, config: ShadowConfig(password: publicKeyHex, mode: .DARKSTAR_CLIENT), logger: self.logger)
+        let factory = ShadowConnectionFactory(host: NWEndpoint.Host.ipv4(IPv4Address("127.0.0.1")!), port: NWEndpoint.Port(integerLiteral: 1234), config: ShadowConfig(password: publicKeyHex, mode: .DARKSTAR_CLIENT), logger: self.logger)
         guard var client = factory.connect(using: .tcp) else {return}
+
         client.stateUpdateHandler={
             state in
 

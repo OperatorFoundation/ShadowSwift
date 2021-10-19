@@ -9,27 +9,40 @@ import Foundation
 import Network
 import Logging
 import Transmission
+import Transport
 
 public class ShadowServer
 {
     let config: ShadowConfig
     var log: Logger
 
-    let listener: Listener
+    let listener: Transmission.Listener
+    let endpoint: NWEndpoint
 
     public init?(host: String, port: Int, config: ShadowConfig, logger: Logger)
     {
         self.config = config
         self.log = logger
 
+        self.endpoint = NWEndpoint.hostPort(host: NWEndpoint.Host.ipv4(IPv4Address(host)!), port: NWEndpoint.Port(integerLiteral: UInt16(port)))
+
         guard let listener = Listener(port: port) else {return nil}
         self.listener = listener
     }
 
-    public func accept() -> ShadowConnection?
+    public func accept() -> Transport.Connection?
     {
         let connection = self.listener.accept()
-        let shadow = ShadowConnection(connection: connection, parameters: .tcp, config: self.config, logger: self.log)
-        return shadow
+
+        if self.config.mode == .DARKSTAR_SERVER
+        {
+            let shadow = DarkStarConnection(connection: connection, endpoint: self.endpoint, parameters: .tcp, config: self.config, logger: self.log)
+            return shadow
+        }
+        else
+        {
+            let shadow = ShadowConnection(connection: connection, parameters: .tcp, config: self.config, logger: self.log)
+            return shadow
+        }
     }
 }
