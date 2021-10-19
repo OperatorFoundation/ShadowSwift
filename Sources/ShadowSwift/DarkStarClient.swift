@@ -65,6 +65,7 @@ public class DarkStarClient
         let hashed = hash.finalize()
 
         let hashedData = Data(hashed)
+        print("shared key: \(hashedData.hex)")
         return SymmetricKey(data: hashedData)
     }
 

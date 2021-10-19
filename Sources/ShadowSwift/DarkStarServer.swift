@@ -10,6 +10,7 @@ import Crypto
 import Transmission
 import Network
 import Datable
+import SwiftHexTools
 
 public class DarkStarServer
 {
@@ -20,6 +21,7 @@ public class DarkStarServer
     static public func handleServerConfirmationCode(connection: Connection, sharedKey: SymmetricKey, endpoint: NWEndpoint, serverEphemeralPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Bool
     {
         guard let data = DarkStar.generateServerConfirmationCode(clientSharedKey: sharedKey, endpoint: endpoint, serverEphemeralPublicKey: serverEphemeralPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else {return false}
+        print("server confirmation code: \(data.hex)")
         return connection.write(data: data)
     }
 
