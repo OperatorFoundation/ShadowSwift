@@ -543,7 +543,7 @@ return                        }
         guard let privateKey = try? P256.KeyAgreement.PrivateKey(derRepresentation: privateKeyBytes) else {return}
         let publicKey = privateKey.publicKey
 
-        let publicKeyData = publicKey.derRepresentation
+        let publicKeyData = publicKey.compactRepresentation!
         let publicKeyHex = publicKeyData.hex
         print(publicKeyHex)
 
