@@ -48,9 +48,9 @@ public class DarkStarClient
 
         let clientEphemeralPublicKey = clientEphemeralPrivateKey.publicKey
 
-        let clientEphemeralPublicKeyData = clientEphemeralPublicKey.derRepresentation
+        let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation!
 
-        let serverEphemeralPublicKeyData = serverEphemeralPublicKey.derRepresentation
+        let serverEphemeralPublicKeyData = serverEphemeralPublicKey.compactRepresentation!
 
         guard let serverIdentifier = DarkStar.makeServerIdentifier(serverEndpoint) else {return nil}
 

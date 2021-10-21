@@ -500,7 +500,7 @@ return                        }
         guard let privateKey = try? P256.KeyAgreement.PrivateKey(derRepresentation: privateKeyBytes) else {return}
         let publicKey = privateKey.publicKey
 
-        let publicKeyData = publicKey.derRepresentation
+        let publicKeyData = publicKey.compactRepresentation!
         let publicKeyHex = publicKeyData.hex
         print(publicKeyHex)
 
@@ -543,7 +543,7 @@ return                        }
         guard let privateKey = try? P256.KeyAgreement.PrivateKey(derRepresentation: privateKeyBytes) else {return}
         let publicKey = privateKey.publicKey
 
-        let publicKeyData = publicKey.derRepresentation
+        let publicKeyData = publicKey.compactRepresentation!
         let publicKeyHex = publicKeyData.hex
         print(publicKeyHex)
 
@@ -553,6 +553,20 @@ return                        }
         connection.send(content: "test\n".data, contentContext: NWConnection.ContentContext.defaultMessage, isComplete: true, completion: .contentProcessed({ maybeError in
             print("Sent!")
             }))
+    }
+
+    func testGenerateKeys()
+    {
+        let privateKey = P256.KeyAgreement.PrivateKey()
+        let privateKeyData = privateKey.x963Representation
+        let privateKeyHex = privateKeyData.hex
+
+        let publicKey = privateKey.publicKey
+        let publicKeyData = publicKey.compactRepresentation
+        let publicKeyHex = publicKeyData!.hex
+
+        print("Private key: \(privateKeyHex)")
+        print("Public key: \(publicKeyHex)")
     }
 }
 
