@@ -37,8 +37,8 @@ public struct DarkStar
     static public func generateServerConfirmationCode(clientSharedKey: SymmetricKey, endpoint: NWEndpoint, serverEphemeralPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Data?
     {
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else {return nil}
-        let serverEphemeralPublicKeyData = serverEphemeralPublicKey.derRepresentation
-        let clientEphemeralPublicKeyData = clientEphemeralPublicKey.derRepresentation
+        let serverEphemeralPublicKeyData = serverEphemeralPublicKey.compactRepresentation!
+        let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation!
         
 //        print("SCC: \(sharedSecretToData(secret: clientSharedKey))")
         print("SCC: \(serverIdentifier.hex)")
@@ -66,7 +66,7 @@ public struct DarkStar
         guard let myEphemeralPrivateKey = try? P256.KeyAgreement.PrivateKey(derRepresentation: myEphemeralPrivateKeyData) else {return nil}
 
         let myEphemeralPublicKey = myEphemeralPrivateKey.publicKey
-        let myEphemeralPublicKeyData = myEphemeralPublicKey.derRepresentation
+        let myEphemeralPublicKeyData = myEphemeralPublicKey.compactRepresentation!
 
         guard connection.write(data: myEphemeralPublicKeyData) else {return nil}
 
@@ -79,8 +79,8 @@ public struct DarkStar
         let ecdhData = DarkStar.sharedSecretToData(secret: ecdh)
 
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else {return nil}
-        let serverPersistentPublicKeyData = serverPersistentPublicKey.derRepresentation
-        let clientEphemeralPublicKeyData = clientEphemeralPublicKey.derRepresentation
+        let serverPersistentPublicKeyData = serverPersistentPublicKey.compactRepresentation!
+        let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation!
 
         var hash = SHA256()
         hash.update(data: ecdhData)
@@ -98,7 +98,7 @@ public struct DarkStar
     {
         // Receive their ephemeral key
         guard let theirEphemeralPublicKeyData = connection.read(size: P256KeySize) else {return nil}
-        guard let theirEphemeralPublicKey = try? P256.KeyAgreement.PublicKey(derRepresentation: theirEphemeralPublicKeyData) else {return nil}
+        guard let theirEphemeralPublicKey = try? P256.KeyAgreement.PublicKey(compactRepresentation: theirEphemeralPublicKeyData) else {return nil}
         return theirEphemeralPublicKey
     }
 

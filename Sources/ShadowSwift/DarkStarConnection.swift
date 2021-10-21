@@ -108,7 +108,7 @@ open class DarkStarConnection: Transport.Connection
                 self.log = logger
             case .DARKSTAR_CLIENT:
                 guard let serverPersistentPublicKeyData = Data(hex: config.password) else {return nil}
-                guard let serverPersistentPublicKey = try? P256.KeyAgreement.PublicKey(derRepresentation: serverPersistentPublicKeyData) else {return nil}
+                guard let serverPersistentPublicKey = try? P256.KeyAgreement.PublicKey(compactRepresentation: serverPersistentPublicKeyData) else {return nil}
 
                 guard let client = DarkStarClient(serverPersistentPublicKey: serverPersistentPublicKey, endpoint: endpoint, connection: connection) else {return nil}
 
@@ -154,7 +154,7 @@ open class DarkStarConnection: Transport.Connection
                 self.log = logger
             case .DARKSTAR_CLIENT:
                 guard let serverPersistentPublicKeyData = Data(hex: config.password) else {return nil}
-                let serverPersistentPublicKey = try? P256.KeyAgreement.PublicKey(derRepresentation: serverPersistentPublicKeyData)
+                let serverPersistentPublicKey = try? P256.KeyAgreement.PublicKey(compactRepresentation: serverPersistentPublicKeyData)
 
                 guard let client = DarkStarClient(serverPersistentPublicKey: serverPersistentPublicKey, endpoint: endpoint, connection: connection) else {return nil}
 
