@@ -14,8 +14,6 @@ import SwiftHexTools
 
 public class DarkStarServer
 {
-    let serverNonce: AES.GCM.Nonce
-    let clientNonce: AES.GCM.Nonce
     let sharedKey: SymmetricKey
 
     static public func handleServerConfirmationCode(connection: Connection, sharedKey: SymmetricKey, endpoint: NWEndpoint, serverEphemeralPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Bool
@@ -115,12 +113,6 @@ public class DarkStarServer
         // Receive and validate client confirmation code
         guard DarkStarServer.handleClientConfirmationCode(connection: connection, theirPublicKey: clientEphemeralPublicKey, myPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else {return nil}
 
-        // Receive client nonce
-        guard let clientNonceData = DarkStar.handleTheirNonce(connection: connection) else {return nil}
-
-        guard let clientNonce = try? AES.GCM.Nonce(data: clientNonceData) else {return nil}
-        self.clientNonce = clientNonce
-
         // Send server ephemeral key
         guard let (serverEphemeralPrivateKey, serverEphemeralPublicKey) = DarkStar.handleMyEphemeralKey(connection: connection) else {return nil}
 
@@ -130,11 +122,5 @@ public class DarkStarServer
 
         // Send server confirmation code
         guard DarkStarServer.handleServerConfirmationCode(connection: connection, sharedKey: sharedKey, endpoint: endpoint, serverEphemeralPublicKey: serverEphemeralPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else {return nil}
-
-        // Send server nonce
-        guard let serverNonce = DarkStar.handleMyNonce(connection: connection) else {return nil}
-
-        guard let serverNonce = try? AES.GCM.Nonce(data: serverNonce) else {return nil}
-        self.serverNonce = serverNonce
     }
 }

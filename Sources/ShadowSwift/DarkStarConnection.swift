@@ -99,8 +99,8 @@ open class DarkStarConnection: Transport.Connection
 
                 guard let server = DarkStarServer(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection) else {return nil}
 
-                guard let eCipher = DarkStarCipher(key: server.sharedKey, nonce: server.serverNonce, logger: logger) else {return nil}
-                guard let dCipher = DarkStarCipher(key: server.sharedKey, nonce: server.clientNonce, logger: logger) else {return nil}
+                guard let eCipher = DarkStarCipher(key: server.sharedKey, logger: logger) else {return nil}
+                guard let dCipher = DarkStarCipher(key: server.sharedKey, logger: logger) else {return nil}
 
                 self.encryptingCipher = eCipher
                 self.decryptingCipher = dCipher
@@ -112,8 +112,8 @@ open class DarkStarConnection: Transport.Connection
 
                 guard let client = DarkStarClient(serverPersistentPublicKey: serverPersistentPublicKey, endpoint: endpoint, connection: connection) else {return nil}
 
-                guard let eCipher = DarkStarCipher(key: client.sharedKey, nonce: client.clientNonce, logger: self.log) else {return nil}
-                guard let dCipher = DarkStarCipher(key: client.sharedKey, nonce: client.serverNonce, logger: self.log) else {return nil}
+                guard let eCipher = DarkStarCipher(key: client.sharedKey, logger: self.log) else {return nil}
+                guard let dCipher = DarkStarCipher(key: client.sharedKey, logger: self.log) else {return nil}
 
                 self.encryptingCipher = eCipher
                 self.decryptingCipher = dCipher

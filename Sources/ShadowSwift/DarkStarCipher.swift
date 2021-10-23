@@ -58,12 +58,26 @@ class DarkStarCipher
     static let minRead = 1 + Cipher.overhead
 
     let key: SymmetricKey
-    let nonce: AES.GCM.Nonce
+    var encryptCounter: UInt64 = 0
+    var encryptNonce: AES.GCM.Nonce?
+    {
+        guard let data = self.encryptCounter.maybeNetworkData else {return nil}
+        guard let nonce = try? AES.GCM.Nonce(data: data) else {return nil}
+        self.encryptCounter = self.encryptCounter + 1
+        return nonce
+    }
+    var decryptCounter: UInt64 = 0
+    var decryptNonce: AES.GCM.Nonce?
+    {
+        guard let data = self.decryptCounter.maybeNetworkData else {return nil}
+        guard let nonce = try? AES.GCM.Nonce(data: data) else {return nil}
+        self.decryptCounter = self.decryptCounter + 1
+        return nonce
+    }
 
-    init?(key: SymmetricKey, nonce: AES.GCM.Nonce, logger: Logger)
+    init?(key: SymmetricKey, logger: Logger)
     {
         self.key = key
-        self.nonce = nonce
         self.log = logger
     }
 
@@ -96,7 +110,8 @@ class DarkStarCipher
 
         do
         {
-            let sealedBox = try AES.GCM.seal(plaintext, using: self.key, nonce: self.nonce)
+            guard let nonce = self.encryptNonce else {return nil}
+            let sealedBox = try AES.GCM.seal(plaintext, using: self.key, nonce: nonce)
             cipherText = sealedBox.ciphertext
             tag = sealedBox.tag
         }
@@ -128,7 +143,8 @@ class DarkStarCipher
     {
         do
         {
-            let sealedBox = try AES.GCM.SealedBox(nonce: self.nonce, ciphertext: encrypted, tag: tag)
+            guard let nonce = self.decryptNonce else {return nil}
+            let sealedBox = try AES.GCM.SealedBox(nonce: nonce, ciphertext: encrypted, tag: tag)
             return try AES.GCM.open(sealedBox, using: self.key)
         }
         catch let decryptError

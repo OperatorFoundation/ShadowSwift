@@ -159,22 +159,6 @@ public struct DarkStar
                 return nil
         }
     }
-
-    static public func handleTheirNonce(connection: Connection) -> Data?
-    {
-        return connection.read(size: NonceSize)
-    }
-
-    static public func handleMyNonce(connection: Connection) -> Data?
-    {
-        // FIXME - Fixed nonce just for testing
-        // let nonce = DarkStar.randomBytes(size: NonceSize)
-
-        let nonce = Data(hex: "aac4b88639421b26e832d6f85f369c2a60258ed4892e84d2f61fe94a21166047")!
-
-        guard connection.write(data: nonce) else {return nil}
-        return nonce
-    }
 }
 
 enum ServerType: UInt8
