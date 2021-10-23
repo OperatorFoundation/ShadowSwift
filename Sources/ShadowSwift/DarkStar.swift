@@ -40,10 +40,10 @@ public struct DarkStar
         let serverEphemeralPublicKeyData = serverEphemeralPublicKey.compactRepresentation!
         let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation!
         
-//        print("SCC: \(sharedSecretToData(secret: clientSharedKey))")
-        print("SCC: \(serverIdentifier.hex)")
-        print("SCC: \(serverEphemeralPublicKeyData.hex)")
-        print("SCC: \(clientEphemeralPublicKeyData.hex)")
+        print("SCC1: \(symmetricKeyToData(key: clientSharedKey).hex)")
+        print("SCC2: \(serverIdentifier.hex)")
+        print("SCC3: \(serverEphemeralPublicKeyData.hex)")
+        print("SCC4: \(clientEphemeralPublicKeyData.hex)")
 
         var hmac = HMAC<SHA256>(key: clientSharedKey)
         hmac.update(data: serverIdentifier)

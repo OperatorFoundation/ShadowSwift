@@ -89,6 +89,11 @@ public class DarkStarServer
 
         guard let serverIdentifier = DarkStar.makeServerIdentifier(serverEndpoint) else {return nil}
 
+        print("ecdh1: \(ephemeralECDHData.hex)")
+        print("ecdh2: \(persistentECDHData.hex)")
+        print("SEPub: \(serverEphemeralPublicKeyData.hex)")
+        print("ServerIdentifier: \(serverIdentifier)")
+        
         var hash = SHA256()
         hash.update(data: ephemeralECDHData)
         hash.update(data: persistentECDHData)
@@ -96,7 +101,6 @@ public class DarkStarServer
         hash.update(data: clientEphemeralPublicKeyData)
         hash.update(data: serverEphemeralPublicKeyData)
         hash.update(data: DarkStarString.data)
-        hash.update(data: ServerString.data)
         let hashed = hash.finalize()
 
         let hashedData = Data(hashed)
