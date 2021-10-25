@@ -95,7 +95,7 @@ open class DarkStarConnection: Transport.Connection
         {
             case .DARKSTAR_SERVER:
                 guard let serverPersistentPrivateKeyData = Data(hex: config.password) else {return nil}
-                guard let serverPersistentPrivateKey = try? P256.KeyAgreement.PrivateKey(derRepresentation: serverPersistentPrivateKeyData) else {return nil}
+                guard let serverPersistentPrivateKey = try? P256.KeyAgreement.PrivateKey(rawRepresentation: serverPersistentPrivateKeyData) else {return nil}
 
                 guard let server = DarkStarServer(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection) else {return nil}
 
