@@ -538,6 +538,8 @@ return                        }
         //        let privateKey = P256.KeyAgreement.PrivateKey()
         //        let privateKeyData = privateKey.derRepresentation
         //        let privateKeyHex = privateKeyData.hex
+        let sent = XCTestExpectation(description: "Sent!")
+        
         let privateKeyHex = "dd5e9e88d13e66017eb2087b128c1009539d446208f86173e30409a898ada148"
         guard let privateKeyBytes = Data(hex: privateKeyHex) else {
             XCTFail()
@@ -564,7 +566,9 @@ return                        }
         }
         connection.send(content: "test\n".data, contentContext: NWConnection.ContentContext.defaultMessage, isComplete: true, completion: .contentProcessed({ maybeError in
             print("Sent!")
+            sent.fulfill()
             }))
+        wait(for: [sent], timeout: 30)  // 30 seconds
     }
 
     func testGenerateKeys()

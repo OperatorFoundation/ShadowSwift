@@ -61,18 +61,33 @@ class DarkStarCipher
     var encryptCounter: UInt64 = 0
     var encryptNonce: AES.GCM.Nonce?
     {
-        guard let data = self.encryptCounter.maybeNetworkData else {return nil}
-        guard let nonce = try? AES.GCM.Nonce(data: data) else {return nil}
-        self.encryptCounter = self.encryptCounter + 1
-        return nonce
+        guard let counterData = self.encryptCounter.maybeNetworkData else {return nil}
+        let paddingData = Data(repeating: 0, count: 4)
+        let nonceData = paddingData + counterData
+        do {
+            let nonce = try AES.GCM.Nonce(data: nonceData)
+            self.encryptCounter = self.encryptCounter + 1
+            return nonce
+        } catch {
+            print(error)
+            return nil
+        }
     }
+    
     var decryptCounter: UInt64 = 0
     var decryptNonce: AES.GCM.Nonce?
     {
-        guard let data = self.decryptCounter.maybeNetworkData else {return nil}
-        guard let nonce = try? AES.GCM.Nonce(data: data) else {return nil}
-        self.decryptCounter = self.decryptCounter + 1
-        return nonce
+        guard let counterData = self.decryptCounter.maybeNetworkData else {return nil}
+        let paddingData = Data(repeating: 0, count: 4)
+        let nonceData = paddingData + counterData
+        do {
+            let nonce = try AES.GCM.Nonce(data: nonceData)
+            self.decryptCounter = self.decryptCounter + 1
+            return nonce
+        } catch {
+            print(error)
+            return nil
+        }
     }
 
     init?(key: SymmetricKey, logger: Logger)
