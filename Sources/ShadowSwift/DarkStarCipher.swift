@@ -73,6 +73,7 @@ class DarkStarCipher
         guard let nonce = try? AES.GCM.Nonce(data: counterData) else {return nil}
         return nonce
     }
+    
     var decryptCounter: UInt64 = 0
     var decryptNonce: AES.GCM.Nonce?
     {
@@ -128,6 +129,11 @@ class DarkStarCipher
             let sealedBox = try AES.GCM.seal(plaintext, using: self.key, nonce: nonce)
             cipherText = sealedBox.ciphertext
             tag = sealedBox.tag
+            print("encrypt Key: \(DarkStar.symmetricKeyToData(key: self.key).hex)")
+            print("encrypt nonce: \(Data(nonce).hex)")
+            print("encrypt plaintext: \(plaintext.hex)")
+            print("encrypt cipherText: \(cipherText.hex)")
+            print("encrypt tag: \(tag.hex)")
         }
         catch let encryptError
         {

@@ -12,7 +12,7 @@ import Network
 import Datable
 import SwiftHexTools
 
-let P256KeySize = 91 // X.509 DER format
+let P256KeySize = 32 // compact format
 let ConfirmationSize = 32
 let NonceSize = 32
 
