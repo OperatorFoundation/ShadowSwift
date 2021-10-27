@@ -570,6 +570,34 @@ return                        }
             }))
         wait(for: [sent], timeout: 30)  // 30 seconds
     }
+    
+    func testDarkStarClientOnly()
+    {
+        let ready = XCTestExpectation(description: "Ready!")
+        
+        let publicKeyData = Data(hex: "d089c225ef8cda8d477a586f062b31a756270124d94944e458edf1a9e1e41ed6")
+        let publicKeyHex = publicKeyData!.hex
+        print(publicKeyHex)
+        
+        let factory = ShadowConnectionFactory(host: NWEndpoint.Host.ipv4(IPv4Address("127.0.0.1")!), port: NWEndpoint.Port(integerLiteral: 1234), config: ShadowConfig(password: publicKeyHex, mode: .DARKSTAR_CLIENT), logger: self.logger)
+        guard var client = factory.connect(using: .tcp) else {return}
+
+        client.stateUpdateHandler={
+            state in
+
+            switch state
+            {
+                case .ready:
+                    print("Ready!")
+                    ready.fulfill()
+                default:
+                    return
+            }
+        }
+        let queue2 = DispatchQueue(label: "Client")
+        client.start(queue: queue2)
+        wait(for: [ready], timeout: 30)  // 30 seconds
+    }
 
     func testGenerateKeys()
     {
