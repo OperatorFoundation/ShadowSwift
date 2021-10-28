@@ -29,8 +29,6 @@ public class DarkStarClient
     {
         guard let data = DarkStar.generateClientConfirmationCode(connection: connection, theirPublicKey: theirPublicKey, myPrivateKey: myPrivateKey, endpoint: endpoint, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else {return false}
 
-        print(data.hex)
-
         return connection.write(data: data)
     }
 
@@ -63,7 +61,6 @@ public class DarkStarClient
         let hashed = hash.finalize()
 
         let hashedData = Data(hashed)
-        print("shared key: \(hashedData.hex)")
         return SymmetricKey(data: hashedData)
     }
 
