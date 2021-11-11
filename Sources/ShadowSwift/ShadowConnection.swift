@@ -67,7 +67,7 @@ open class ShadowConnection: Transport.Connection
                              logger: Logger)
     {
         #if (os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
-        guard let newConnection = Transmission.Connection(host: "\(host)", port: Int(port.rawValue))
+        guard let newConnection = Transmission.TransmissionConnection(host: "\(host)", port: Int(port.rawValue))
         else
         {
             logger.error("Failed to initialize a ShadowConnection because we could not create a Network Connection using host \(host) and port \(Int(port.rawValue)).")
