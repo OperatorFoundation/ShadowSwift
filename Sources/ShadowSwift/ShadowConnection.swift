@@ -29,18 +29,11 @@ import Foundation
 import Logging
 
 import Chord
-import Datable
-import Transport
-
-#if (os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
-import CryptoKit
-import Network
-import Transmission
-#else
 import Crypto
-import NetworkLinux
-import TransmissionLinux
-#endif
+import Datable
+import Net
+import Transmission
+import Transport
 
 open class ShadowConnection: Transport.Connection
 {

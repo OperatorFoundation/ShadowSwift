@@ -32,16 +32,9 @@ import Chord
 import Datable
 import Transport
 import SwiftHexTools
-
-#if (os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
-import CryptoKit
-import Network
-import Transmission
-#else
 import Crypto
-import NetworkLinux
-import TransmissionLinux
-#endif
+import Net
+import Transmission
 
 open class DarkStarConnection: Transport.Connection
 {

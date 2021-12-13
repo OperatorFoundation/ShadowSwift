@@ -28,12 +28,7 @@
 import Foundation
 import Logging
 
-#if os(Linux)
-import NetworkLinux
-#else
-import Network
-#endif
-
+import Net
 import Transport
 
 open class ShadowConnectionFactory: ConnectionFactory

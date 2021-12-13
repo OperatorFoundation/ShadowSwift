@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Network
+import Net
 import Logging
 import Transmission
 import Transport
