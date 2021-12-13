@@ -8,7 +8,7 @@
 import Foundation
 import Crypto
 import Transmission
-import Network
+import Net
 import Datable
 import SwiftHexTools
 

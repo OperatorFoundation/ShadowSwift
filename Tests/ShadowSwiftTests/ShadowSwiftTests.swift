@@ -8,17 +8,11 @@
 import XCTest
 import Logging
 
+import Crypto
 import Datable
 import SwiftHexTools
 import Chord
-
-#if (os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
-import CryptoKit
-import Network
-#else
-import Crypto
-import NetworkLinux
-#endif
+import Net
 
 import XCTest
 @testable import ShadowSwift
