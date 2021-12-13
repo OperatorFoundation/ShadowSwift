@@ -46,12 +46,7 @@ open class ShadowConnection: Transport.Connection
     let salt: Data
     let encryptingCipher: Cipher
     var decryptingCipher: Cipher?
-    
-    #if (os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
     var network: Transmission.Connection
-    #else
-    var network: TransmissionLinux.Connection
-    #endif
     
     public convenience init?(host: NWEndpoint.Host,
                              port: NWEndpoint.Port,
@@ -59,26 +54,16 @@ open class ShadowConnection: Transport.Connection
                              config: ShadowConfig,
                              logger: Logger)
     {
-        #if (os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
         guard let newConnection = Transmission.TransmissionConnection(host: "\(host)", port: Int(port.rawValue))
         else
         {
             logger.error("Failed to initialize a ShadowConnection because we could not create a Network Connection using host \(host) and port \(Int(port.rawValue)).")
             return nil
         }
-        #else
-        guard let newConnection = TransmissionLinux.Connection(host: "\(host)", port: Int(port.rawValue))
-        else
-        {
-            logger.error("Failed to initialize a ShadowConnection because we could not create a Network Connection using host \(host) and port \(Int(port.rawValue)).")
-            return nil
-        }
-        #endif
 
         self.init(connection: newConnection, parameters: parameters, config: config, logger: logger)
     }
 
-    #if (os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
     public init?(connection: Transmission.Connection, parameters: NWParameters, config: ShadowConfig, logger: Logger)
     {
         guard let actualSalt = Cipher.createSalt(mode: config.mode)
@@ -111,40 +96,6 @@ open class ShadowConnection: Transport.Connection
  
         handshake()
     }
-    #else
-    public init?(connection: TransmissionLinux.Connection, parameters: NWParameters, config: ShadowConfig, logger: Logger)
-    {
-        guard let actualSalt = Cipher.createSalt(mode: config.mode)
-            else
-        {
-            if let updateHandler = stateUpdateHandler
-            {
-                updateHandler(.failed(NWError.posix(.EIO)))
-            }
-            
-            return nil
-        }
-        
-        guard let eCipher = Cipher(config: config, salt: actualSalt, logger: logger)
-            else
-        {
-            if let updateHandler = stateUpdateHandler
-            {
-                updateHandler(.failed(NWError.posix(.EIO)))
-            }
-            
-            return nil
-        }
-        
-        self.salt = actualSalt
-        self.encryptingCipher = eCipher
-        self.network = connection
-        self.log = logger
-        self.config = config
- 
-        handshake()
-    }
-    #endif
     
     // MARK: Connection Protocol
     

@@ -45,12 +45,7 @@ open class DarkStarConnection: Transport.Connection
     let networkQueue = DispatchQueue(label: "ShadowNetworkQueue")
     let encryptingCipher: DarkStarCipher
     var decryptingCipher: DarkStarCipher
-
-#if (os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
     var network: Transmission.Connection
-#else
-    var network: TransmissionLinux.Connection
-#endif
 
     public convenience init?(host: NWEndpoint.Host,
                              port: NWEndpoint.Port,
@@ -59,27 +54,16 @@ open class DarkStarConnection: Transport.Connection
                              logger: Logger)
     {
         let endpoint = NWEndpoint.hostPort(host: host, port: port)
-
-#if (os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
         guard let newConnection = Transmission.TransmissionConnection(host: "\(host)", port: Int(port.rawValue))
         else
         {
             logger.error("Failed to initialize a ShadowConnection because we could not create a Network Connection using host \(host) and port \(Int(port.rawValue)).")
             return nil
         }
-#else
-        guard let newConnection = TransmissionLinux.Connection(host: "\(host)", port: Int(port.rawValue))
-        else
-        {
-            logger.error("Failed to initialize a ShadowConnection because we could not create a Network Connection using host \(host) and port \(Int(port.rawValue)).")
-            return nil
-        }
-#endif
 
         self.init(connection: newConnection, endpoint: endpoint, parameters: parameters, config: config, logger: logger)
     }
 
-#if (os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
     public init?(connection: Transmission.Connection, endpoint: NWEndpoint, parameters: NWParameters, config: ShadowConfig, logger: Logger)
     {
         self.log = logger
@@ -125,53 +109,6 @@ open class DarkStarConnection: Transport.Connection
             actualViabilityUpdateHandler(true)
         }
     }
-#else
-    public init?(connection: TransmissionLinux.Connection, endpoint: NWEndpoint, parameters: NWParameters, config: ShadowConfig, logger: Logger)
-    {
-        self.log = logger
-
-        switch config.mode
-        {
-            case .DARKSTAR_SERVER:
-                guard let serverPersistentPrivateKeyData = Data(hex: config.password) else {return nil}
-                let serverPersistentPrivateKey = try? P256.KeyAgreement.PrivateKey(derRepresentation: serverPersistentPrivateKeyData)
-
-                guard let server = DarkStarServer(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection) else {return nil}
-
-                guard let eCipher = DarkStarCipher(key: server.sharedKey, nonce: server.serverNonce, logger: logger) else {return nil}
-                guard let dCipher = DarkStarCipher(key: server.sharedKey, nonce: server.clientNonce, logger: logger) else {return nil}
-
-                self.encryptingCipher = eCipher
-                self.decryptingCipher = dCipher
-                self.network = connection
-                self.log = logger
-            case .DARKSTAR_CLIENT:
-                guard let serverPersistentPublicKeyData = Data(hex: config.password) else {return nil}
-                let serverPersistentPublicKey = try? P256.KeyAgreement.PublicKey(compactRepresentation: serverPersistentPublicKeyData)
-
-                guard let client = DarkStarClient(serverPersistentPublicKey: serverPersistentPublicKey, endpoint: endpoint, connection: connection) else {return nil}
-
-                guard let eCipher = DarkStarCipher(key: client.sharedKey, nonce: client.clientNonce, logger: self.log) else {return nil}
-                guard let dCipher = DarkStarCipher(key: client.sharedKey, nonce: client.serverNonce, logger: self.log) else {return nil}
-
-                self.encryptingCipher = eCipher
-                self.decryptingCipher = dCipher
-                self.network = connection
-            default:
-                return nil
-        }
-
-        if let actualStateUpdateHandler = self.stateUpdateHandler
-        {
-            actualStateUpdateHandler(.ready)
-        }
-
-        if let actualViabilityUpdateHandler = self.viabilityUpdateHandler
-        {
-            actualViabilityUpdateHandler(true)
-        }
-    }
-#endif
 
     // MARK: Connection Protocol
 
