@@ -8,9 +8,16 @@
 import Foundation
 import Crypto
 import Transmission
-import Network
 import Datable
 import SwiftHexTools
+
+#if (os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
+import CryptoKit
+import Network
+#else
+import Crypto
+import NetworkLinux
+#endif
 
 let P256KeySize = 32 // compact format
 let ConfirmationSize = 32
