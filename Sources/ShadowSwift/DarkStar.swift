@@ -27,11 +27,15 @@ public struct DarkStar
 
     static public func randomBytes(size: Int) -> Data
     {
-        var data = Data(count: size)
-        _ = data.withUnsafeMutableBytes {
-            SecRandomCopyBytes(kSecRandomDefault, size, $0.baseAddress!)
+        var dataArray = [Data.Element]()
+        
+        for _ in 1...size
+        {
+            let someInt = Int.random(in: 0 ..< 256)
+            dataArray.append(Data.Element(someInt))
         }
-        return data
+                
+        return Data(array: dataArray)
     }
 
     static public func generateServerConfirmationCode(clientSharedKey: SymmetricKey, endpoint: NWEndpoint, serverEphemeralPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Data?
