@@ -62,7 +62,7 @@ let package = Package(
         .package(url: "https://github.com/OperatorFoundation/Chord.git", from: "0.0.15"),
         .package(url: "https://github.com/OperatorFoundation/Datable.git", from: "3.1.2"),
         .package(url: "https://github.com/OperatorFoundation/NetworkLinux.git", from: "0.4.5"),
-        .package(url: "https://github.com/OperatorFoundation/Net.git", from: "0.0.7")
+        .package(url: "https://github.com/OperatorFoundation/Net.git", from: "0.0.7"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.4.2"),
         .package(url: "https://github.com/OperatorFoundation/SwiftHexTools.git", from: "1.2.5"),
         .package(url: "https://github.com/OperatorFoundation/Transmission.git", from: "1.2.10"),
