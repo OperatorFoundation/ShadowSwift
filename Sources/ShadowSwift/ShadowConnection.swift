@@ -63,6 +63,22 @@ open class ShadowConnection: Transport.Connection
 
         self.init(connection: newConnection, parameters: parameters, config: config, logger: logger)
     }
+    
+    public convenience init?(host: String,
+                             port: Int,
+                             parameters: NWParameters,
+                             config: ShadowConfig,
+                             logger: Logger)
+    {
+        guard let newConnection = Transmission.TransmissionConnection(host: host, port: Int(port))
+        else
+        {
+            logger.error("Failed to initialize a ShadowConnection because we could not create a Network Connection using host \(host) and port \(Int(port)).")
+            return nil
+        }
+
+        self.init(connection: newConnection, parameters: parameters, config: config, logger: logger)
+    }
 
     public init?(connection: Transmission.Connection, parameters: NWParameters, config: ShadowConfig, logger: Logger)
     {
