@@ -290,8 +290,8 @@ class Cipher
                     do
                     {
                         print("nonce: \(nonce)")
-                        print("encrypted: \(encrypted.string)")
-                        print("tag: \(tag.string)")
+                        print("encrypted: \(encrypted)")
+                        print("tag: \(tag)")
                         let sealedBox = try ChaChaPoly.SealedBox(nonce: nonce, ciphertext: encrypted, tag: tag)
                         return try ChaChaPoly.open(sealedBox, using: key)
                     }
