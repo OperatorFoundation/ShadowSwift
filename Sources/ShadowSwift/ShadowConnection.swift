@@ -54,7 +54,18 @@ open class ShadowConnection: Transport.Connection
                              config: ShadowConfig,
                              logger: Logger)
     {
-        guard let newConnection = Transmission.TransmissionConnection(host: "\(host)", port: Int(port.rawValue))
+        var maybeHostString: String? = nil
+        switch host
+        {
+            case .ipv4(let ipv4):
+                let data = ipv4.rawValue
+                maybeHostString = "\(data[0]).\(data[1]).\(data[2]).\(data[3])"
+            default:
+                maybeHostString = nil
+        }
+        guard let hostString = maybeHostString else {return nil}
+
+        guard let newConnection = Transmission.TransmissionConnection(host: hostString, port: Int(port.rawValue))
         else
         {
             logger.error("Failed to initialize a ShadowConnection because we could not create a Network Connection using host \(host) and port \(Int(port.rawValue)).")
