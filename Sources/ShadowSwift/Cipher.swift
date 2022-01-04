@@ -285,14 +285,28 @@ class Cipher
             case .CHACHA20_IETF_POLY1305:
                 do
                 {
-                    let sealedBox = try ChaChaPoly.SealedBox(nonce: ChaChaPoly.Nonce(data: nonce()), ciphertext: encrypted, tag: tag)
-                    return try ChaChaPoly.open(sealedBox, using: key)
+                    let nonce = try ChaChaPoly.Nonce(data: nonce())
+                    
+                    do
+                    {
+                        print("nonce: \(nonce)")
+                        print("encrypted: \(encrypted)")
+                        print("tag: \(tag)")
+                        let sealedBox = try ChaChaPoly.SealedBox(nonce: nonce, ciphertext: encrypted, tag: tag)
+                        return try ChaChaPoly.open(sealedBox, using: key)
+                    }
+                    catch let decryptError
+                    {
+                        log.error("Error running ChaChaPoly decryption: \(decryptError)")
+                        return nil
+                    }
                 }
-                catch let decryptError
+                catch let nonceError
                 {
-                    log.error("Error running ChaChaPoly decryption: \(decryptError)")
+                    log.error("Error getting nonce: \(nonceError)")
                     return nil
                 }
+                
             case .DARKSTAR_CLIENT:
                 // FIXME
                 return nil
