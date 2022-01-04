@@ -58,7 +58,12 @@ class Cipher
     
     init?(config: ShadowConfig, salt: Data, logger: Logger)
     {
+        print("Shadow Config password: \(config.password)")
+        print("Shadow Config mode: \(config.mode)")
+        
         let presharedKey = Cipher.kdf(shadowConfig: config)
+        print("salt: \(salt.hex)")
+        print("presharedKey: \(presharedKey.hex)")
         
         guard let actualKey = Cipher.hkdfSHA1(secret: presharedKey, salt: salt, cipherMode: config.mode)
         else
