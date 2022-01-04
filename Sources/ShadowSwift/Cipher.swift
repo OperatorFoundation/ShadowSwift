@@ -29,6 +29,7 @@ import Foundation
 import Logging
 import Crypto
 import Datable
+import SwiftHexTools
 
 class Cipher
 {
@@ -289,9 +290,22 @@ class Cipher
                     
                     do
                     {
-                        print("nonce: \(nonce)")
-                        print("encrypted: \(encrypted)")
-                        print("tag: \(tag)")
+                        print("nonce size: \(nonce)")
+                        
+                        var nonceHex = ""
+                        nonce.forEach
+                        {
+                            (thisByte) in
+                            
+                            nonceHex += thisByte.data.hex
+                            
+                        }
+                        
+                        print("nonce: \(nonceHex)")
+                        print("encrypted size: \(encrypted)")
+                        print("encrypted: \(encrypted.hex)")
+                        print("tag size: \(tag)")
+                        print("tag: \(tag.hex)")
                         let sealedBox = try ChaChaPoly.SealedBox(nonce: nonce, ciphertext: encrypted, tag: tag)
                         return try ChaChaPoly.open(sealedBox, using: key)
                     }
