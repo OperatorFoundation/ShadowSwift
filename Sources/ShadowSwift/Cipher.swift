@@ -306,6 +306,16 @@ class Cipher
                         print("encrypted: \(encrypted.hex)")
                         print("tag size: \(tag)")
                         print("tag: \(tag.hex)")
+                        print("key size: \(key.bitCount)")
+                        
+                        let keyBytes = key.withUnsafeBytes
+                        {
+                            bufferPointer in
+                            
+                            return Data(bufferPointer)
+                        }
+                        print("key: \(keyBytes.hex)")
+                        
                         let sealedBox = try ChaChaPoly.SealedBox(nonce: nonce, ciphertext: encrypted, tag: tag)
                         return try ChaChaPoly.open(sealedBox, using: key)
                     }
