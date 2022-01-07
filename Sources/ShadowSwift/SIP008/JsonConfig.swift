@@ -53,7 +53,7 @@ public struct ServerConfig: Codable
 {
     let id: String
     let server: String
-    let port: Int
+    let server_port: Int
     let password: String
     let method: String
 }

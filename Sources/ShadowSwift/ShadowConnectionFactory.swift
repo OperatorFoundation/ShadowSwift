@@ -76,7 +76,7 @@ open class ShadowConnectionFactory: ConnectionFactory
         self.config = shadowConfig
 
         self.host = NWEndpoint.Host(serverConfig.server)
-        self.port = NWEndpoint.Port(integerLiteral: UInt16(serverConfig.port))
+        self.port = NWEndpoint.Port(integerLiteral: UInt16(serverConfig.server_port))
     }
     
     public func connect(using parameters: NWParameters) -> Connection?
