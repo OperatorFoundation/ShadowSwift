@@ -51,7 +51,7 @@ public struct JsonConfig: Codable
 
 public struct ServerConfig: Codable
 {
-    let id: UUID
+    let id: String
     let server: String
     let port: Int
     let password: String
@@ -68,8 +68,16 @@ extension JsonConfig
         guard let data = try? Data(contentsOf: url) else {return nil}
 
         let decoder = JSONDecoder()
-        guard let result = try? decoder.decode(JsonConfig.self, from: data) else {return nil}
-        self = result
+        do
+        {
+            let result = try decoder.decode(JsonConfig.self, from: data)
+            self = result
+        }
+        catch
+        {
+            print(error)
+            return nil
+        }
     }
 
     public init?(path: String)

@@ -69,7 +69,7 @@ open class ShadowConnectionFactory: ConnectionFactory
         {
             (config: ServerConfig) -> Bool in
 
-            return config.id == serverid
+            return config.id == serverid.uuidString
         }
         guard let serverConfig = maybeServerConfig else {return nil}
         guard let shadowConfig = serverConfig.shadowConfig else {return nil}

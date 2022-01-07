@@ -611,7 +611,7 @@ return                        }
     {
         let ready = XCTestExpectation(description: "Ready!")
         
-        guard let url = URL(string: "https://github.com/OperatorFoundation/ShadowSwift/testsip008.json") else
+        guard let url = URL(string: "https://raw.githubusercontent.com/OperatorFoundation/ShadowSwift/main/Tests/ShadowSwiftTests/testsip008.json") else
         {
             XCTFail()
             return
