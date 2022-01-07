@@ -606,5 +606,45 @@ return                        }
         print("Private key: \(privateKeyHex)")
         print("Public key: \(publicKeyHex)")
     }
+
+    func testSIP008()
+    {
+        let ready = XCTestExpectation(description: "Ready!")
+        
+        guard let url = URL(string: "https://github.com/OperatorFoundation/ShadowSwift/testsip008.json") else
+        {
+            XCTFail()
+            return
+        }
+        guard let serverid = UUID(uuidString: "27b8a625-4f4b-4428-9f0f-8a2317db7c79") else
+        {
+            XCTFail()
+            return
+        }
+
+        guard let factory = ShadowConnectionFactory(url: url, serverid: serverid, logger: self.logger) else
+        {
+            XCTFail()
+            return
+        }
+
+        guard var client = factory.connect(using: .tcp) else {return}
+
+        client.stateUpdateHandler={
+            state in
+
+            switch state
+            {
+                case .ready:
+                    print("Ready!")
+                    ready.fulfill()
+                default:
+                    return
+            }
+        }
+        let queue2 = DispatchQueue(label: "Client")
+        client.start(queue: queue2)
+        wait(for: [ready], timeout: 30)  // 30 seconds
+    }
 }
 

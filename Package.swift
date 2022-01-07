@@ -7,7 +7,8 @@ let package = Package(
     name: "ShadowSwift",
     platforms: [
         .macOS(.v10_15),
-        .iOS(.v14)],
+        .iOS(.v14)
+    ],
     products: [
         .library(
             name: "ShadowSwift",
@@ -27,6 +28,7 @@ let package = Package(
         .target(
             name: "ShadowSwift",
             dependencies: [
+                "Net",
                 "Chord",
                 "Datable",
                 "Transmission",
@@ -42,8 +44,7 @@ let package = Package(
                         "SwiftHexTools",
                         "Chord",
                         .product(name: "Logging", package: "swift-log")],
-            exclude: ["Info.plist"]),
+            exclude: ["Info.plist", "testsip008.json"]),
     ],
-    
     swiftLanguageVersions: [.v5]
 )

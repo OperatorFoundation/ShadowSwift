@@ -48,6 +48,36 @@ open class ShadowConnectionFactory: ConnectionFactory
         self.config = config
         self.log = logger
     }
+
+    public convenience init?(url: URL, serverid: UUID, logger: Logger)
+    {
+        guard let jsonConfig = JsonConfig(url: url) else {return nil}
+        self.init(jsonConfig: jsonConfig, serverid: serverid, logger: logger)
+    }
+
+    public convenience init?(path: String, serverid: UUID, logger: Logger)
+    {
+        guard let jsonConfig = JsonConfig(path: path) else {return nil}
+        self.init(jsonConfig: jsonConfig, serverid: serverid, logger: logger)
+    }
+
+    init?(jsonConfig: JsonConfig, serverid: UUID, logger: Logger)
+    {
+        self.log = logger
+
+        let maybeServerConfig = jsonConfig.servers.first
+        {
+            (config: ServerConfig) -> Bool in
+
+            return config.id == serverid
+        }
+        guard let serverConfig = maybeServerConfig else {return nil}
+        guard let shadowConfig = serverConfig.shadowConfig else {return nil}
+        self.config = shadowConfig
+
+        self.host = NWEndpoint.Host(serverConfig.server)
+        self.port = NWEndpoint.Port(integerLiteral: UInt16(serverConfig.port))
+    }
     
     public func connect(using parameters: NWParameters) -> Connection?
     {
@@ -68,30 +98,4 @@ open class ShadowConnectionFactory: ConnectionFactory
             return ShadowConnection(host: currentHost, port: currentPort, parameters: parameters, config: config, logger: log)
         }
     }
-
-//    public init(connection: Connection, config: ShadowConfig, logger: Logger)
-//    {
-//        self.connection = connection
-//        self.config = config
-//        self.log = logger
-//    }
-    
-//    public func connect(using parameters: NWParameters) -> Connection?
-//    {
-//        if let currentConnection = connection
-//        {
-//            return ShadowConnection(connection: currentConnection, parameters: parameters, config: config, logger: log)
-//        }
-//        else
-//        {
-//            guard let currentHost = host, let currentPort = port
-//                else
-//            {
-//                return nil
-//            }
-//
-//            return ShadowConnection(host: currentHost, port: currentPort, parameters: parameters, config: config, logger: log)
-//        }
-//    }
-    
 }

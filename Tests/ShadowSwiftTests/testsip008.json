@@ -1,0 +1,30 @@
+{
+    "version": 1,
+    "servers": [
+        {
+            // Server UUID to distinguish between servers when updating.
+            "id": "27b8a625-4f4b-4428-9f0f-8a2317db7c79",
+            "remarks": "Local test server",
+            "server": "127.0.0.1",
+            "server_port": 1234,
+            "password": "d089c225ef8cda8d477a586f062b31a756270124d94944e458edf1a9e1e41ed6",
+            "method": "DarkStarClient",
+        },
+        // Another server
+        {
+            "id": "7842c068-c667-41f2-8f7d-04feece3cb67",
+            "remarks": "Name of the server",
+            "server": "example.com",
+            "server_port": 8388,
+            "password": "example",
+            "method": "chacha20-ietf-poly1305",
+            "plugin": "xxx",
+            "plugin_opts": "xxxxx"
+        }
+    ],
+    // The above fields are mandatory.
+    // Optional fields for data usage:
+    "bytes_used": 274877906944,
+    "bytes_remaining": 824633720832
+    // You may add other custom fields in the root object.
+}
