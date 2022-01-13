@@ -41,13 +41,21 @@ open class ShadowConnectionFactory: ConnectionFactory
     public var host: NWEndpoint.Host?
     public var port: NWEndpoint.Port?
 
-    public init(host: NWEndpoint.Host, port: NWEndpoint.Port, config: ShadowConfig, logger: Logger)
+    public init(config: ShadowConfig, logger: Logger)
     {
-        self.host = host
-        self.port = port
+        self.host = NWEndpoint.Host(config.serverIP)
+        self.port = NWEndpoint.Port(rawValue: config.port)
         self.config = config
         self.log = logger
     }
+    
+//    public init(host: NWEndpoint.Host, port: NWEndpoint.Port, config: ShadowConfig, logger: Logger)
+//    {
+//        self.host = host
+//        self.port = port
+//        self.config = config
+//        self.log = logger
+//    }
 
     public convenience init?(url: URL, serverid: UUID, logger: Logger)
     {

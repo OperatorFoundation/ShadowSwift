@@ -34,8 +34,8 @@ class ShadowSwiftTests: XCTestCase
         let connected = expectation(description: "Connection callback called")
         //let sent = expectation(description: "TCP data sent")
         
-        let host = NWEndpoint.Host(testIPString)
-        guard let port = NWEndpoint.Port(rawValue: testPort)
+        let _ = NWEndpoint.Host(testIPString)
+        guard let _ = NWEndpoint.Port(rawValue: testPort)
             else
         {
             XCTFail()
@@ -44,9 +44,9 @@ class ShadowSwiftTests: XCTestCase
         
         let logger = Logger(label: "Shadow Logger")
 
-        let shadowConfig = ShadowConfig(password: "1234", mode: .CHACHA20_IETF_POLY1305)
+        let shadowConfig = ShadowConfig(password: "1234", serverIP: testIPString, port: testPort, mode: .CHACHA20_IETF_POLY1305)
         
-        let shadowFactory = ShadowConnectionFactory(host: host, port: port, config: shadowConfig, logger: logger)
+        let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
         
         guard var shadowConnection = shadowFactory.connect(using: .tcp)
             else
@@ -82,8 +82,8 @@ class ShadowSwiftTests: XCTestCase
         let connected = expectation(description: "Connection callback called")
         let sent = expectation(description: "TCP data sent")
         
-        let host = NWEndpoint.Host(testIPString)
-        guard let port = NWEndpoint.Port(rawValue: testPort)
+        let _ = NWEndpoint.Host(testIPString)
+        guard let _ = NWEndpoint.Port(rawValue: testPort)
             else
         {
             XCTFail()
@@ -92,9 +92,9 @@ class ShadowSwiftTests: XCTestCase
         
         let logger = Logger(label: "Shadow Logger")
 
-        let shadowConfig = ShadowConfig(password: "1234", mode: .CHACHA20_IETF_POLY1305)
+        let shadowConfig = ShadowConfig(password: "1234", serverIP: testIPString, port: testPort, mode: .CHACHA20_IETF_POLY1305)
         
-        let shadowFactory = ShadowConnectionFactory(host: host, port: port, config: shadowConfig, logger: logger)
+        let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
         
         guard var shadowConnection = shadowFactory.connect(using: .tcp)
             else
@@ -160,8 +160,8 @@ class ShadowSwiftTests: XCTestCase
         
         wait(for: [serverListening], timeout: 20)
 
-        let host = NWEndpoint.Host(testIPString)
-        guard let port = NWEndpoint.Port(rawValue: testPort)
+        let _ = NWEndpoint.Host(testIPString)
+        guard let _ = NWEndpoint.Port(rawValue: testPort)
             else
         {
             XCTFail()
@@ -169,8 +169,8 @@ class ShadowSwiftTests: XCTestCase
         }
         
         let logger = Logger(label: "Shadow Logger")
-        let shadowConfig = ShadowConfig(password: "1234", mode: .CHACHA20_IETF_POLY1305)
-        let shadowFactory = ShadowConnectionFactory(host: host, port: port, config: shadowConfig, logger: logger)
+        let shadowConfig = ShadowConfig(password: "1234", serverIP: testIPString, port: testPort, mode: .CHACHA20_IETF_POLY1305)
+        let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
         
         guard var shadowConnection = shadowFactory.connect(using: .tcp)
             else
@@ -258,16 +258,16 @@ class ShadowSwiftTests: XCTestCase
         
         wait(for: [serverListening], timeout: 20)
 
-        let host = NWEndpoint.Host(testIPString)
-        guard let port = NWEndpoint.Port(rawValue: testPort)
+        let _ = NWEndpoint.Host(testIPString)
+        guard let _ = NWEndpoint.Port(rawValue: testPort)
             else
         {
             XCTFail()
             return
         }
         
-        let shadowConfig = ShadowConfig(password: "1234", mode: .CHACHA20_IETF_POLY1305)
-        let shadowFactory = ShadowConnectionFactory(host: host, port: port, config: shadowConfig, logger: logger)
+        let shadowConfig = ShadowConfig(password: "1234", serverIP: testIPString, port: testPort, mode: .CHACHA20_IETF_POLY1305)
+        let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
         
         guard var shadowConnection = shadowFactory.connect(using: .tcp)
             else
@@ -468,11 +468,11 @@ return                        }
     
     func testJSONConfig()
     {
-        let shadowConfig = ShadowConfig(password: "password", mode: .CHACHA20_IETF_POLY1305)
+        let shadowConfig = ShadowConfig(password: "password", serverIP: testIPString, port: testPort, mode: .CHACHA20_IETF_POLY1305)
         let encoder = JSONEncoder()
         let json = try? encoder.encode(shadowConfig)
         
-        let filePath = "/Users/mafalda/Documents/Operator/Canary/Sources/Resources/Configs/shadowsockscopy.json"
+        let filePath = ""
         FileManager.default.createFile(atPath: filePath, contents: json)
         
         
@@ -498,7 +498,7 @@ return                        }
         let publicKeyHex = publicKeyData.hex
         print(publicKeyHex)
 
-        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(password: privateKeyHex, mode: .DARKSTAR_SERVER), logger: self.logger) else {return}
+        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(password: privateKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR_SERVER), logger: self.logger) else {return}
 
         let queue = DispatchQueue(label: "Client")
         queue.async
@@ -509,7 +509,7 @@ return                        }
             }))
         }
 
-        let factory = ShadowConnectionFactory(host: NWEndpoint.Host.ipv4(IPv4Address("127.0.0.1")!), port: NWEndpoint.Port(integerLiteral: 1234), config: ShadowConfig(password: publicKeyHex, mode: .DARKSTAR_CLIENT), logger: self.logger)
+        let factory = ShadowConnectionFactory(config: ShadowConfig(password: publicKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR_CLIENT), logger: self.logger)
         guard var client = factory.connect(using: .tcp) else {return}
 
         client.stateUpdateHandler={
@@ -549,7 +549,7 @@ return                        }
         let publicKeyHex = publicKeyData.hex
         print(publicKeyHex)
 
-        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(password: privateKeyHex, mode: .DARKSTAR_SERVER), logger: self.logger) else {
+        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(password: privateKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR_SERVER), logger: self.logger) else {
             XCTFail()
             return
         }
@@ -573,7 +573,7 @@ return                        }
         let publicKeyHex = publicKeyData!.hex
         print(publicKeyHex)
         
-        let factory = ShadowConnectionFactory(host: NWEndpoint.Host.ipv4(IPv4Address("127.0.0.1")!), port: NWEndpoint.Port(integerLiteral: 1234), config: ShadowConfig(password: publicKeyHex, mode: .DARKSTAR_CLIENT), logger: self.logger)
+        let factory = ShadowConnectionFactory(config: ShadowConfig(password: publicKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR_CLIENT), logger: self.logger)
         guard var client = factory.connect(using: .tcp) else {return}
 
         client.stateUpdateHandler={

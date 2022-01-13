@@ -53,7 +53,7 @@ public struct ServerConfig: Codable
 {
     let id: String
     let server: String
-    let server_port: Int
+    let server_port: UInt16
     let password: String
     let method: String
 }
@@ -97,6 +97,6 @@ extension ServerConfig
     public var shadowConfig: ShadowConfig?
     {
         guard let mode = CipherMode(rawValue: self.method) else {return nil}
-        return ShadowConfig(password: self.password, mode: mode)
+        return ShadowConfig(password: self.password, serverIP: server, port: server_port, mode: mode)
     }
 }
