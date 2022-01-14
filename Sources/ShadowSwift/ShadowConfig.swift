@@ -39,6 +39,7 @@ public struct ShadowConfig: Codable
         }
         catch
         {
+            print("Error received while attempting to decode a ShadowConfig json file: \(error)")
             return nil
         }
     }
