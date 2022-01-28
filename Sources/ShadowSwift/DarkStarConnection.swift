@@ -87,8 +87,8 @@ open class DarkStarConnection: Transport.Connection
 
                 guard let server = DarkStarServer(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection) else {return nil}
 
-                guard let eCipher = DarkStarCipher(key: server.serverToClientSharedKey, endpoint: endpoint, logger: logger) else {return nil}
-                guard let dCipher = DarkStarCipher(key: server.clientToServerSharedKey, endpoint: endpoint, logger: logger) else {return nil}
+                guard let eCipher = DarkStarCipher(key: server.serverToClientSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else {return nil}
+                guard let dCipher = DarkStarCipher(key: server.clientToServerSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else {return nil}
 
                 self.encryptingCipher = eCipher
                 self.decryptingCipher = dCipher
@@ -100,8 +100,8 @@ open class DarkStarConnection: Transport.Connection
 
                 guard let client = DarkStarClient(serverPersistentPublicKey: serverPersistentPublicKey, endpoint: endpoint, connection: connection) else {return nil}
 
-                guard let eCipher = DarkStarCipher(key: client.clientToServerSharedKey, endpoint: endpoint, logger: self.log) else {return nil}
-                guard let dCipher = DarkStarCipher(key: client.serverToClientSharedKey, endpoint: endpoint, logger: self.log) else {return nil}
+                guard let eCipher = DarkStarCipher(key: client.clientToServerSharedKey, endpoint: endpoint, isServerConnection: false, logger: self.log) else {return nil}
+                guard let dCipher = DarkStarCipher(key: client.serverToClientSharedKey, endpoint: endpoint, isServerConnection: false, logger: self.log) else {return nil}
 
                 self.encryptingCipher = eCipher
                 self.decryptingCipher = dCipher
