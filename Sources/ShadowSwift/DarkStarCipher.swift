@@ -94,6 +94,8 @@ class DarkStarCipher
     /// [encrypted payload length][length tag][encrypted payload][payload tag]
     func pack(plaintext: Data) -> Data?
     {
+        // Check for integer overflow
+        guard plaintext.count < UInt16.max else {return nil}
         let payloadLength = UInt16(plaintext.count)
         DatableConfig.endianess = .big
 
