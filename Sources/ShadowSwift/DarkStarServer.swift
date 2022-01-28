@@ -101,6 +101,13 @@ public class DarkStarServer
         guard let sharedKey = DarkStarServer.createServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: endpoint) else {return nil}
         self.sharedKey = sharedKey
 
+        //      Todo: Get rid of this
+        //        let keyb64 = sharedKey.withUnsafeBytes {
+        //            return Data(Array($0)).hex
+        //        }
+        //
+        //        print("Shared key: " + keyb64)
+
         // Send server confirmation code
         guard DarkStarServer.handleServerConfirmationCode(connection: connection, sharedKey: sharedKey, endpoint: endpoint, serverEphemeralPublicKey: serverEphemeralPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else {return nil}
     }

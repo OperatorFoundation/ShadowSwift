@@ -79,6 +79,13 @@ public class DarkStarClient
         guard let sharedKey = DarkStarClient.createClientSharedKey(clientEphemeralPrivateKey: clientEphemeralPrivateKey, serverEphemeralPublicKey: serverEphemeralPublicKey, serverPersistentPublicKey: serverPersistentPublicKey, serverEndpoint: endpoint) else {return nil}
         self.sharedKey = sharedKey
 
+        //      Todo: Get rid of this
+        //        let keyb64 = sharedKey.withUnsafeBytes {
+        //            return Data(Array($0)).hex
+        //        }
+        //
+        //        print("Shared key: " + keyb64)
+
         // Receive and validate server confirmation code
         guard DarkStarClient.handleServerConfirmationCode(connection: connection, sharedKey: sharedKey, endpoint: endpoint, serverEphemeralPublicKey: serverEphemeralPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else {return nil}
     }

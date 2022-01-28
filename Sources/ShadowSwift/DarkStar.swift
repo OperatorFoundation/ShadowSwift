@@ -57,14 +57,7 @@ public struct DarkStar
 
     static public func handleMyEphemeralKey(connection: Connection) -> (P256.KeyAgreement.PrivateKey, P256.KeyAgreement.PublicKey)?
     {
-        // FIXME - Fixed keys for testing only
-        // let myEphemeralPrivateKey = P256.KeyAgreement.PrivateKey()
-
-        let privateHex = "308187020100301306072a8648ce3d020106082a8648ce3d030107046d306b02010104203b1614c756935c8e13861598369dcc94419dfab6d07533978e8f5fc57b8076a4a144034200044007b3e630c9f146cce11a91d89c4a187c48981737ab5d7d9c95125e5c4e319e684b5b581d735fe04f7112e69a24b52ac68b9843f681a47d1a08f98f6664fbea"
-        let myEphemeralPrivateKeyData = Data(hex: privateHex)!
-        guard let myEphemeralPrivateKey = try? P256.KeyAgreement.PrivateKey(rawRepresentation: myEphemeralPrivateKeyData)
-        else {return nil}
-
+        let myEphemeralPrivateKey = P256.KeyAgreement.PrivateKey()
         let myEphemeralPublicKey = myEphemeralPrivateKey.publicKey
         let myEphemeralPublicKeyData = myEphemeralPublicKey.compactRepresentation!
 
