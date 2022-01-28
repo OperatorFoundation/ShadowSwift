@@ -71,7 +71,12 @@ class DarkStarCipher
         }
 
         let result = nonce(counter: self.encryptCounter, personalizationString: personalizationString.data)
-        self.encryptCounter += 1
+
+        let (newCounter, didOverflow) = self.encryptCounter.addingReportingOverflow(1)
+        guard !didOverflow else {return nil}
+
+        self.encryptCounter = newCounter
+
         return result
     }
     
@@ -89,7 +94,12 @@ class DarkStarCipher
         }
 
         let result = nonce(counter: self.decryptCounter, personalizationString: personalizationString.data)
-        self.decryptCounter += 1
+
+        let (newCounter, didOverflow) = self.encryptCounter.addingReportingOverflow(1)
+        guard !didOverflow else {return nil}
+
+        self.decryptCounter = newCounter
+
         return result
     }
 
