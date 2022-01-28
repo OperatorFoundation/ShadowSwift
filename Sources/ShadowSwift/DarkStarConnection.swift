@@ -53,6 +53,9 @@ open class DarkStarConnection: Transport.Connection
                              config: ShadowConfig,
                              logger: Logger)
     {
+        // Only support devices with secure enclave.
+        guard SecureEnclave.isAvailable else {return nil}
+
         var maybeHostString: String? = nil
         switch host
         {

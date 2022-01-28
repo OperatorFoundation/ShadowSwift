@@ -17,7 +17,7 @@ public class DarkStarClient
     let clientToServerSharedKey: SymmetricKey
     let serverToClientSharedKey: SymmetricKey
 
-    static public func handleServerConfirmationCode(connection: Connection, endpoint: NWEndpoint, serverStaticPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPrivateKey: P256.KeyAgreement.PrivateKey) -> Bool
+    static public func handleServerConfirmationCode(connection: Connection, endpoint: NWEndpoint, serverStaticPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPrivateKey: SecureEnclave.P256.KeyAgreement.PrivateKey) -> Bool
     {
         let data = connection.read(size: P256KeySize)
 
@@ -42,24 +42,24 @@ public class DarkStarClient
         return data == code
     }
 
-    static public func handleClientConfirmationCode(connection: Connection, theirPublicKey: P256.KeyAgreement.PublicKey, myPrivateKey: P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint, serverPersistentPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Bool
+    static public func handleClientConfirmationCode(connection: Connection, theirPublicKey: P256.KeyAgreement.PublicKey, myPrivateKey: SecureEnclave.P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint, serverPersistentPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Bool
     {
         guard let data = DarkStar.generateClientConfirmationCode(connection: connection, theirPublicKey: theirPublicKey, myPrivateKey: myPrivateKey, endpoint: endpoint, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else {return false}
 
         return connection.write(data: data)
     }
 
-    static public func createClientToServerSharedKey(clientEphemeralPrivateKey: P256.KeyAgreement.PrivateKey, serverEphemeralPublicKey: P256.KeyAgreement.PublicKey, serverPersistentPublicKey: P256.KeyAgreement.PublicKey, serverEndpoint: NWEndpoint) -> SymmetricKey?
+    static public func createClientToServerSharedKey(clientEphemeralPrivateKey: SecureEnclave.P256.KeyAgreement.PrivateKey, serverEphemeralPublicKey: P256.KeyAgreement.PublicKey, serverPersistentPublicKey: P256.KeyAgreement.PublicKey, serverEndpoint: NWEndpoint) -> SymmetricKey?
     {
         createClientSharedKey(clientEphemeralPrivateKey: clientEphemeralPrivateKey, serverEphemeralPublicKey: serverEphemeralPublicKey, serverPersistentPublicKey: serverPersistentPublicKey, serverEndpoint: serverEndpoint, personalizationString: ServerString)
     }
 
-    static public func createServerToClientSharedKey(clientEphemeralPrivateKey: P256.KeyAgreement.PrivateKey, serverEphemeralPublicKey: P256.KeyAgreement.PublicKey, serverPersistentPublicKey: P256.KeyAgreement.PublicKey, serverEndpoint: NWEndpoint) -> SymmetricKey?
+    static public func createServerToClientSharedKey(clientEphemeralPrivateKey: SecureEnclave.P256.KeyAgreement.PrivateKey, serverEphemeralPublicKey: P256.KeyAgreement.PublicKey, serverPersistentPublicKey: P256.KeyAgreement.PublicKey, serverEndpoint: NWEndpoint) -> SymmetricKey?
     {
         createClientSharedKey(clientEphemeralPrivateKey: clientEphemeralPrivateKey, serverEphemeralPublicKey: serverEphemeralPublicKey, serverPersistentPublicKey: serverPersistentPublicKey, serverEndpoint: serverEndpoint, personalizationString: ClientString)
     }
 
-    static func createClientSharedKey(clientEphemeralPrivateKey: P256.KeyAgreement.PrivateKey, serverEphemeralPublicKey: P256.KeyAgreement.PublicKey, serverPersistentPublicKey: P256.KeyAgreement.PublicKey, serverEndpoint: NWEndpoint, personalizationString: String) -> SymmetricKey?
+    static func createClientSharedKey(clientEphemeralPrivateKey: SecureEnclave.P256.KeyAgreement.PrivateKey, serverEphemeralPublicKey: P256.KeyAgreement.PublicKey, serverPersistentPublicKey: P256.KeyAgreement.PublicKey, serverEndpoint: NWEndpoint, personalizationString: String) -> SymmetricKey?
     {
         guard let ephemeralECDH = try? clientEphemeralPrivateKey.sharedSecretFromKeyAgreement(with: serverEphemeralPublicKey) else {return nil}
 
@@ -94,7 +94,7 @@ public class DarkStarClient
     public init?(serverPersistentPublicKey: P256.KeyAgreement.PublicKey, endpoint: NWEndpoint, connection: Connection)
     {
         // Send client ephemeral key
-        guard let (clientEphemeralPrivateKey, clientEphemeralPublicKey) = DarkStar.handleMyEphemeralKey(connection: connection) else {return nil}
+        guard let (clientEphemeralPrivateKey, clientEphemeralPublicKey) = DarkStar.handleClientEphemeralKey(connection: connection) else {return nil}
 
         // Send client confirmation code
         guard DarkStarClient.handleClientConfirmationCode(connection: connection, theirPublicKey: serverPersistentPublicKey, myPrivateKey: clientEphemeralPrivateKey, endpoint: endpoint, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else {return nil}
