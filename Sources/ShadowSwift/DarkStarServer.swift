@@ -14,7 +14,8 @@ import SwiftHexTools
 
 public class DarkStarServer
 {
-    let sharedKey: SymmetricKey
+    let serverToClientSharedKey: SymmetricKey
+    let clientToServerSharedKey: SymmetricKey
 
     static public func handleServerConfirmationCode(connection: Connection, sharedKey: SymmetricKey, endpoint: NWEndpoint, serverEphemeralPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Bool
     {
@@ -54,7 +55,17 @@ public class DarkStarServer
         return Data(result)
     }
 
-    static public func createServerSharedKey(serverPersistentPrivateKey: P256.KeyAgreement.PrivateKey, serverEphemeralPrivateKey: P256.KeyAgreement.PrivateKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey, serverEndpoint: NWEndpoint) -> SymmetricKey?
+    static public func createServerToClientSharedKey(serverPersistentPrivateKey: P256.KeyAgreement.PrivateKey, serverEphemeralPrivateKey: P256.KeyAgreement.PrivateKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey, serverEndpoint: NWEndpoint) -> SymmetricKey?
+    {
+        createServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: serverEndpoint, personalizationString: ClientString)
+    }
+
+    static public func createClientToServerSharedKey(serverPersistentPrivateKey: P256.KeyAgreement.PrivateKey, serverEphemeralPrivateKey: P256.KeyAgreement.PrivateKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey, serverEndpoint: NWEndpoint) -> SymmetricKey?
+    {
+        createServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: serverEndpoint, personalizationString: ServerString)
+    }
+
+    static func createServerSharedKey(serverPersistentPrivateKey: P256.KeyAgreement.PrivateKey, serverEphemeralPrivateKey: P256.KeyAgreement.PrivateKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey, serverEndpoint: NWEndpoint, personalizationString: String) -> SymmetricKey?
     {
         guard let ephemeralECDH = try? serverEphemeralPrivateKey.sharedSecretFromKeyAgreement(with: clientEphemeralPublicKey) else {return nil}
 
@@ -78,6 +89,7 @@ public class DarkStarServer
         hash.update(data: clientEphemeralPublicKeyData)
         hash.update(data: serverEphemeralPublicKeyData)
         hash.update(data: DarkStarString.data)
+        hash.update(data: personalizationString.data) // Destination
         let hashed = hash.finalize()
 
         let hashedData = Data(hashed)
@@ -98,8 +110,11 @@ public class DarkStarServer
         guard let (serverEphemeralPrivateKey, serverEphemeralPublicKey) = DarkStar.handleMyEphemeralKey(connection: connection) else {return nil}
 
         // Create shared key
-        guard let sharedKey = DarkStarServer.createServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: endpoint) else {return nil}
-        self.sharedKey = sharedKey
+        guard let serverToClientSharedKey = DarkStarServer.createServerToClientSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: endpoint) else {return nil}
+        self.serverToClientSharedKey = serverToClientSharedKey
+
+        guard let clientToServerSharedKey = DarkStarServer.createClientToServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: endpoint) else {return nil}
+        self.clientToServerSharedKey = clientToServerSharedKey
 
         //      Todo: Get rid of this
         //        let keyb64 = sharedKey.withUnsafeBytes {
@@ -109,6 +124,6 @@ public class DarkStarServer
         //        print("Shared key: " + keyb64)
 
         // Send server confirmation code
-        guard DarkStarServer.handleServerConfirmationCode(connection: connection, sharedKey: sharedKey, endpoint: endpoint, serverEphemeralPublicKey: serverEphemeralPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else {return nil}
+        guard DarkStarServer.handleServerConfirmationCode(connection: connection, sharedKey: serverToClientSharedKey, endpoint: endpoint, serverEphemeralPublicKey: serverEphemeralPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else {return nil}
     }
 }
