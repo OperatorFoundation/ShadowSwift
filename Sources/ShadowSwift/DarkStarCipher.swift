@@ -30,6 +30,7 @@ import Logging
 
 import Crypto
 import Datable
+import Network
 
 class DarkStarCipher
 {
@@ -53,41 +54,111 @@ class DarkStarCipher
     static let minRead = 1 + Cipher.overhead
 
     let key: SymmetricKey
+    let serverIdentifier: Data
+    let isServerConnection: Bool
+
     var encryptCounter: UInt64 = 0
     var encryptNonce: AES.GCM.Nonce?
     {
-        DatableConfig.endianess = .little
-        var counterData = self.encryptCounter.data
+        var personalizationString = ""
+        if isServerConnection
+        {
+            personalizationString = "client" // client is destination
+        }
+        else
+        {
+            personalizationString = "server" // server is destination
+        }
 
-        // We have 8 bytes, nonce should be 12
-        counterData.append(contentsOf: [0, 0, 0, 0])
-
-        // We increment our counter every time nonce is used (encrypt/decrypt)
+        let result = nonce(counter: self.encryptCounter, personalizationString: personalizationString.data)
         self.encryptCounter += 1
-
-        guard let nonce = try? AES.GCM.Nonce(data: counterData) else {return nil}
-        return nonce
+        return result
     }
     
     var decryptCounter: UInt64 = 0
     var decryptNonce: AES.GCM.Nonce?
     {
-        DatableConfig.endianess = .little
-        var counterData = self.decryptCounter.data
+        var personalizationString = ""
+        if isServerConnection
+        {
+            personalizationString = "server" // server is destination
+        }
+        else
+        {
+            personalizationString = "client" // client is destination
+        }
 
-        // We have 8 bytes, nonce should be 12
-        counterData.append(contentsOf: [0, 0, 0, 0])
-
-        // We increment our counter every time nonce is used (encrypt/decrypt)
+        let result = nonce(counter: self.decryptCounter, personalizationString: personalizationString.data)
         self.decryptCounter += 1
+        return result
+    }
 
-        guard let nonce = try? AES.GCM.Nonce(data: counterData) else {return nil}
+    func nonce(counter: UInt64, personalizationString: Data) -> AES.GCM.Nonce?
+    {
+        // NIST Special Publication 800-38D - Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM) and GMAC
+        // https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38d.pdf
+        // Section 8.2.1 - Deterministic Construction
+        // Applicable to nonces of 96 bytes or less.
+
+        /*
+         In the deterministic construction, the IV is the concatenation of two
+         fields, called the fixed field and the invocation field. The fixed field
+         shall identify the device, or, more generally, the context for the
+         instance of the authenticated encryption function. The invocation field
+         shall identify the sets of inputs to the authenticated encryption
+         function in that particular device.
+
+         For any given key, no two distinct devices shall share the same fixed
+         field, and no two distinct sets of inputs to any single device shall
+         share the same invocation field. Compliance with these two requirements
+         implies compliance with the uniqueness requirement on IVs in Sec. 8.
+
+         If desired, the fixed field itself may be constructed from two or more
+         smaller fields. Moreover, one of those smaller fields could consist of
+         bits that are arbitrary (i.e., not necessarily deterministic nor unique
+         to the device), as long as the remaining bits ensure that the fixed
+         field is not repeated in its entirety for some other device with the
+         same key.
+
+         Similarly, the entire fixed field may consist of arbitrary bits when
+         there is only one context to identify, such as when a fresh key is
+         limited to a single session of a communications protocol. In this case,
+         if different participants in the session share a common fixed field,
+         then the protocol shall ensure that the invocation fields are distinct
+         for distinct data inputs.
+        */
+
+        let fixedField = Data(repeating: 0x1A, count: 4) // 4 bytes = 32 bits
+
+        /*
+         The invocation field typically is either 1) an integer counter or 2) a
+         linear feedback shift register that is driven by a primitive polynomial
+         to ensure a maximal cycle length. In either case, the invocation field
+         increments upon each invocation of the authenticated encryption
+         function.
+
+         The lengths and positions of the fixed field and the invocation field
+         shall be fixed for each supported IV length for the life of the key. In
+         order to promote interoperability for the default IV length of 96 bits,
+         this Recommendation suggests, but does not require, that the leading
+         (i.e., leftmost) 32 bits of the IV hold the fixed field; and that the
+         trailing (i.e., rightmost) 64 bits hold the invocation field.
+        */
+
+        guard let invocationField = self.encryptCounter.maybeNetworkData else {return nil}
+
+        let nonceData = fixedField + invocationField
+
+        guard let nonce = try? AES.GCM.Nonce(data: nonceData) else {return nil}
         return nonce
     }
 
-    init?(key: SymmetricKey, logger: Logger)
+    init?(key: SymmetricKey, endpoint: NWEndpoint, isServerConnection: Bool, logger: Logger)
     {
         self.key = key
+        guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else {return nil}
+        self.serverIdentifier = serverIdentifier
+        self.isServerConnection = isServerConnection
         self.log = logger
     }
 
