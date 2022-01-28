@@ -17,11 +17,27 @@ public class DarkStarClient
     let clientToServerSharedKey: SymmetricKey
     let serverToClientSharedKey: SymmetricKey
 
-    static public func handleServerConfirmationCode(connection: Connection, sharedKey: SymmetricKey, endpoint: NWEndpoint, serverEphemeralPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Bool
+    static public func handleServerConfirmationCode(connection: Connection, endpoint: NWEndpoint, serverStaticPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPrivateKey: P256.KeyAgreement.PrivateKey) -> Bool
     {
         let data = connection.read(size: P256KeySize)
 
-        guard let code = DarkStar.generateServerConfirmationCode(clientSharedKey: sharedKey, endpoint: endpoint, serverEphemeralPublicKey: serverEphemeralPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else {return false}
+        guard let ecdh = try? clientEphemeralPrivateKey.sharedSecretFromKeyAgreement(with: serverStaticPublicKey) else {return false}
+        let ecdhData = DarkStar.sharedSecretToData(secret: ecdh)
+
+        guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else {return false}
+        let clientEphemeralPublicKeyData = clientEphemeralPrivateKey.publicKey.compactRepresentation!
+        let serverStaticPublicKeyData = serverStaticPublicKey.compactRepresentation!
+
+        var hash = SHA256()
+        hash.update(data: ecdhData)
+        hash.update(data: serverIdentifier)
+        hash.update(data: serverStaticPublicKeyData)
+        hash.update(data: clientEphemeralPublicKeyData)
+        hash.update(data: DarkStarString.data)
+        hash.update(data: ServerString.data)
+        let result = hash.finalize()
+
+        let code = Data(result)
 
         return data == code
     }
@@ -101,6 +117,6 @@ public class DarkStarClient
         //        print("Shared key: " + keyb64)
 
         // Receive and validate server confirmation code
-        guard DarkStarClient.handleServerConfirmationCode(connection: connection, sharedKey: serverToClientSharedKey, endpoint: endpoint, serverEphemeralPublicKey: serverEphemeralPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else {return nil}
+        guard DarkStarClient.handleServerConfirmationCode(connection: connection, endpoint: endpoint, serverStaticPublicKey: serverPersistentPublicKey, clientEphemeralPrivateKey: clientEphemeralPrivateKey) else {return nil}
     }
 }

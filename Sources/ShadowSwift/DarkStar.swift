@@ -38,19 +38,23 @@ public struct DarkStar
         return Data(array: dataArray)
     }
 
-    static public func generateServerConfirmationCode(clientSharedKey: SymmetricKey, endpoint: NWEndpoint, serverEphemeralPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Data?
+    static public func generateServerConfirmationCode(theirPublicKey: P256.KeyAgreement.PublicKey, myPrivateEphemeralKey: P256.KeyAgreement.PrivateKey, myPrivateStaticKey: P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint) -> Data?
     {
-        guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else {return nil}
-        let serverEphemeralPublicKeyData = serverEphemeralPublicKey.compactRepresentation!
-        let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation!
+        guard let ecdh = try? myPrivateStaticKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else {return nil}
+        let ecdhData = DarkStar.sharedSecretToData(secret: ecdh)
 
-        var hmac = HMAC<SHA256>(key: clientSharedKey)
-        hmac.update(data: serverIdentifier)
-        hmac.update(data: serverEphemeralPublicKeyData)
-        hmac.update(data: clientEphemeralPublicKeyData)
-        hmac.update(data: DarkStarString.data)
-        hmac.update(data: ServerString.data)
-        let result = hmac.finalize()
+        guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else {return nil}
+        let serverPersistentPublicKeyData = myPrivateStaticKey.publicKey.compactRepresentation!
+        let clientEphemeralPublicKeyData = theirPublicKey.compactRepresentation!
+
+        var hash = SHA256()
+        hash.update(data: ecdhData)
+        hash.update(data: serverIdentifier)
+        hash.update(data: serverPersistentPublicKeyData)
+        hash.update(data: clientEphemeralPublicKeyData)
+        hash.update(data: DarkStarString.data)
+        hash.update(data: ServerString.data)
+        let result = hash.finalize()
 
         return Data(result)
     }
