@@ -30,7 +30,7 @@ import Logging
 
 import Crypto
 import Datable
-import Network
+import Net
 
 class DarkStarCipher
 {
