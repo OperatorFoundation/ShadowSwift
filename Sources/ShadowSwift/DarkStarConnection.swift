@@ -53,8 +53,11 @@ open class DarkStarConnection: Transport.Connection
                              config: ShadowConfig,
                              logger: Logger)
     {
-        // Only support devices with secure enclave.
+        
+        #if os(macOS)
+        // Only support Apple devices with secure enclave.
         guard SecureEnclave.isAvailable else {return nil}
+        #endif
 
         var maybeHostString: String? = nil
         switch host
