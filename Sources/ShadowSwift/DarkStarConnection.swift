@@ -49,8 +49,11 @@ open class DarkStarConnection: Transport.Connection
 
     public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig, isClient: Bool, logger: Logger)
     {
-        // Only support devices with secure enclave.
+        
+        #if os(macOS)
+        // Only support Apple devices with secure enclave.
         guard SecureEnclave.isAvailable else {return nil}
+        #endif
 
         var maybeHostString: String? = nil
         switch host

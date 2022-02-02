@@ -38,6 +38,7 @@ public struct DarkStar
         return Data(array: dataArray)
     }
 
+    #if os(macOS)
     static public func generateServerConfirmationCode(theirPublicKey: P256.KeyAgreement.PublicKey, myPrivateEphemeralKey: SecureEnclave.P256.KeyAgreement.PrivateKey, myPrivateStaticKey: SecureEnclave.P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint) -> Data?
     {
         guard let ecdh = try? myPrivateStaticKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else {return nil}
@@ -58,7 +59,30 @@ public struct DarkStar
 
         return Data(result)
     }
+    #else
+    static public func generateServerConfirmationCode(theirPublicKey: P256.KeyAgreement.PublicKey, myPrivateEphemeralKey: P256.KeyAgreement.PrivateKey, myPrivateStaticKey: P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint) -> Data?
+    {
+        guard let ecdh = try? myPrivateStaticKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else {return nil}
+        let ecdhData = DarkStar.sharedSecretToData(secret: ecdh)
 
+        guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else {return nil}
+        let serverPersistentPublicKeyData = myPrivateStaticKey.publicKey.compactRepresentation!
+        let clientEphemeralPublicKeyData = theirPublicKey.compactRepresentation!
+
+        var hash = SHA256()
+        hash.update(data: ecdhData)
+        hash.update(data: serverIdentifier)
+        hash.update(data: serverPersistentPublicKeyData)
+        hash.update(data: clientEphemeralPublicKeyData)
+        hash.update(data: DarkStarString.data)
+        hash.update(data: ServerString.data)
+        let result = hash.finalize()
+
+        return Data(result)
+    }
+    #endif
+    
+    
     static public func handleServerEphemeralKey(connection: Connection) -> (P256.KeyAgreement.PrivateKey, P256.KeyAgreement.PublicKey)?
     {
         let myEphemeralPrivateKey = P256.KeyAgreement.PrivateKey()
@@ -70,6 +94,7 @@ public struct DarkStar
         return (myEphemeralPrivateKey, myEphemeralPublicKey)
     }
 
+    #if os(macOS)
     static public func handleClientEphemeralKey(connection: Connection) -> (SecureEnclave.P256.KeyAgreement.PrivateKey, P256.KeyAgreement.PublicKey)?
     {
         guard let myEphemeralPrivateKey = try? SecureEnclave.P256.KeyAgreement.PrivateKey() else {return nil}
@@ -80,7 +105,7 @@ public struct DarkStar
 
         return (myEphemeralPrivateKey, myEphemeralPublicKey)
     }
-
+    
     static public func generateClientConfirmationCode(connection: Connection, theirPublicKey: P256.KeyAgreement.PublicKey, myPrivateKey: SecureEnclave.P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint, serverPersistentPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Data?
     {
         guard let ecdh = try? myPrivateKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else {return nil}
@@ -101,6 +126,42 @@ public struct DarkStar
 
         return Data(result)
     }
+    
+    #else
+    static public func handleClientEphemeralKey(connection: Connection) -> (P256.KeyAgreement.PrivateKey, P256.KeyAgreement.PublicKey)?
+    {
+        guard let myEphemeralPrivateKey = try? P256.KeyAgreement.PrivateKey() else {return nil}
+        let myEphemeralPublicKey = myEphemeralPrivateKey.publicKey
+        let myEphemeralPublicKeyData = myEphemeralPublicKey.compactRepresentation!
+
+        guard connection.write(data: myEphemeralPublicKeyData) else {return nil}
+
+        return (myEphemeralPrivateKey, myEphemeralPublicKey)
+    }
+    
+    static public func generateClientConfirmationCode(connection: Connection, theirPublicKey: P256.KeyAgreement.PublicKey, myPrivateKey: P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint, serverPersistentPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Data?
+    {
+        guard let ecdh = try? myPrivateKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else {return nil}
+        let ecdhData = DarkStar.sharedSecretToData(secret: ecdh)
+
+        guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else {return nil}
+        let serverPersistentPublicKeyData = serverPersistentPublicKey.compactRepresentation!
+        let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation!
+
+        var hash = SHA256()
+        hash.update(data: ecdhData)
+        hash.update(data: serverIdentifier)
+        hash.update(data: serverPersistentPublicKeyData)
+        hash.update(data: clientEphemeralPublicKeyData)
+        hash.update(data: DarkStarString.data)
+        hash.update(data: ClientString.data)
+        let result = hash.finalize()
+
+        return Data(result)
+    }
+    #endif
+
+    
 
     static public func handleTheirEphemeralPublicKey(connection: Connection) -> P256.KeyAgreement.PublicKey?
     {
