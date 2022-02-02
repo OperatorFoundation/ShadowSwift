@@ -48,14 +48,6 @@ open class ShadowConnectionFactory: ConnectionFactory
         self.config = config
         self.log = logger
     }
-    
-//    public init(host: NWEndpoint.Host, port: NWEndpoint.Port, config: ShadowConfig, logger: Logger)
-//    {
-//        self.host = host
-//        self.port = port
-//        self.config = config
-//        self.log = logger
-//    }
 
     public convenience init?(url: URL, serverid: UUID, logger: Logger)
     {
@@ -89,21 +81,18 @@ open class ShadowConnectionFactory: ConnectionFactory
     
     public func connect(using parameters: NWParameters) -> Connection?
     {
-        guard let currentHost = self.host, let currentPort = self.port
-            else
+        guard let currentHost = self.host, let currentPort = self.port else
         {
             return nil
         }
 
         print(currentHost)
 
-        if config.mode == .DARKSTAR_CLIENT || config.mode == .DARKSTAR_SERVER
+        guard config.mode == .DARKSTAR else
         {
-            return DarkStarConnection(host: currentHost, port: currentPort, parameters: parameters, config: config, logger: log)
+            return nil
         }
-        else
-        {
-            return ShadowConnection(host: currentHost, port: currentPort, parameters: parameters, config: config, logger: log)
-        }
+
+        return DarkStarConnection(host: currentHost, port: currentPort, parameters: parameters, config: config, isClient: true, logger: log)
     }
 }

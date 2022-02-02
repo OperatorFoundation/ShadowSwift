@@ -43,8 +43,7 @@ class ShadowSwiftTests: XCTestCase
         }
         
         let logger = Logger(label: "Shadow Logger")
-
-        let shadowConfig = ShadowConfig(password: "1234", serverIP: testIPString, port: testPort, mode: .CHACHA20_IETF_POLY1305)
+        let shadowConfig = ShadowConfig(key: "d089c225ef8cda8d477a586f062b31a756270124d94944e458edf1a9e1e41ed6", serverIP: testIPString, port: testPort, mode: .DARKSTAR)
         
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
         
@@ -92,7 +91,7 @@ class ShadowSwiftTests: XCTestCase
         
         let logger = Logger(label: "Shadow Logger")
 
-        let shadowConfig = ShadowConfig(password: "1234", serverIP: testIPString, port: testPort, mode: .CHACHA20_IETF_POLY1305)
+        let shadowConfig = ShadowConfig(key: "d089c225ef8cda8d477a586f062b31a756270124d94944e458edf1a9e1e41ed6", serverIP: testIPString, port: testPort, mode: .DARKSTAR)
         
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
         
@@ -169,7 +168,7 @@ class ShadowSwiftTests: XCTestCase
         }
         
         let logger = Logger(label: "Shadow Logger")
-        let shadowConfig = ShadowConfig(password: "1234", serverIP: testIPString, port: testPort, mode: .CHACHA20_IETF_POLY1305)
+        let shadowConfig = ShadowConfig(key: "d089c225ef8cda8d477a586f062b31a756270124d94944e458edf1a9e1e41ed6", serverIP: testIPString, port: testPort, mode: .DARKSTAR)
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
         
         guard var shadowConnection = shadowFactory.connect(using: .tcp)
@@ -266,7 +265,7 @@ class ShadowSwiftTests: XCTestCase
             return
         }
         
-        let shadowConfig = ShadowConfig(password: "1234", serverIP: testIPString, port: testPort, mode: .CHACHA20_IETF_POLY1305)
+        let shadowConfig = ShadowConfig(key: "d089c225ef8cda8d477a586f062b31a756270124d94944e458edf1a9e1e41ed6", serverIP: testIPString, port: testPort, mode: .DARKSTAR)
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
         
         guard var shadowConnection = shadowFactory.connect(using: .tcp)
@@ -468,7 +467,7 @@ return                        }
     
     func testJSONConfig()
     {
-        let shadowConfig = ShadowConfig(password: "password", serverIP: testIPString, port: testPort, mode: .CHACHA20_IETF_POLY1305)
+        let shadowConfig = ShadowConfig(key: "d089c225ef8cda8d477a586f062b31a756270124d94944e458edf1a9e1e41ed6", serverIP: testIPString, port: testPort, mode: .DARKSTAR)
         let encoder = JSONEncoder()
         let json = try? encoder.encode(shadowConfig)
         
@@ -498,7 +497,7 @@ return                        }
         let publicKeyHex = publicKeyData.hex
         print(publicKeyHex)
 
-        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(password: privateKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR_SERVER), logger: self.logger) else {return}
+        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(key: privateKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR), logger: self.logger) else {return}
 
         let queue = DispatchQueue(label: "Client")
         queue.async
@@ -509,7 +508,7 @@ return                        }
             }))
         }
 
-        let factory = ShadowConnectionFactory(config: ShadowConfig(password: publicKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR_CLIENT), logger: self.logger)
+        let factory = ShadowConnectionFactory(config: ShadowConfig(key: publicKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR), logger: self.logger)
         guard var client = factory.connect(using: .tcp) else {return}
 
         client.stateUpdateHandler={
@@ -549,7 +548,7 @@ return                        }
         let publicKeyHex = publicKeyData.hex
         print(publicKeyHex)
 
-        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(password: privateKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR_SERVER), logger: self.logger) else {
+        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(key: privateKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR), logger: self.logger) else {
             XCTFail()
             return
         }
@@ -573,7 +572,7 @@ return                        }
         let publicKeyHex = publicKeyData!.hex
         print(publicKeyHex)
         
-        let factory = ShadowConnectionFactory(config: ShadowConfig(password: publicKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR_CLIENT), logger: self.logger)
+        let factory = ShadowConnectionFactory(config: ShadowConfig(key: publicKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR), logger: self.logger)
         guard var client = factory.connect(using: .tcp) else {return}
 
         client.stateUpdateHandler={
@@ -645,6 +644,14 @@ return                        }
         let queue2 = DispatchQueue(label: "Client")
         client.start(queue: queue2)
         wait(for: [ready], timeout: 30)  // 30 seconds
+    }
+
+    public func testULong()
+    {
+        let uint64 = UInt64.max
+        let int64 = Int64(bitPattern: uint64)
+        print(uint64)
+        print(int64)
     }
 }
 

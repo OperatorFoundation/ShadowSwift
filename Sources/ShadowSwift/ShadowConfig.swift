@@ -11,19 +11,19 @@ import Crypto
 
 public struct ShadowConfig: Codable
 {
-    public let password: String
+    public let key: String
     public let serverIP: String
     public let port: UInt16
     public let mode: CipherMode
     
     private enum CodingKeys : String, CodingKey
     {
-        case password, serverIP, port, mode = "cipherName"
+        case key, serverIP, port, mode = "cipherName"
     }
     
-    public init(password: String, serverIP: String, port: UInt16, mode: CipherMode)
+    public init(key: String, serverIP: String, port: UInt16, mode: CipherMode)
     {
-        self.password = password
+        self.key = key
         self.serverIP = serverIP
         self.port = port
         self.mode = mode

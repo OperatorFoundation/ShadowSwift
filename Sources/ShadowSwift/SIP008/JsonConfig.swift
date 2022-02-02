@@ -97,6 +97,6 @@ extension ServerConfig
     public var shadowConfig: ShadowConfig?
     {
         guard let mode = CipherMode(rawValue: self.method) else {return nil}
-        return ShadowConfig(password: self.password, serverIP: server, port: server_port, mode: mode)
+        return ShadowConfig(key: self.password, serverIP: server, port: server_port, mode: mode)
     }
 }

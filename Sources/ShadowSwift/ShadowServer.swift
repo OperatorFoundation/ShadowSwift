@@ -34,15 +34,9 @@ public class ShadowServer
     {
         let connection = self.listener.accept()
 
-        if self.config.mode == .DARKSTAR_SERVER
-        {
-            let shadow = DarkStarConnection(connection: connection, endpoint: self.endpoint, parameters: .tcp, config: self.config, logger: self.log)
-            return shadow
-        }
-        else
-        {
-            let shadow = ShadowConnection(connection: connection, parameters: .tcp, config: self.config, logger: self.log)
-            return shadow
-        }
+        guard self.config.mode == .DARKSTAR else {return nil}
+
+        let shadow = DarkStarConnection(connection: connection, endpoint: self.endpoint, parameters: .tcp, config: self.config, isClient: false, logger: self.log)
+        return shadow
     }
 }

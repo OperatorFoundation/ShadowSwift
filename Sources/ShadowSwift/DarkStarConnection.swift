@@ -47,11 +47,7 @@ open class DarkStarConnection: Transport.Connection
     var decryptingCipher: DarkStarCipher
     var network: Transmission.Connection
 
-    public convenience init?(host: NWEndpoint.Host,
-                             port: NWEndpoint.Port,
-                             parameters: NWParameters,
-                             config: ShadowConfig,
-                             logger: Logger)
+    public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig, isClient: Bool, logger: Logger)
     {
         // Only support devices with secure enclave.
         guard SecureEnclave.isAvailable else {return nil}
@@ -75,42 +71,42 @@ open class DarkStarConnection: Transport.Connection
             return nil
         }
 
-        self.init(connection: newConnection, endpoint: endpoint, parameters: parameters, config: config, logger: logger)
+        self.init(connection: newConnection, endpoint: endpoint, parameters: parameters, config: config, isClient: isClient, logger: logger)
     }
 
-    public init?(connection: Transmission.Connection, endpoint: NWEndpoint, parameters: NWParameters, config: ShadowConfig, logger: Logger)
+    public init?(connection: Transmission.Connection, endpoint: NWEndpoint, parameters: NWParameters, config: ShadowConfig, isClient: Bool, logger: Logger)
     {
         self.log = logger
 
-        switch config.mode
+        guard config.mode == .DARKSTAR else {return nil}
+        if isClient
         {
-            case .DARKSTAR_SERVER:
-                guard let serverPersistentPrivateKeyData = Data(hex: config.password) else {return nil}
-                guard let serverPersistentPrivateKey = try? P256.KeyAgreement.PrivateKey(rawRepresentation: serverPersistentPrivateKeyData) else {return nil}
+            guard let serverPersistentPublicKeyData = Data(hex: config.key) else {return nil}
+            guard let serverPersistentPublicKey = try? P256.KeyAgreement.PublicKey(compactRepresentation: serverPersistentPublicKeyData) else {return nil}
 
-                guard let server = DarkStarServer(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection) else {return nil}
+            guard let client = DarkStarClient(serverPersistentPublicKey: serverPersistentPublicKey, endpoint: endpoint, connection: connection) else {return nil}
 
-                guard let eCipher = DarkStarCipher(key: server.serverToClientSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else {return nil}
-                guard let dCipher = DarkStarCipher(key: server.clientToServerSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else {return nil}
+            guard let eCipher = DarkStarCipher(key: client.clientToServerSharedKey, endpoint: endpoint, isServerConnection: false, logger: self.log) else {return nil}
+            guard let dCipher = DarkStarCipher(key: client.serverToClientSharedKey, endpoint: endpoint, isServerConnection: false, logger: self.log) else {return nil}
 
-                self.encryptingCipher = eCipher
-                self.decryptingCipher = dCipher
-                self.network = connection
-                self.log = logger
-            case .DARKSTAR_CLIENT:
-                guard let serverPersistentPublicKeyData = Data(hex: config.password) else {return nil}
-                guard let serverPersistentPublicKey = try? P256.KeyAgreement.PublicKey(compactRepresentation: serverPersistentPublicKeyData) else {return nil}
+            self.encryptingCipher = eCipher
+            self.decryptingCipher = dCipher
+            self.network = connection
+        }
+        else
+        {
+            guard let serverPersistentPrivateKeyData = Data(hex: config.key) else {return nil}
+            guard let serverPersistentPrivateKey = try? P256.KeyAgreement.PrivateKey(rawRepresentation: serverPersistentPrivateKeyData) else {return nil}
 
-                guard let client = DarkStarClient(serverPersistentPublicKey: serverPersistentPublicKey, endpoint: endpoint, connection: connection) else {return nil}
+            guard let server = DarkStarServer(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection) else {return nil}
 
-                guard let eCipher = DarkStarCipher(key: client.clientToServerSharedKey, endpoint: endpoint, isServerConnection: false, logger: self.log) else {return nil}
-                guard let dCipher = DarkStarCipher(key: client.serverToClientSharedKey, endpoint: endpoint, isServerConnection: false, logger: self.log) else {return nil}
+            guard let eCipher = DarkStarCipher(key: server.serverToClientSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else {return nil}
+            guard let dCipher = DarkStarCipher(key: server.clientToServerSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else {return nil}
 
-                self.encryptingCipher = eCipher
-                self.decryptingCipher = dCipher
-                self.network = connection
-            default:
-                return nil
+            self.encryptingCipher = eCipher
+            self.decryptingCipher = dCipher
+            self.network = connection
+            self.log = logger
         }
 
         if let actualStateUpdateHandler = self.stateUpdateHandler
