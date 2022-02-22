@@ -449,7 +449,9 @@ class ShadowSwiftTests: XCTestCase
                         }
                         
                     default:
-return                        }
+                            return
+                            
+                    }
                 }
                 
                 newConnection.start(queue: .global())
@@ -485,12 +487,9 @@ return                        }
 
     func testDarkStarServer()
     {
-//        let privateKey = P256.KeyAgreement.PrivateKey()
-//        let privateKeyData = privateKey.derRepresentation
-//        let privateKeyHex = privateKeyData.hex
-        let privateKeyHex = "308187020100301306072a8648ce3d020106082a8648ce3d030107046d306b02010104204a6a7e6c9d15527905d58ef98aa59e2a81a3804f4d40ed1a219db6668d0c42fca144034200044ed5d754928698e5f73de6ff22feb516e146b7fd1a0e6ca466ccb77e2cc324bf3deb2b4df4d7583b521ecd466f37e84b8f7930482ca2a0d18baffd353fb207fd"
+        let privateKeyHex = "dd5e9e88d13e66017eb2087b128c1009539d446208f86173e30409a898ada148"
         guard let privateKeyBytes = Data(hex: privateKeyHex) else {return}
-        guard let privateKey = try? P256.KeyAgreement.PrivateKey(derRepresentation: privateKeyBytes) else {return}
+        guard let privateKey = try? P256.KeyAgreement.PrivateKey(rawRepresentation: privateKeyBytes) else {return}
         let publicKey = privateKey.publicKey
 
         let publicKeyData = publicKey.compactRepresentation!
@@ -522,41 +521,45 @@ return                        }
                     return
             }
         }
+        
         let queue2 = DispatchQueue(label: "Client")
         client.start(queue: queue2)
     }
 
     func testDarkStarOnlyServer()
     {
-        //        let privateKey = P256.KeyAgreement.PrivateKey()
-        //        let privateKeyData = privateKey.derRepresentation
-        //        let privateKeyHex = privateKeyData.hex
         let sent = XCTestExpectation(description: "Sent!")
         
         let privateKeyHex = "dd5e9e88d13e66017eb2087b128c1009539d446208f86173e30409a898ada148"
-        guard let privateKeyBytes = Data(hex: privateKeyHex) else {
+        guard let privateKeyBytes = Data(hex: privateKeyHex) else
+        {
             XCTFail()
             return
         }
-        guard let privateKey = try? P256.KeyAgreement.PrivateKey(rawRepresentation: privateKeyBytes) else {
+        
+        guard let privateKey = try? P256.KeyAgreement.PrivateKey(rawRepresentation: privateKeyBytes) else
+        {
             XCTFail()
             return
         }
+        
         let publicKey = privateKey.publicKey
-
         let publicKeyData = publicKey.compactRepresentation!
         let publicKeyHex = publicKeyData.hex
         print(publicKeyHex)
 
-        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(key: privateKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR), logger: self.logger) else {
+        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(key: privateKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR), logger: self.logger) else
+        {
             XCTFail()
             return
         }
 
-        guard let connection = server.accept() else {
+        guard let connection = server.accept() else
+        {
             XCTFail()
             return
         }
+        
         connection.send(content: "test\n".data, contentContext: NWConnection.ContentContext.defaultMessage, isComplete: true, completion: .contentProcessed({ maybeError in
             print("Sent!")
             sent.fulfill()
