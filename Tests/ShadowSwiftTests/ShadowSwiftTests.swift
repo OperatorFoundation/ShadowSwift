@@ -576,7 +576,11 @@ class ShadowSwiftTests: XCTestCase
         print(publicKeyHex)
         
         let factory = ShadowConnectionFactory(config: ShadowConfig(key: publicKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR), logger: self.logger)
-        guard var client = factory.connect(using: .tcp) else {return}
+        guard var client = factory.connect(using: .tcp) else
+        {
+            XCTFail()
+            return
+        }
 
         client.stateUpdateHandler={
             state in
@@ -587,6 +591,7 @@ class ShadowSwiftTests: XCTestCase
                     print("Ready!")
                     ready.fulfill()
                 default:
+                    XCTFail()
                     return
             }
         }
