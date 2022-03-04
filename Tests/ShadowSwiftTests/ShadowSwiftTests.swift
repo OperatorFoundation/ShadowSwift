@@ -29,6 +29,15 @@ class ShadowSwiftTests: XCTestCase
         LoggingSystem.bootstrap(StreamLogHandler.standardError)
     }
     
+    func testConfigFromFile()
+    {
+        guard let shadowConfig = ShadowConfig(path: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/Configs/shadowsocks.json").path) else
+        {
+            XCTFail()
+            return
+        }
+    }
+    
     func testShadowConnection()
     {
         let connected = expectation(description: "Connection callback called")

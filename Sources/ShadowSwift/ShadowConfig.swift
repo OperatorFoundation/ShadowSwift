@@ -18,7 +18,7 @@ public struct ShadowConfig: Codable
     
     private enum CodingKeys : String, CodingKey
     {
-        case key, serverIP, port, mode = "cipherName"
+        case password, serverIP, port, mode = "cipherName"
     }
     
     public init(key: String, serverIP: String, port: UInt16, mode: CipherMode)
