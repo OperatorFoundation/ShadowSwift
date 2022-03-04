@@ -11,7 +11,7 @@ import Crypto
 
 public struct ShadowConfig: Codable
 {
-    public let key: String
+    public let password: String
     public let serverIP: String
     public let port: UInt16
     public let mode: CipherMode
@@ -23,7 +23,7 @@ public struct ShadowConfig: Codable
     
     public init(key: String, serverIP: String, port: UInt16, mode: CipherMode)
     {
-        self.key = key
+        self.password = key
         self.serverIP = serverIP
         self.port = port
         self.mode = mode
