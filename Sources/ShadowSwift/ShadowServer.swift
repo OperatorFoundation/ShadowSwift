@@ -8,10 +8,12 @@
 import Foundation
 import Net
 import Logging
+
 import Transmission
 import Transport
+import TransmissionTransport
 
-public class ShadowServer
+public class ShadowServer: Transmission.Listener
 {
     let config: ShadowConfig
     var log: Logger
@@ -30,13 +32,37 @@ public class ShadowServer
         self.listener = listener
     }
 
-    public func accept() -> Transport.Connection?
+    public func accept() throws -> Transmission.Connection
     {
-        let connection = self.listener.accept()
+        let connection = try self.listener.accept()
 
-        guard self.config.mode == .DARKSTAR else {return nil}
-
-        let shadow = DarkStarConnection(connection: connection, endpoint: self.endpoint, parameters: .tcp, config: self.config, isClient: false, logger: self.log)
-        return shadow
+        guard let shadow = DarkStarConnection(connection: connection, endpoint: self.endpoint, parameters: .tcp, config: self.config, isClient: false, logger: self.log) else
+        {
+            throw ShadowServerError.darkStarConnectionError
+        }
+        
+        guard let transmissionConnection = TransportToTransmissionConnection(shadow) else
+        {
+            throw ShadowServerError.transportToTransmissionError
+        }
+        
+        return transmissionConnection
+    }
+    
+    enum ShadowServerError: LocalizedError
+    {
+        case darkStarConnectionError
+        case transportToTransmissionError
+        
+        var errorDescription: String?
+        {
+            switch self
+            {
+                case .darkStarConnectionError:
+                    return "We to create a DarkStar connection."
+                case .transportToTransmissionError:
+                    return "We failed to convert the DarkStar transport connection to a Transmission connection."
+            }
+        }
     }
 }

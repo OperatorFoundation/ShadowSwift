@@ -20,6 +20,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-log.git", from: "1.4.2"),
         .package(url: "https://github.com/OperatorFoundation/SwiftHexTools.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Transmission.git", branch: "main"),
+        .package(url: "https://github.com/OperatorFoundation/TransmissionTransport.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Transport.git", from: "2.3.12"),
         .package(url: "https://github.com/apple/swift-crypto", from: "2.0.0"),
         .package(url: "https://github.com/OperatorFoundation/Net.git", branch: "main"),
@@ -32,6 +33,7 @@ let package = Package(
                 "Chord",
                 "Datable",
                 "Transmission",
+                "TransmissionTransport",
                 "Transport",
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "Crypto", package: "swift-crypto")

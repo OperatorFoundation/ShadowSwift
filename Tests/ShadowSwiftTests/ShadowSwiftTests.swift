@@ -510,10 +510,20 @@ class ShadowSwiftTests: XCTestCase
         let queue = DispatchQueue(label: "Client")
         queue.async
         {
-            guard let connection = server.accept() else {return}
-            connection.send(content: "test\n".data, contentContext: NWConnection.ContentContext.defaultMessage, isComplete: true, completion: .contentProcessed({ maybeError in
+            do
+            {
+                let connection = try server.accept()
+                
+                connection.write(string: "test\n")
                 print("Sent!")
-            }))
+            }
+            catch
+            {
+                print(error.localizedDescription)
+                XCTFail()
+                return
+            }
+            
         }
 
         let factory = ShadowConnectionFactory(config: ShadowConfig(key: publicKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR), logger: self.logger)
@@ -563,17 +573,19 @@ class ShadowSwiftTests: XCTestCase
             return
         }
 
-        guard let connection = server.accept() else
+        do
         {
+            let connection = try server.accept()
+            connection.write(string: "test\n")
+            print("Sent!")
+            wait(for: [sent], timeout: 30)  // 30 seconds
+        }
+        catch
+        {
+            print(error)
             XCTFail()
             return
         }
-        
-        connection.send(content: "test\n".data, contentContext: NWConnection.ContentContext.defaultMessage, isComplete: true, completion: .contentProcessed({ maybeError in
-            print("Sent!")
-            sent.fulfill()
-            }))
-        wait(for: [sent], timeout: 30)  // 30 seconds
     }
     
     func testDarkStarClientOnly()
