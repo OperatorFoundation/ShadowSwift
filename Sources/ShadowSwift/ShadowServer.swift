@@ -15,6 +15,12 @@ import TransmissionTransport
 
 public class ShadowServer: Transmission.Listener
 {
+    // TODO: Ask how to pursue the closing
+    public func close() {
+       // <#code#>
+        print("Need a close")
+    }
+    
     let config: ShadowConfig
     var log: Logger
 

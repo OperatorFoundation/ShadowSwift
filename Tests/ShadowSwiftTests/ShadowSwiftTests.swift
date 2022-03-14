@@ -682,5 +682,20 @@ class ShadowSwiftTests: XCTestCase
         print(uint64)
         print(int64)
     }
+    
+    func testBloomFilterSave()
+    {
+        // store the bloomFilter JSON file in a variable.
+        let bloomFilterDirectory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop", isDirectory: true).appendingPathComponent("Configs", isDirectory: true).appendingPathComponent("bloom.json", isDirectory: false)
+        
+        // TODO: instantiate a bloom filter.
+        //let bloomFilter = BloomFilter()
+        
+        // TODO: insert some data into the bloom filter.
+        //bloomFilter.insert(<#T##filterData#>)
+        
+        // TODO: Uncomment & save the results to the bloom filter JSON file.
+        //bloomFilter.save(filePath: bloomFilterDirectory.path)
+    }
 }
 

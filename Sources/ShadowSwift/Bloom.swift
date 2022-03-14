@@ -85,40 +85,54 @@ public struct BloomFilter<filterData: Hashable>: Codable
     }
     
     // Use Codable to save as JSON
-    // give it the filename of the JSON and it will search for that file and put the data in it.
     func save(filePath: String)
     {
+        // create an encoder
         let jsonEncoder = JSONEncoder()
-//        let bloomFilterDirectory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop", isDirectory: true).appendingPathComponent("Configs", isDirectory: true)
         
         do
         {
+            // try to encode self as JSON data
             let data = try jsonEncoder.encode(self)
+            var fileURL: URL
+            var directoryURL: URL
             
-            // creates the file directory:
-//            try FileManager.default.createDirectory(at: bloomFilterDirectory, withIntermediateDirectories: true)
-//
-//            // establishing a path for where the file will go:
-//            let bloomFilterJsonFilePath = bloomFilterDirectory.appendingPathComponent("bloomFilter.json", isDirectory: false)
-            
-            // checks to see if there's a file at the path given
-            guard FileManager.default.fileExists(atPath: filePath)
-            else
-            {
-                print("File at path does not exist.")
-                return
-            }
-            
-            // takes the filePath string and changes it to a URL
+            // try to convert filePath to a URL
             guard let pathUrl = URL.init(string: filePath)
             else
             {
-                print("Could not create a URL from the filePath")
+                print("Failed to create a URL from filePath: \(filePath)")
                 return
             }
             
-            // unsure if this appends or overwrites, test!
-            try data.write(to: pathUrl)
+            if pathUrl.isDirectory // filePath provided is a directory. Does not include filename
+            {
+                // add a filename to the path provided for fileURL
+                fileURL = pathUrl.appendingPathComponent("BloomFilter.json")
+                // filePath is a directory
+                directoryURL = pathUrl
+            }
+            else // filePath provided includes the filename
+            {
+                // user provided the complete filePath
+                // save the URL version of this to fileURL
+                fileURL = pathUrl
+                // create directoryURL by removing the filename from the path provided
+                directoryURL = pathUrl.deletingLastPathComponent()
+            }
+            
+            // create the directory if it doesn't exist
+            try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true)
+            
+            // check to see if there's a file at the path given
+            // delete it if there is
+            if FileManager.default.fileExists(atPath: fileURL.path)
+            {
+                try FileManager.default.removeItem(atPath: fileURL.path)
+            }
+            
+            // save the JSON data to fileURL
+            try data.write(to: fileURL)
             
         }
         catch (let jsonEncodeError)
@@ -127,10 +141,13 @@ public struct BloomFilter<filterData: Hashable>: Codable
             return
         }
     }
-    
-    func load(filePath: String)
+}
+
+extension URL
+{
+    var isDirectory: Bool
     {
-        
+        (try? resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true
     }
 }
 
