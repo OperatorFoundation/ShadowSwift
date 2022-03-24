@@ -55,6 +55,8 @@ public struct ShadowConfig: Codable
         }
         catch
         {
+            print("Error decoding Shadow config file: \(error)")
+            
             return nil
         }        
     }
