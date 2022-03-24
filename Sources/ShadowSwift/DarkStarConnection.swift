@@ -81,7 +81,13 @@ open class DarkStarConnection: Transport.Connection
     {
         self.log = logger
 
-        guard config.mode == .DARKSTAR else {return nil}
+        guard config.mode == .DARKSTAR else
+        {
+            log.error("Attempted a connection with \(config.mode.rawValue), Currently DarkStar is the only supported shadow mode.", metadata: <#T##Logger.Metadata?#>)
+            return nil
+            
+        }
+        
         if isClient
         {
             guard let serverPersistentPublicKeyData = Data(hex: config.password) else {return nil}

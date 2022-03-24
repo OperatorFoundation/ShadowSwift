@@ -65,7 +65,7 @@ public class ShadowServer: Transmission.Listener
             switch self
             {
                 case .darkStarConnectionError:
-                    return "We to create a DarkStar connection."
+                    return "We failed to create a DarkStar connection."
                 case .transportToTransmissionError:
                     return "We failed to convert the DarkStar transport connection to a Transmission connection."
             }
