@@ -83,7 +83,7 @@ open class DarkStarConnection: Transport.Connection
 
         guard config.mode == .DARKSTAR else
         {
-            log.error("Attempted a connection with \(config.mode.rawValue), Currently DarkStar is the only supported shadow mode.", metadata: <#T##Logger.Metadata?#>)
+            log.error("Attempted a connection with \(config.mode.rawValue), Currently DarkStar is the only supported shadow mode.")
             return nil
             
         }
