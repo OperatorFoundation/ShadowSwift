@@ -32,7 +32,7 @@ class ShadowSwiftTests: XCTestCase
     
     func testConfigFromFile()
     {
-        guard let config = ShadowConfig(path: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/Configs/shadowsocks.json").path) else
+        guard let config = ShadowConfig(path: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/Configs/shadowsocksPrivateKey.json").path) else
         {
             XCTFail()
             return
@@ -664,7 +664,7 @@ class ShadowSwiftTests: XCTestCase
     func testGenerateKeys()
     {
         let privateKey = P256.KeyAgreement.PrivateKey()
-        let privateKeyData = privateKey.x963Representation
+        let privateKeyData = privateKey.rawRepresentation
         let privateKeyHex = privateKeyData.hex
 
         let publicKey = privateKey.publicKey
