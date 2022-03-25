@@ -83,13 +83,15 @@ open class ShadowConnectionFactory: ConnectionFactory
     {
         guard let currentHost = self.host, let currentPort = self.port else
         {
+            log.error("Failed to connect as ShadowConnectionFactory does not have a valid endpoint.")
             return nil
         }
 
-        print(currentHost)
+        print("Attempting to connect: \(currentHost)")
 
         guard config.mode == .DARKSTAR else
         {
+            log.error("Unable to make a shadow connection using \(config.mode.rawValue). Currently only DarkStar is supported.")
             return nil
         }
 

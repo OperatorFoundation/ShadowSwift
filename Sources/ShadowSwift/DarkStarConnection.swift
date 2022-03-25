@@ -63,7 +63,9 @@ open class DarkStarConnection: Transport.Connection
                 maybeHostString = "\(data[0]).\(data[1]).\(data[2]).\(data[3])"
             default:
                 maybeHostString = nil
+                logger.error("Failed to initialize a ShadowConnection because we could not create a Network Connection using host \(host). Only IPV4 is currently supported.")
         }
+        
         guard let hostString = maybeHostString else {return nil}
 
         let endpoint = NWEndpoint.hostPort(host: host, port: port)
