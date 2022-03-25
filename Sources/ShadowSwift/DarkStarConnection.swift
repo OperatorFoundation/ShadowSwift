@@ -104,36 +104,42 @@ open class DarkStarConnection: Transport.Connection
         }
         else
         {
-            // FIXME: DEBUG ONLY remove logger errors
+            // FIXME: DEBUG ONLY remove logger errors and debug prints
+            
             guard let serverPersistentPrivateKeyData = Data(hex: config.password) else
             {
                 logger.error("Failed to parse password from config.")
                 return nil
             }
+            print("Parsed a config file and got some key data.")
             
             guard let serverPersistentPrivateKey = try? P256.KeyAgreement.PrivateKey(rawRepresentation: serverPersistentPrivateKeyData) else
             {
                 logger.error("Failed to generate key from data.")
                 return nil
             }
+            print("Generated a key from some data.")
 
             guard let server = DarkStarServer(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection) else
             {
                 logger.error("Failed to init DarkStarServer")
                 return nil
             }
+            print("Initialized a DarkStarServer")
 
             guard let eCipher = DarkStarCipher(key: server.serverToClientSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
             {
                 logger.error("Failed to create the encryption cipher.")
                 return nil
             }
+            print("Created an encryption cipher.")
             
             guard let dCipher = DarkStarCipher(key: server.clientToServerSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
             {
                 logger.error("Failed to create the decryption cipher.")
                 return nil
             }
+            print("Created a decryption cipher.")
 
             self.encryptingCipher = eCipher
             self.decryptingCipher = dCipher
