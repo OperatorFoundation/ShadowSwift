@@ -13,6 +13,7 @@ import Datable
 import SwiftHexTools
 import Chord
 import Net
+import Transmission
 
 import XCTest
 @testable import ShadowSwift
@@ -31,11 +32,50 @@ class ShadowSwiftTests: XCTestCase
     
     func testConfigFromFile()
     {
-        guard let shadowConfig = ShadowConfig(path: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/Configs/shadowsocks.json").path) else
+        guard let config = ShadowConfig(path: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/Configs/shadowsocks.json").path) else
         {
             XCTFail()
             return
         }
+        
+        guard let serverPersistentPrivateKeyData = Data(hex: config.password) else
+        {
+            XCTFail()
+            return
+        }
+        
+        do
+        {
+            let serverPersistentPrivateKey = try P256.KeyAgreement.PrivateKey(rawRepresentation: serverPersistentPrivateKeyData)
+        }
+        catch
+        {
+            print("Error generating private key from data: \(error)")
+            XCTFail()
+            return
+        }
+        
+//        let port = NWEndpoint.Port(rawValue: config.port)
+//        let host = NWEndpoint.Host(config.serverIP)
+//        let endpoint = NWEndpoint.hostPort(host: host, port: port!)
+//
+//        guard let server = DarkStarServer(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: ) else
+//        {
+//            XCTFail()
+//            return
+//        }
+//
+//        guard let eCipher = DarkStarCipher(key: server.serverToClientSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
+//        {
+//            XCTFail()
+//            return
+//        }
+//
+//        guard let dCipher = DarkStarCipher(key: server.clientToServerSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
+//        {
+//            XCTFail()
+//            return
+//        }
     }
     
     func testShadowConnection()

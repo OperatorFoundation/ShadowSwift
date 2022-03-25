@@ -104,13 +104,36 @@ open class DarkStarConnection: Transport.Connection
         }
         else
         {
-            guard let serverPersistentPrivateKeyData = Data(hex: config.password) else {return nil}
-            guard let serverPersistentPrivateKey = try? P256.KeyAgreement.PrivateKey(rawRepresentation: serverPersistentPrivateKeyData) else {return nil}
+            // FIXME: DEBUG ONLY remove logger errors
+            guard let serverPersistentPrivateKeyData = Data(hex: config.password) else
+            {
+                logger.error("Failed to parse password from config.")
+                return nil
+            }
+            
+            guard let serverPersistentPrivateKey = try? P256.KeyAgreement.PrivateKey(rawRepresentation: serverPersistentPrivateKeyData) else
+            {
+                logger.error("Failed to generate key from data.")
+                return nil
+            }
 
-            guard let server = DarkStarServer(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection) else {return nil}
+            guard let server = DarkStarServer(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection) else
+            {
+                logger.error("Failed to init DarkStarServer")
+                return nil
+            }
 
-            guard let eCipher = DarkStarCipher(key: server.serverToClientSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else {return nil}
-            guard let dCipher = DarkStarCipher(key: server.clientToServerSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else {return nil}
+            guard let eCipher = DarkStarCipher(key: server.serverToClientSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
+            {
+                logger.error("Failed to create the encryption cipher.")
+                return nil
+            }
+            
+            guard let dCipher = DarkStarCipher(key: server.clientToServerSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
+            {
+                logger.error("Failed to create the decryption cipher.")
+                return nil
+            }
 
             self.encryptingCipher = eCipher
             self.decryptingCipher = dCipher
