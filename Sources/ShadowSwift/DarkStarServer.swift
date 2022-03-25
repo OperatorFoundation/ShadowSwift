@@ -115,6 +115,7 @@ public class DarkStarServer
 
     public init?(serverPersistentPrivateKey: P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint, connection: Connection)
     {
+        print("Initializing a DarkStarServer")
         let serverPersistentPublicKey = serverPersistentPrivateKey.publicKey
 
         // Receive client ephemeral key
