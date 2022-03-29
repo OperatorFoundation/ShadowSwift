@@ -229,8 +229,8 @@ class DarkStarCipher
 
     func unpack(encrypted: Data, expectedCiphertextLength: Int) -> Data?
     {
-        let ciphertext = encrypted[0..<expectedCiphertextLength]
-        let tag = encrypted[expectedCiphertextLength...]
+        let ciphertext = Data(encrypted[0..<expectedCiphertextLength])
+        let tag = Data(encrypted[expectedCiphertextLength...])
 
         // Quality Check
         guard tag.count == Cipher.tagSize
