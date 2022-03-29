@@ -81,6 +81,8 @@ public class DarkStarServer
             print("DarkStarServer failed to make a server identifier.")
             return nil
         }
+        
+        print("Created a server identifier: \(serverIdentifier) from an endpoint: \(endpoint)")
                 
         guard let serverPersistentPublicKeyData = serverPersistentPublicKey.compactRepresentation else
         {
