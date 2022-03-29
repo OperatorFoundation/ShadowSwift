@@ -265,7 +265,7 @@ class DarkStarCipher
         }
         catch let decryptError
         {
-            log.error("Error running AESGCM decryption: \(decryptError)")
+            log.error("Error running AESGCM decryption: \(decryptError.localizedDescription)")
             return nil
         }
     }
