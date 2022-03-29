@@ -37,8 +37,14 @@ public class ShadowServer: Transmission.Listener
         
         self.config = config
         self.log = logger
-
-        self.endpoint = NWEndpoint.hostPort(host: NWEndpoint.Host.ipv4(IPv4Address(host)!), port: NWEndpoint.Port(integerLiteral: UInt16(port)))
+        
+        guard let ipv4Address = IPv4Address(host) else
+        {
+            logger.error("Unable to initialize a Shadow Server \(host) is not a valid IPV4 address.")
+            return nil
+        }
+                                                  
+        self.endpoint = NWEndpoint.hostPort(host: NWEndpoint.Host.ipv4(ipv4Address), port: NWEndpoint.Port(integerLiteral: UInt16(port)))
 
         guard let listener = TransmissionListener(port: port, logger: nil) else {return nil}
         self.listener = listener
