@@ -203,10 +203,21 @@ class DarkStarCipher
 
         do
         {
-            guard let nonce = self.encryptNonce else {return nil}
+            guard let nonce = self.encryptNonce else
+            {
+                log.error("Failed to encrypt, nonce is nil.")
+                return nil
+            }
+            
             let sealedBox = try AES.GCM.seal(plaintext, using: self.key, nonce: nonce)
             cipherText = sealedBox.ciphertext
             tag = sealedBox.tag
+            
+            print("Encrypting...")
+            print("ciphertext: \(plaintext.hex)")
+            print("Tag: \(tag.hex)")
+            print("Nonce: \(Data(nonce))")
+            print("Key: \(DarkStar.symmetricKeyToData(key: key))")
         }
         catch let encryptError
         {
@@ -236,7 +247,18 @@ class DarkStarCipher
     {
         do
         {
-            guard let nonce = self.decryptNonce else {return nil}
+            guard let nonce = self.decryptNonce else
+            {
+                log.error("DarkStarCipher failed to decrypt the nonce.")
+                return nil
+            }
+            
+            print("Decrypting...")
+            print("Encrypted data: \(encrypted.hex)")
+            print("Tag: \(tag.hex)")
+            print("Nonce: \(Data(nonce))")
+            print("Key: \(DarkStar.symmetricKeyToData(key: key))")
+            
             let sealedBox = try AES.GCM.SealedBox(nonce: nonce, ciphertext: encrypted, tag: tag)
             return try AES.GCM.open(sealedBox, using: self.key)
         }
