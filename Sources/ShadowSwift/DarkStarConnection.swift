@@ -66,7 +66,11 @@ open class DarkStarConnection: Transport.Connection
                 logger.error("Failed to initialize a ShadowConnection because we could not create a Network Connection using host \(host). Only IPV4 is currently supported.")
         }
         
-        guard let hostString = maybeHostString else {return nil}
+        guard let hostString = maybeHostString else
+        {
+            logger.error("Failed to initialize a ShadowConnection because we could not resolve the host string.")
+            return nil
+        }
 
         let endpoint = NWEndpoint.hostPort(host: host, port: port)
         guard let newConnection = Transmission.TransmissionConnection(host: hostString, port: Int(port.rawValue))
@@ -87,18 +91,39 @@ open class DarkStarConnection: Transport.Connection
         {
             log.error("Attempted a connection with \(config.mode.rawValue), Currently DarkStar is the only supported shadow mode.")
             return nil
-            
         }
         
         if isClient
         {
-            guard let serverPersistentPublicKeyData = Data(hex: config.password) else {return nil}
-            guard let serverPersistentPublicKey = try? P256.KeyAgreement.PublicKey(compactRepresentation: serverPersistentPublicKeyData) else {return nil}
+            guard let serverPersistentPublicKeyData = Data(hex: config.password) else
+            {
+                log.error("DarkStarConnection failed to decode password as hex.")
+                return nil
+            }
+            
+            guard let serverPersistentPublicKey = try? P256.KeyAgreement.PublicKey(compactRepresentation: serverPersistentPublicKeyData) else
+            {
+                log.error("DarkStarConnection failed to parse the key as a compact representation P256 Public key.")
+                return nil
+            }
 
-            guard let client = DarkStarClient(serverPersistentPublicKey: serverPersistentPublicKey, endpoint: endpoint, connection: connection) else {return nil}
+            guard let client = DarkStarClient(serverPersistentPublicKey: serverPersistentPublicKey, endpoint: endpoint, connection: connection) else
+            {
+                log.error("DarkStarConnection the handshake failed.")
+                return nil
+            }
 
-            guard let eCipher = DarkStarCipher(key: client.clientToServerSharedKey, endpoint: endpoint, isServerConnection: false, logger: self.log) else {return nil}
-            guard let dCipher = DarkStarCipher(key: client.serverToClientSharedKey, endpoint: endpoint, isServerConnection: false, logger: self.log) else {return nil}
+            guard let eCipher = DarkStarCipher(key: client.clientToServerSharedKey, endpoint: endpoint, isServerConnection: false, logger: self.log) else
+            {
+                log.error("DarkStarConnection failed to make an encryption cipher.")
+                return nil
+            }
+            
+            guard let dCipher = DarkStarCipher(key: client.serverToClientSharedKey, endpoint: endpoint, isServerConnection: false, logger: self.log) else
+            {
+                log.error("DarkStarConnection failed to make a decryption cipher.")
+                return nil
+            }
 
             self.encryptingCipher = eCipher
             self.decryptingCipher = dCipher
