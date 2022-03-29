@@ -152,6 +152,14 @@ public class DarkStarServer
         hash.update(data: personalizationString.data) // Destination
         let hashed = hash.finalize()
 
+        print(ephemeralECDHData.hex)
+        print(persistentECDHData.hex)
+        print(serverIdentifier.hex)
+        print(clientEphemeralPublicKeyData.hex)
+        print(serverEphemeralPublicKeyData.hex)
+        print(DarkStarString.data.hex)
+        print(personalizationString.data.hex)
+
         let hashedData = Data(hashed)
         return SymmetricKey(data: hashedData)
     }
