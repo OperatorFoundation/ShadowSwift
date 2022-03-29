@@ -267,10 +267,12 @@ open class DarkStarConnection: Transport.Connection
                         maximumLength: Int,
                         completion: @escaping (Data?, NWConnection.ContentContext?, Bool, NWError?) -> Void)
     {
+        self.log.debug("👻  DarkStarConnection receive(minimumIncompleteLength: \(minimumIncompleteLength), maximumLength: \(maximumLength), completion:) called")
         // Get our encrypted length first
         let encryptedLengthSize = Cipher.lengthSize + Cipher.tagSize
         let maybeData = network.read(size: encryptedLengthSize)
-
+        
+        
         // Nothing to decrypt
         guard let someData = maybeData
         else
@@ -279,6 +281,8 @@ open class DarkStarConnection: Transport.Connection
             completion(nil, .defaultMessage, false, NWError.posix(.ENODATA))
             return
         }
+        
+        print("👻  DarkStarConnection received \(someData.count): \(someData.hex)")
 
         guard let lengthData = self.decryptingCipher.unpack(encrypted: someData, expectedCiphertextLength: Cipher.lengthSize)
         else
@@ -340,6 +344,7 @@ open class DarkStarConnection: Transport.Connection
             return
         }
 
+        self.log.debug("👻 Shadow receive complete.")
         completion(decrypted, maybeContext, connectionComplete, maybeError)
     }
 
