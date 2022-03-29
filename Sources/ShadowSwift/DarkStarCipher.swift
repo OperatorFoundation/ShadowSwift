@@ -95,7 +95,7 @@ class DarkStarCipher
 
         let result = nonce(counter: self.decryptCounter, personalizationString: personalizationString.data)
 
-        let (newCounter, didOverflow) = self.encryptCounter.addingReportingOverflow(1)
+        let (newCounter, didOverflow) = self.decryptCounter.addingReportingOverflow(1)
         guard !didOverflow else {return nil}
 
         self.decryptCounter = newCounter
