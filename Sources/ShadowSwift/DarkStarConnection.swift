@@ -49,7 +49,8 @@ open class DarkStarConnection: Transport.Connection
 
     public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig, isClient: Bool, logger: Logger)
     {
-        
+        print("DarkStarConnection init called.")
+        logger.debug("DarkStarConnection init called.")
         #if os(macOS)
         // Only support Apple devices with secure enclave.
         guard SecureEnclave.isAvailable else {return nil}
@@ -79,7 +80,8 @@ open class DarkStarConnection: Transport.Connection
             logger.error("Failed to initialize a ShadowConnection because we could not create a Network Connection using host \(host) and port \(Int(port.rawValue)).")
             return nil
         }
-
+        
+        
         self.init(connection: newConnection, endpoint: endpoint, parameters: parameters, config: config, isClient: isClient, logger: logger)
     }
 
