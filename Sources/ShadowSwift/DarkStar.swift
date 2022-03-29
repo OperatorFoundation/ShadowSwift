@@ -156,6 +156,13 @@ public struct DarkStar
         hash.update(data: DarkStarString.data)
         hash.update(data: ClientString.data)
         let result = hash.finalize()
+        
+        print("ecdhData: \(ecdhData.hex)")
+        print("serverIdentifier: \(serverIdentifier.hex)")
+        print("serverPersistentPublicKeyData \(serverPersistentPublicKeyData.hex)")
+        print("clientEphemeralPublicKeyData: \(clientEphemeralPublicKeyData.hex)")
+        print("DarkStarString as data: \(DarkStarString.data.hex)")
+        print("ClientString as data as hex :) : \(ClientString.data.hex)")
 
         return Data(result)
     }
