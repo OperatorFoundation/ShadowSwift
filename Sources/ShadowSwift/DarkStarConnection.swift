@@ -305,6 +305,13 @@ open class DarkStarConnection: Transport.Connection
         let payloadLength = Int(lengthUInt16)
         let expectedLength = payloadLength + Cipher.tagSize
         let nextMaybeData = network.read(size: expectedLength)
+        
+        if let nextData = nextMaybeData
+        {
+            print("👻  DarkStarConnection called \(type(of: network)).read(size: \(expectedLength)")
+            print("👻  DarkStarConnection received \(nextData.count) bytes: \(nextData.hex)")
+        }
+            
 
         self.shadowReceive(payloadLength: payloadLength, maybeData: nextMaybeData, maybeContext: .defaultMessage, connectionComplete: false, maybeError: nil, completion: completion)
     }
@@ -316,6 +323,7 @@ open class DarkStarConnection: Transport.Connection
                        maybeError: NWError?,
                        completion: @escaping (Data?, NWConnection.ContentContext?, Bool, NWError?) -> Void)
     {
+        print("👻  DarkStarConnection shadowReceive(payloadLength: \(payloadLength)...) called")
         // Something went wrong
         if let error = maybeError
         {
@@ -335,7 +343,7 @@ open class DarkStarConnection: Transport.Connection
 
         let dCipher = self.decryptingCipher
 
-        // Attempt tp decrypt the data we received before passing it along
+        // Attempt to decrypt the data we received before passing it along
         guard let decrypted = dCipher.unpack(encrypted: someData, expectedCiphertextLength: payloadLength)
         else
         {
