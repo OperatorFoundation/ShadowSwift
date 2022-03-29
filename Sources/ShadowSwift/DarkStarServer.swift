@@ -42,7 +42,11 @@ public class DarkStarServer
 
     static public func handleClientConfirmationCode(connection: Connection, theirPublicKey: P256.KeyAgreement.PublicKey, myPrivateKey: P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint, serverPersistentPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Bool
     {
-        let data = connection.read(size: ConfirmationSize)
+        guard let data = connection.read(size: ConfirmationSize) else
+        {
+            print("DarkStarServer failed to read confirmation data.")
+            return false
+        }
 
         guard let code = generateClientConfirmationCode(connection: connection, theirPublicKey: theirPublicKey, myPrivateKey: myPrivateKey, endpoint: endpoint, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey)
         else
@@ -51,7 +55,15 @@ public class DarkStarServer
             return false
         }
         
-        return data == code
+        if data == code
+        {
+            return true
+        }
+        else
+        {
+            print("data: \(data.hex) != code: \(code.hex)")
+            return false
+        }
     }
 
     static public func generateClientConfirmationCode(connection: Connection, theirPublicKey: P256.KeyAgreement.PublicKey, myPrivateKey:P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint, serverPersistentPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Data?
