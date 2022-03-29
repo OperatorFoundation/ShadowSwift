@@ -29,6 +29,12 @@ public class ShadowServer: Transmission.Listener
 
     public init?(host: String, port: Int, config: ShadowConfig, logger: Logger)
     {
+        if host == "0.0.0.0"
+        {
+            logger.error("Shadow Server does not allow '0.0.0.0' as a bindhost you must use the actual server IP.")
+            return nil
+        }
+        
         self.config = config
         self.log = logger
 
