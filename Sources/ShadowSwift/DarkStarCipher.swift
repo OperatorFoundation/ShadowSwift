@@ -155,11 +155,12 @@ class DarkStarCipher
          trailing (i.e., rightmost) 64 bits hold the invocation field.
         */
 
-        guard let invocationField = self.encryptCounter.maybeNetworkData else {return nil}
+        guard let invocationField = counter.maybeNetworkData else {return nil}
 
         let nonceData = fixedField + invocationField
 
         guard let nonce = try? AES.GCM.Nonce(data: nonceData) else {return nil}
+        
         return nonce
     }
 
