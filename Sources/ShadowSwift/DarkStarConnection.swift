@@ -271,7 +271,7 @@ open class DarkStarConnection: Transport.Connection
         // Get our encrypted length first
         let encryptedLengthSize = Cipher.lengthSize + Cipher.tagSize
         let maybeData = network.read(size: encryptedLengthSize)
-        
+        print("👻  DarkStarConnection called \(type(of: network)).read(size: \(encryptedLengthSize)")
         
         // Nothing to decrypt
         guard let someData = maybeData
