@@ -35,6 +35,7 @@ import SwiftHexTools
 import Crypto
 import Net
 import Transmission
+import Network
 
 open class DarkStarConnection: Transport.Connection
 {
@@ -224,6 +225,12 @@ open class DarkStarConnection: Transport.Connection
         else
         {
             log.debug("Shadow connection received a send command with no content.")
+            
+            if isComplete // We're done, close the connection
+            {
+                network.close()
+            }
+            
             switch completion
             {
                 case .contentProcessed(let handler):
@@ -238,7 +245,14 @@ open class DarkStarConnection: Transport.Connection
         else
         {
             log.error("Failed to encrypt shadow send content.")
-            return
+            switch completion
+            {
+                case .contentProcessed(let handler):
+                    handler(NWError.posix(.EAUTH))
+                    return
+                default:
+                    return
+            }
         }
 
         let written = network.write(data: encrypted)
@@ -337,8 +351,19 @@ open class DarkStarConnection: Transport.Connection
         else
         {
             self.log.debug("Shadow receive called, but there was no data.")
-            completion(nil, maybeContext, connectionComplete, maybeError)
-            return
+            
+            if connectionComplete
+            {
+                network.close()
+                completion(nil, maybeContext, connectionComplete, nil)
+                return
+            }
+            else // This should never happen
+            {
+                self.log.debug("We did not received any data but the connection is not complete.")
+                completion(nil, maybeContext, connectionComplete, NWError.posix(.ENODATA))
+                return
+            }
         }
 
         let dCipher = self.decryptingCipher
@@ -353,7 +378,13 @@ open class DarkStarConnection: Transport.Connection
         }
 
         self.log.debug("👻 Shadow receive complete.")
-        completion(decrypted, maybeContext, connectionComplete, maybeError)
+        
+        if connectionComplete
+        {
+            network.close()
+        }
+        
+        completion(decrypted, maybeContext, false, nil)
     }
 
     // End of Connection Protocol
