@@ -247,7 +247,7 @@ open class DarkStarConnection: Transport.Connection
             switch completion
             {
                 case .contentProcessed(let handler):
-                    handler(NWError.posix(.EAUTH))
+                    handler(NWError.posix(.EBADMSG))
                     return
                 default:
                     return
