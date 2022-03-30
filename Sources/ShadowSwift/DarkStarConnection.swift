@@ -35,7 +35,6 @@ import SwiftHexTools
 import Crypto
 import Net
 import Transmission
-import Network
 
 open class DarkStarConnection: Transport.Connection
 {
