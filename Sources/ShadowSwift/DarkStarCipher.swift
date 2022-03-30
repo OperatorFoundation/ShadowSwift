@@ -215,7 +215,8 @@ class DarkStarCipher
             tag = sealedBox.tag
             
             print("Encrypting...")
-            print("Encrypt data: \(cipherText.hex)")
+            print("Encrypt plaintext: \(plaintext.hex)")
+            print("Encrypt ciphertext: \(cipherText.hex)")
             print("Encrypt Tag: \(tag.hex)")
             print("Encrypt Nonce: \(Data(nonce).hex)")
             print("Encrypt Key: \(DarkStar.symmetricKeyToData(key: key).hex)")
@@ -255,13 +256,16 @@ class DarkStarCipher
             }
             
             print("Decrypting...")
-            print("Decrypt Encrypted data: \(encrypted.hex)")
+            print("Decrypt ciphertext: \(encrypted.hex)")
             print("Decrypt Tag: \(tag.hex)")
             print("Decrypt Nonce: \(Data(nonce).hex)")
             print("Decrypt Key: \(DarkStar.symmetricKeyToData(key: key).hex)")
             
             let sealedBox = try AES.GCM.SealedBox(nonce: nonce, ciphertext: encrypted, tag: tag)
-            return try AES.GCM.open(sealedBox, using: self.key)
+            let plaintext = try AES.GCM.open(sealedBox, using: self.key)
+            
+            print("Decrypt ciphertext: \(plaintext.hex)")
+            return plaintext
         }
         catch let decryptError
         {
