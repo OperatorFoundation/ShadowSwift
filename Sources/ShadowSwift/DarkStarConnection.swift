@@ -239,6 +239,19 @@ open class DarkStarConnection: Transport.Connection
                     return
             }
         }
+        
+        guard someData.count > 0 else
+        {
+            print("---> DarkStarConnection send called with a data length of \(someData.count).<---")
+            switch completion
+            {
+                case .contentProcessed(let handler):
+                    handler(NWError.posix(.ENODATA))
+                    return
+                default:
+                    return
+            }
+        }
 
         guard let encrypted = encryptingCipher.pack(plaintext: someData)
         else
