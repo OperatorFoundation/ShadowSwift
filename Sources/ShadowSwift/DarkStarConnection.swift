@@ -384,10 +384,8 @@ open class DarkStarConnection: Transport.Connection
         else
         {
             self.log.error("Failed to encrypt our address. Cancelling connection.")
-
-            // FIXME: Add Connection.close() to the Transmission library
-            // self.network.cancel()
-
+            network.close()
+            
             if let actualStateUpdateHandler = self.stateUpdateHandler
             {
                 actualStateUpdateHandler(.cancelled)
@@ -416,9 +414,8 @@ open class DarkStarConnection: Transport.Connection
         }
         else
         {
-            // FIXME: Add Connection.close() to the Transmission library
-            // self.network.cancel()
-
+            network.close()
+            
             if let actualStateUpdateHandler = self.stateUpdateHandler
             {
                 actualStateUpdateHandler(.cancelled)
