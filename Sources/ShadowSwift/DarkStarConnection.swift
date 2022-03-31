@@ -194,8 +194,7 @@ open class DarkStarConnection: Transport.Connection
 
     public func cancel()
     {
-        // FIXME: Need to add Connection.close() to Transmission library
-        // network.close()
+         network.close()
 
         if let stateUpdate = self.stateUpdateHandler
         {
