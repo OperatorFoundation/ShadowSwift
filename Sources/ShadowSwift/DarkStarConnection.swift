@@ -49,8 +49,6 @@ open class DarkStarConnection: Transport.Connection
 
     public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig, isClient: Bool, logger: Logger)
     {
-        print("DarkStarConnection init called.")
-        logger.debug("DarkStarConnection init called.")
         #if os(macOS)
         // Only support Apple devices with secure enclave.
         guard SecureEnclave.isAvailable else {return nil}
@@ -133,42 +131,35 @@ open class DarkStarConnection: Transport.Connection
         }
         else
         {
-            // FIXME: DEBUG ONLY remove logger errors and debug prints
-            
             guard let serverPersistentPrivateKeyData = Data(hex: config.password) else
             {
                 logger.error("Failed to parse password from config.")
                 return nil
             }
-            print("Parsed a config file and got some key data.")
             
             guard let serverPersistentPrivateKey = try? P256.KeyAgreement.PrivateKey(rawRepresentation: serverPersistentPrivateKeyData) else
             {
                 logger.error("Failed to generate key from data.")
                 return nil
             }
-            print("Generated a key from some data.")
 
             guard let server = DarkStarServer(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection) else
             {
                 logger.error("Failed to init DarkStarServer")
                 return nil
             }
-            print("Initialized a DarkStarServer")
 
             guard let eCipher = DarkStarCipher(key: server.serverToClientSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
             {
                 logger.error("Failed to create the encryption cipher.")
                 return nil
             }
-            print("Created an encryption cipher.")
             
             guard let dCipher = DarkStarCipher(key: server.clientToServerSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
             {
                 logger.error("Failed to create the decryption cipher.")
                 return nil
             }
-            print("Created a decryption cipher.")
 
             self.encryptingCipher = eCipher
             self.decryptingCipher = dCipher
@@ -242,7 +233,7 @@ open class DarkStarConnection: Transport.Connection
         
         guard someData.count > 0 else
         {
-            print("---> DarkStarConnection send called with a data length of \(someData.count).<---")
+            log.debug("---> DarkStarConnection send called with a data length of \(someData.count).<---")
             switch completion
             {
                 case .contentProcessed(let handler):
@@ -293,11 +284,9 @@ open class DarkStarConnection: Transport.Connection
                         maximumLength: Int,
                         completion: @escaping (Data?, NWConnection.ContentContext?, Bool, NWError?) -> Void)
     {
-        self.log.debug("👻  DarkStarConnection receive(minimumIncompleteLength: \(minimumIncompleteLength), maximumLength: \(maximumLength), completion:) called")
         // Get our encrypted length first
         let encryptedLengthSize = Cipher.lengthSize + Cipher.tagSize
         let maybeData = network.read(size: encryptedLengthSize)
-        print("👻  DarkStarConnection called \(type(of: network)).read(size: \(encryptedLengthSize)")
         
         // Nothing to decrypt
         guard let someData = maybeData
@@ -308,8 +297,6 @@ open class DarkStarConnection: Transport.Connection
             return
         }
         
-        print("👻  DarkStarConnection received \(someData.count): \(someData.hex)")
-
         guard let lengthData = self.decryptingCipher.unpack(encrypted: someData, expectedCiphertextLength: Cipher.lengthSize)
         else
         {
@@ -331,14 +318,7 @@ open class DarkStarConnection: Transport.Connection
         let payloadLength = Int(lengthUInt16)
         let expectedLength = payloadLength + Cipher.tagSize
         let nextMaybeData = network.read(size: expectedLength)
-        
-        if let nextData = nextMaybeData
-        {
-            print("👻  DarkStarConnection called \(type(of: network)).read(size: \(expectedLength)")
-            print("👻  DarkStarConnection received \(nextData.count) bytes: \(nextData.hex)")
-        }
             
-
         self.shadowReceive(payloadLength: payloadLength, maybeData: nextMaybeData, maybeContext: .defaultMessage, connectionComplete: false, maybeError: nil, completion: completion)
     }
 
@@ -349,7 +329,6 @@ open class DarkStarConnection: Transport.Connection
                        maybeError: NWError?,
                        completion: @escaping (Data?, NWConnection.ContentContext?, Bool, NWError?) -> Void)
     {
-        print("👻  DarkStarConnection shadowReceive(payloadLength: \(payloadLength)...) called")
         // Something went wrong
         if let error = maybeError
         {
@@ -388,8 +367,6 @@ open class DarkStarConnection: Transport.Connection
             completion(someData, maybeContext, connectionComplete, NWError.posix(POSIXErrorCode.EBADMSG))
             return
         }
-
-        self.log.debug("👻 Shadow receive complete.")
         
         if connectionComplete
         {
