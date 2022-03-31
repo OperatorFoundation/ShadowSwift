@@ -199,8 +199,7 @@ open class DarkStarConnection: Transport.Connection
 
     public func cancel()
     {
-        // FIXME: Need to add Connection.close() to Transmission library
-        // network.close()
+         network.close()
 
         if let stateUpdate = self.stateUpdateHandler
         {
@@ -238,7 +237,6 @@ open class DarkStarConnection: Transport.Connection
         
         guard someData.count > 0 else
         {
-            log.debug("---> DarkStarConnection send called with a data length of \(someData.count).<---")
             switch completion
             {
                 case .contentProcessed(let handler):
@@ -324,7 +322,7 @@ open class DarkStarConnection: Transport.Connection
         let payloadLength = Int(lengthUInt16)
         let expectedLength = payloadLength + Cipher.tagSize
         let nextMaybeData = network.read(size: expectedLength)
-            
+                
         self.shadowReceive(payloadLength: payloadLength, maybeData: nextMaybeData, maybeContext: .defaultMessage, connectionComplete: false, maybeError: nil, completion: completion)
     }
 
@@ -335,7 +333,8 @@ open class DarkStarConnection: Transport.Connection
                        maybeError: NWError?,
                        completion: @escaping (Data?, NWConnection.ContentContext?, Bool, NWError?) -> Void)
     {
-        // Something went wrong
+        print("\(#file) shadowReceive()")
+
         if let error = maybeError
         {
             self.log.error("Shadow receive called, but we got an error: \(error)")
@@ -392,10 +391,8 @@ open class DarkStarConnection: Transport.Connection
         else
         {
             self.log.error("Failed to encrypt our address. Cancelling connection.")
-
-            // FIXME: Add Connection.close() to the Transmission library
-            // self.network.cancel()
-
+            network.close()
+            
             if let actualStateUpdateHandler = self.stateUpdateHandler
             {
                 actualStateUpdateHandler(.cancelled)
@@ -424,9 +421,8 @@ open class DarkStarConnection: Transport.Connection
         }
         else
         {
-            // FIXME: Add Connection.close() to the Transmission library
-            // self.network.cancel()
-
+            network.close()
+            
             if let actualStateUpdateHandler = self.stateUpdateHandler
             {
                 actualStateUpdateHandler(.cancelled)
