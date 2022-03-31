@@ -283,9 +283,11 @@ open class DarkStarConnection: Transport.Connection
                         maximumLength: Int,
                         completion: @escaping (Data?, NWConnection.ContentContext?, Bool, NWError?) -> Void)
     {
+        print("\(#file) receive(min: max:) called")
         // Get our encrypted length first
         let encryptedLengthSize = Cipher.lengthSize + Cipher.tagSize
         let maybeData = network.read(size: encryptedLengthSize)
+        print("\(#file) returned from network.read(size: \(encryptedLengthSize))")
         
         // Nothing to decrypt
         guard let someData = maybeData
@@ -317,7 +319,9 @@ open class DarkStarConnection: Transport.Connection
         let payloadLength = Int(lengthUInt16)
         let expectedLength = payloadLength + Cipher.tagSize
         let nextMaybeData = network.read(size: expectedLength)
-            
+        
+        print("\(#file) calling shadowReceive()")
+        
         self.shadowReceive(payloadLength: payloadLength, maybeData: nextMaybeData, maybeContext: .defaultMessage, connectionComplete: false, maybeError: nil, completion: completion)
     }
 
@@ -328,7 +332,8 @@ open class DarkStarConnection: Transport.Connection
                        maybeError: NWError?,
                        completion: @escaping (Data?, NWConnection.ContentContext?, Bool, NWError?) -> Void)
     {
-        // Something went wrong
+        print("\(#file) shadowReceive()")
+
         if let error = maybeError
         {
             self.log.error("Shadow receive called, but we got an error: \(error)")
@@ -367,11 +372,14 @@ open class DarkStarConnection: Transport.Connection
             return
         }
         
+        
         if connectionComplete
         {
+            print("\(#file) calling network.close()")
             network.close()
         }
         
+        print("\(#file) calling shadowReceive() completion")
         completion(decrypted, maybeContext, false, nil)
     }
 
