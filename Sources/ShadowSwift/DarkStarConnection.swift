@@ -283,7 +283,7 @@ open class DarkStarConnection: Transport.Connection
                         maximumLength: Int,
                         completion: @escaping (Data?, NWConnection.ContentContext?, Bool, NWError?) -> Void)
     {
-        print("\(#file) receive(min: max:) called")
+        print("\(#file) receive(min: \(minimumIncompleteLength) max: \(maximumLength) called")
         // Get our encrypted length first
         let encryptedLengthSize = Cipher.lengthSize + Cipher.tagSize
         let maybeData = network.read(size: encryptedLengthSize)
