@@ -232,7 +232,6 @@ open class DarkStarConnection: Transport.Connection
         
         guard someData.count > 0 else
         {
-            log.debug("---> DarkStarConnection send called with a data length of \(someData.count).<---")
             switch completion
             {
                 case .contentProcessed(let handler):
@@ -283,11 +282,9 @@ open class DarkStarConnection: Transport.Connection
                         maximumLength: Int,
                         completion: @escaping (Data?, NWConnection.ContentContext?, Bool, NWError?) -> Void)
     {
-        print("\(#file) receive(min: \(minimumIncompleteLength) max: \(maximumLength) called")
         // Get our encrypted length first
         let encryptedLengthSize = Cipher.lengthSize + Cipher.tagSize
         let maybeData = network.read(size: encryptedLengthSize)
-        print("\(#file) returned from network.read(size: \(encryptedLengthSize))")
         
         // Nothing to decrypt
         guard let someData = maybeData
@@ -319,9 +316,7 @@ open class DarkStarConnection: Transport.Connection
         let payloadLength = Int(lengthUInt16)
         let expectedLength = payloadLength + Cipher.tagSize
         let nextMaybeData = network.read(size: expectedLength)
-        
-        print("\(#file) calling shadowReceive()")
-        
+                
         self.shadowReceive(payloadLength: payloadLength, maybeData: nextMaybeData, maybeContext: .defaultMessage, connectionComplete: false, maybeError: nil, completion: completion)
     }
 
@@ -372,14 +367,11 @@ open class DarkStarConnection: Transport.Connection
             return
         }
         
-        
         if connectionComplete
         {
-            print("\(#file) calling network.close()")
             network.close()
         }
         
-        print("\(#file) calling shadowReceive() completion")
         completion(decrypted, maybeContext, false, nil)
     }
 
