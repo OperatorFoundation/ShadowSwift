@@ -5,12 +5,13 @@
 //  Created by Dr. Brandon Wiley on 10/14/21.
 //
 
-import Foundation
 import Crypto
-import Transmission
-import Net
 import Datable
+import Foundation
+import Net
 import SwiftHexTools
+import Transmission
+import TransmissionTransport
 
 public class DarkStarServer
 {
@@ -154,7 +155,12 @@ public class DarkStarServer
 
         // Receive client ephemeral key
         guard let clientEphemeralPublicKey = DarkStar.handleTheirEphemeralPublicKey(connection: connection) else
-        {return nil}
+        {
+            let transport = TransmissionToTransportConnection({return connection})
+            
+            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
+            return nil
+        }
 
         // Receive and validate client confirmation code
         guard DarkStarServer.handleClientConfirmationCode(connection: connection, theirPublicKey: clientEphemeralPublicKey, myPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else

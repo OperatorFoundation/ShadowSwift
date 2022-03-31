@@ -1,5 +1,5 @@
 //
-//  Bloom.swift
+//  BloomFilter.swift
 //  
 //
 //  Created by Joshua Clark on 1/23/22.

@@ -166,8 +166,18 @@ public struct DarkStar
     static public func handleTheirEphemeralPublicKey(connection: Connection) -> P256.KeyAgreement.PublicKey?
     {
         // Receive their ephemeral key
-        guard let theirEphemeralPublicKeyData = connection.read(size: P256KeySize) else {return nil}
-        guard let theirEphemeralPublicKey = try? P256.KeyAgreement.PublicKey(compactRepresentation: theirEphemeralPublicKeyData) else {return nil}
+        guard let theirEphemeralPublicKeyData = connection.read(size: P256KeySize) else
+        {
+            return nil
+        }
+        
+        guard let theirEphemeralPublicKey = try? P256.KeyAgreement.PublicKey(compactRepresentation: theirEphemeralPublicKeyData) else
+        {
+            return nil
+        }
+        
+        
+        
         return theirEphemeralPublicKey
     }
 

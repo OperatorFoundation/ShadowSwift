@@ -8,13 +8,14 @@
 import Foundation
 import Net
 import Logging
-
 import Transmission
 import Transport
 import TransmissionTransport
 
 public class ShadowServer: Transmission.Listener
 {
+    var bloomFilter: BloomFilter
+    
     // TODO: Ask how to pursue the closing
     public func close() {
         listener.close()
@@ -47,6 +48,15 @@ public class ShadowServer: Transmission.Listener
 
         guard let listener = TransmissionListener(port: port, logger: nil) else {return nil}
         self.listener = listener
+        
+        guard let supportDirectoryURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else
+        {
+            logger.error("Could not get application support directory path.")
+            return nil
+        }
+        
+        let bloomFilterPath = supportDirectoryURL.path + "/" + "BloomFilter"
+        self.bloomFilter = BloomFilter<Data>(withFileAtPath: bloomFilterPath)
     }
 
     public func accept() throws -> Transmission.Connection
@@ -55,6 +65,9 @@ public class ShadowServer: Transmission.Listener
 
         guard let shadow = DarkStarConnection(connection: connection, endpoint: self.endpoint, parameters: .tcp, config: self.config, isClient: false, logger: self.log) else
         {
+            let transport = TransmissionToTransportConnection({return connection})
+            
+            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
             throw ShadowServerError.darkStarConnectionError
         }
         

@@ -46,14 +46,18 @@ open class DarkStarConnection: Transport.Connection
     let encryptingCipher: DarkStarCipher
     var decryptingCipher: DarkStarCipher
     var network: Transmission.Connection
+    var bloomFilter: BloomFilter<Data>
 
-    public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig, isClient: Bool, logger: Logger)
+    public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig, isClient: Bool, bloomFilter: BloomFilter<Data>, logger: Logger)
     {
         #if os(macOS)
         // Only support Apple devices with secure enclave.
-        guard SecureEnclave.isAvailable else {return nil}
+        guard SecureEnclave.isAvailable else
+        {
+            return nil
+        }
         #endif
-
+        
         var maybeHostString: String? = nil
         switch host
         {
@@ -80,11 +84,12 @@ open class DarkStarConnection: Transport.Connection
         }
         
         
-        self.init(connection: newConnection, endpoint: endpoint, parameters: parameters, config: config, isClient: isClient, logger: logger)
+        self.init(connection: newConnection, endpoint: endpoint, parameters: parameters, config: config, isClient: isClient, bloomFilter: bloomFilter, logger: logger)
     }
 
-    public init?(connection: Transmission.Connection, endpoint: NWEndpoint, parameters: NWParameters, config: ShadowConfig, isClient: Bool, logger: Logger)
+    public init?(connection: Transmission.Connection, endpoint: NWEndpoint, parameters: NWParameters, config: ShadowConfig, isClient: Bool, bloomFilter: BloomFilter<Data>, logger: Logger)
     {
+        self.bloomFilter = bloomFilter
         self.log = logger
 
         guard config.mode == .DARKSTAR else
@@ -300,6 +305,7 @@ open class DarkStarConnection: Transport.Connection
         guard let lengthData = self.decryptingCipher.unpack(encrypted: someData, expectedCiphertextLength: Cipher.lengthSize)
         else
         {
+            let _ = BlackHole(timeoutDelaySeconds: 30, socket: self)
             completion(maybeData, .defaultMessage, false, NWError.posix(POSIXErrorCode.EINVAL))
             return
         }
@@ -363,6 +369,7 @@ open class DarkStarConnection: Transport.Connection
         guard let decrypted = dCipher.unpack(encrypted: someData, expectedCiphertextLength: payloadLength)
         else
         {
+            let _ = BlackHole(timeoutDelaySeconds: 30, socket: self)
             self.log.error("Shadow failed to decrypt received data.")
             completion(someData, maybeContext, connectionComplete, NWError.posix(POSIXErrorCode.EBADMSG))
             return
