@@ -148,3 +148,6 @@ let connection = try server.accept()
 let messageSent = connection.write(string: "test\n")
 let maybeData = connection.read(size: expectedLength)
 ```
+
+### Credits
+* Shadowsocks was developed by the Shadowsocks team, you can read the [whitepaper](https://shadowsocks.org/assets/whitepaper.pdf).
