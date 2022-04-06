@@ -57,14 +57,11 @@ guard var connection = factory.connect(using: .tcp) else
 3. Call .send and .receive on the client connection to send and receive data
 
 #### Server:
-1. When creating a shadow server you will need to have a bloom filter json file saved to /Users/<user>/Library/Application Support/BloomFilter. The BloomFilter struct has a static method to create an empty file in the correct directory. Once the initial file is created, you should not replace it as it keeps track of important information to help against replay attacks.
-```
-```
-2. Create a Shadow config containing the password and cipher mode. For DarkStar mode, the password will be the server's persistent private key in hex.
+1. Create a Shadow config containing the password and cipher mode. For DarkStar mode, the password will be the server's persistent private key in hex.
 ```
 let shadowServerConfig = ShadowConfig(password: "privateKeyHex", mode: .DARKSTAR)
 ```
-3. Create a Shadow Server with the host, port, ShadowConfig and Swift Logger. 
+2. Create a Shadow Server with the host, port, ShadowConfig and Swift Logger. 
 ```
 guard let server = ShadowServer(host: "host", port: 2222, config: shadowServerConfig, logger: logger) else                
 {
@@ -72,12 +69,12 @@ guard let server = ShadowServer(host: "host", port: 2222, config: shadowServerCo
 }
 ```
 
-2. Accept the connection
+3. Accept the connection
 ```
 let connection = try server.accept()
 ```
 
-3. Call .send and .receive on the server connection to send and receive data
+4. Call .send and .receive on the server connection to send and receive data
 ```
 let messageSent = connection.write(string: "test\n")
 let maybeData = network.read(size: expectedLength)
