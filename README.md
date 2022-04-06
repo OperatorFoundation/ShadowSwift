@@ -10,15 +10,21 @@ to change the characteristics of network traffic so that it is not identified
 and subsequently blocked by network filtering devices.
 
 There are two components to Shapeshifter: transports and the dispatcher. Each
-transport provide different approach to shapeshifting. These transports are
-provided as a Go library which can be integrated directly into applications.
-The dispatcher is a command line tool which provides a proxy that wraps the
-transport library. It has several different proxy modes and can proxy both
-TCP and UDP traffic.
+transport provide different approach to shapeshifting. ShadowSwift is provided as a 
+Swift library which can be integrated directly into applications.
 
-If you are a tool developer working in the Go programming language, then you
-probably want to use the transports library directly in your application.
-<https://github.com/OperatorFoundation/shapeshifter-transports>
+If you are a tool developer working in the Swift programming language, then you
+are in the right place. If you are a tool developer working in other languages we have 
+several other tools available to you:
+
+- A Go transports library that can be used directly in your application:
+[shapeshifter-transports](https://github.com/OperatorFoundation/shapeshifter-transports)
+
+- A Kotlin transports library that can be used directly in your Android application (currently supports Shadow):
+[ShapeshifterAndroidKotlin](https://github.com/OperatorFoundation/ShapeshifterAndroidKotlin)
+
+- A Java transports library that can be used directly in your Android application (currently supports Shadow):
+[ShapeshifterAndroidJava](https://github.com/OperatorFoundation/ShapeshifterAndroidJava)
 
 If you want a end user that is trying to circumvent filtering on your network or
 you are a developer that wants to add pluggable transports to an existing tool
