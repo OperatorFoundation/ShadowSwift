@@ -146,5 +146,5 @@ let connection = try server.accept()
 4. Call .send and .receive on the server connection to send and receive data
 ```
 let messageSent = connection.write(string: "test\n")
-let maybeData = network.read(size: expectedLength)
+let maybeData = connection.read(size: expectedLength)
 ```
