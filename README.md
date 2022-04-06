@@ -63,24 +63,34 @@ Shadowsocks is a fast, free, and open-source encrypted proxy project, used to ci
 
 ## Prerequisites
 
-What things you need to install the software and how to install them
-
-```
-Xcode
-```
-
-## Installing
-
-1. Clone the repository.
-
-2. Navigate to the project folder
-
-3. Update the dependencies using Swift Package Manager
-```
-swift package update
-```
+The Swift programming language minimum version 5.5. If you are using a Linux system follow the instructions on swift.org to install Swift. If you are using macOS we reccomend that you install Xcode.
 
 ## Using the Library
+
+### Add the dependency to your project
+
+This can be done through the Xcode GUI or by updating your Package.swift file
+```
+dependencies: [
+        // Dependencies declare other packages that this package depends on.
+        .package(url: "https://github.com/OperatorFoundation/ShadowSwift.git", branch: "main"),
+    ],
+```
+
+```
+targets: [
+        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
+        // Targets can depend on other targets in this package, and on products in packages this package depends on.
+        .target(
+            name: "MyApp",
+            dependencies: [
+                "ShadowSwift",
+            ]),
+        .testTarget(
+            name: "MyAppTests",
+            dependencies: ["MyApp"]),
+    ],
+```
 
 ### Client:
 1. Create a Shadow connection factory with a ShadowConfig and a swift Logger containing the password and cipher mode.  For DarkStar mode, the password will be the server's persistent private key in hex.
