@@ -110,7 +110,7 @@ open class DarkStarServerConnection: Transport.Connection
             return nil
         }
 
-        guard let server = DarkStarServer(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection) else
+        guard let server = DarkStarServer(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection, bloomFilter: bloomFilter) else
         {
             logger.error("Failed to init DarkStarServer")
             return nil

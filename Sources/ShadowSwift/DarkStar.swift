@@ -163,7 +163,7 @@ public struct DarkStar
 
     
 
-    static public func handleTheirEphemeralPublicKey(connection: Connection, bloomFilter: BloomFilter<Data>) -> P256.KeyAgreement.PublicKey?
+    static public func handleTheirEphemeralPublicKey(connection: Connection, bloomFilter: BloomFilter<Data>?) -> P256.KeyAgreement.PublicKey?
     {
         // Receive their ephemeral key
         guard let theirEphemeralPublicKeyData = connection.read(size: P256KeySize) else
@@ -171,10 +171,17 @@ public struct DarkStar
             return nil
         }
         
-        // TODO: See if theirEphemeralPublicKeyData is in the BloomFilter, return nil if it is.
-        
-        // TODO: If it's not in a BloomFilter, add it to the BloomFilter and Save the BloomFilter
-        
+        if let serverBloomFilter = bloomFilter // Server
+        {
+            // TODO: See if theirEphemeralPublicKeyData is in the BloomFilter, return nil if it is.
+            
+            // TODO: If it's not in a BloomFilter, add it to the BloomFilter and Save the BloomFilter
+        }
+        else // Client
+        {
+            
+        }
+
         guard let theirEphemeralPublicKey = try? P256.KeyAgreement.PublicKey(compactRepresentation: theirEphemeralPublicKeyData) else
         {
             return nil

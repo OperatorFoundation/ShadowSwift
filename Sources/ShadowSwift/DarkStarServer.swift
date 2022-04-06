@@ -154,7 +154,7 @@ public class DarkStarServer
         let serverPersistentPublicKey = serverPersistentPrivateKey.publicKey
 
         // Receive client ephemeral key
-        guard let clientEphemeralPublicKey = DarkStar.handleTheirEphemeralPublicKey(connection: connection) else
+        guard let clientEphemeralPublicKey = DarkStar.handleTheirEphemeralPublicKey(connection: connection, bloomFilter: bloomFilter) else
         {
             let transport = TransmissionToTransportConnection({return connection})
             

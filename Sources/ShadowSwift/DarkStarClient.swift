@@ -176,7 +176,8 @@ public class DarkStarClient
         guard DarkStarClient.handleClientConfirmationCode(connection: connection, theirPublicKey: serverPersistentPublicKey, myPrivateKey: clientEphemeralPrivateKey, endpoint: endpoint, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else {return nil}
 
         // Receive server ephemeral key
-        guard let serverEphemeralPublicKey = DarkStar.handleTheirEphemeralPublicKey(connection: connection) else {return nil}
+        guard let serverEphemeralPublicKey = DarkStar.handleTheirEphemeralPublicKey(connection: connection, bloomFilter: nil) else
+        {return nil}
 
         // Create shared key
         guard let clientToServerSharedKey = DarkStarClient.createClientToServerSharedKey(clientEphemeralPrivateKey: clientEphemeralPrivateKey, serverEphemeralPublicKey: serverEphemeralPublicKey, serverPersistentPublicKey: serverPersistentPublicKey, serverEndpoint: endpoint) else {return nil}
