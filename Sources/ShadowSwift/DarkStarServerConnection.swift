@@ -36,7 +36,7 @@ import Crypto
 import Net
 import Transmission
 
-open class DarkStarConnection: Transport.Connection
+open class DarkStarServerConnection: Transport.Connection
 {
     public var stateUpdateHandler: ((NWConnection.State) -> Void)?
     public var viabilityUpdateHandler: ((Bool) -> Void)?
@@ -48,7 +48,7 @@ open class DarkStarConnection: Transport.Connection
     var network: Transmission.Connection
     var bloomFilter: BloomFilter<Data>
 
-    public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig, isClient: Bool, bloomFilter: BloomFilter<Data>, logger: Logger)
+    public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig, bloomFilter: BloomFilter<Data>, logger: Logger)
     {
         #if os(macOS)
         // Only support Apple devices with secure enclave.
@@ -84,10 +84,10 @@ open class DarkStarConnection: Transport.Connection
         }
         
         
-        self.init(connection: newConnection, endpoint: endpoint, parameters: parameters, config: config, isClient: isClient, bloomFilter: bloomFilter, logger: logger)
+        self.init(connection: newConnection, endpoint: endpoint, parameters: parameters, config: config, bloomFilter: bloomFilter, logger: logger)
     }
 
-    public init?(connection: Transmission.Connection, endpoint: NWEndpoint, parameters: NWParameters, config: ShadowConfig, isClient: Bool, bloomFilter: BloomFilter<Data>, logger: Logger)
+    public init?(connection: Transmission.Connection, endpoint: NWEndpoint, parameters: NWParameters, config: ShadowConfig, bloomFilter: BloomFilter<Data>, logger: Logger)
     {
         self.bloomFilter = bloomFilter
         self.log = logger
@@ -98,79 +98,40 @@ open class DarkStarConnection: Transport.Connection
             return nil
         }
         
-        if isClient
+        guard let serverPersistentPrivateKeyData = Data(hex: config.password) else
         {
-            guard let serverPersistentPublicKeyData = Data(hex: config.password) else
-            {
-                log.error("DarkStarConnection failed to decode password as hex.")
-                return nil
-            }
-            
-            guard let serverPersistentPublicKey = try? P256.KeyAgreement.PublicKey(compactRepresentation: serverPersistentPublicKeyData) else
-            {
-                log.error("DarkStarConnection failed to parse the key as a compact representation P256 Public key.")
-                return nil
-            }
-
-            guard let client = DarkStarClient(serverPersistentPublicKey: serverPersistentPublicKey, endpoint: endpoint, connection: connection) else
-            {
-                log.error("DarkStarConnection the handshake failed.")
-                return nil
-            }
-
-            guard let eCipher = DarkStarCipher(key: client.clientToServerSharedKey, endpoint: endpoint, isServerConnection: false, logger: self.log) else
-            {
-                log.error("DarkStarConnection failed to make an encryption cipher.")
-                return nil
-            }
-            
-            guard let dCipher = DarkStarCipher(key: client.serverToClientSharedKey, endpoint: endpoint, isServerConnection: false, logger: self.log) else
-            {
-                log.error("DarkStarConnection failed to make a decryption cipher.")
-                return nil
-            }
-
-            self.encryptingCipher = eCipher
-            self.decryptingCipher = dCipher
-            self.network = connection
+            logger.error("Failed to parse password from config.")
+            return nil
         }
-        else
+        
+        guard let serverPersistentPrivateKey = try? P256.KeyAgreement.PrivateKey(rawRepresentation: serverPersistentPrivateKeyData) else
         {
-            guard let serverPersistentPrivateKeyData = Data(hex: config.password) else
-            {
-                logger.error("Failed to parse password from config.")
-                return nil
-            }
-            
-            guard let serverPersistentPrivateKey = try? P256.KeyAgreement.PrivateKey(rawRepresentation: serverPersistentPrivateKeyData) else
-            {
-                logger.error("Failed to generate key from data.")
-                return nil
-            }
-
-            guard let server = DarkStarServer(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection) else
-            {
-                logger.error("Failed to init DarkStarServer")
-                return nil
-            }
-
-            guard let eCipher = DarkStarCipher(key: server.serverToClientSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
-            {
-                logger.error("Failed to create the encryption cipher.")
-                return nil
-            }
-            
-            guard let dCipher = DarkStarCipher(key: server.clientToServerSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
-            {
-                logger.error("Failed to create the decryption cipher.")
-                return nil
-            }
-
-            self.encryptingCipher = eCipher
-            self.decryptingCipher = dCipher
-            self.network = connection
-            self.log = logger
+            logger.error("Failed to generate key from data.")
+            return nil
         }
+
+        guard let server = DarkStarServer(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection) else
+        {
+            logger.error("Failed to init DarkStarServer")
+            return nil
+        }
+
+        guard let eCipher = DarkStarCipher(key: server.serverToClientSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
+        {
+            logger.error("Failed to create the encryption cipher.")
+            return nil
+        }
+        
+        guard let dCipher = DarkStarCipher(key: server.clientToServerSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
+        {
+            logger.error("Failed to create the decryption cipher.")
+            return nil
+        }
+
+        self.encryptingCipher = eCipher
+        self.decryptingCipher = dCipher
+        self.network = connection
+        self.log = logger
 
         if let actualStateUpdateHandler = self.stateUpdateHandler
         {

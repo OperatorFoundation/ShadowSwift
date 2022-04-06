@@ -93,6 +93,6 @@ open class ShadowConnectionFactory: ConnectionFactory
             return nil
         }
 
-        return DarkStarConnection(host: currentHost, port: currentPort, parameters: parameters, config: config, isClient: true, logger: log)
+        return DarkStarClientConnection(host: currentHost, port: currentPort, parameters: parameters, config: config, logger: log)
     }
 }

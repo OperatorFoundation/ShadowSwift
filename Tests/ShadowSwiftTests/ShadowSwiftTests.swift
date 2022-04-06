@@ -46,7 +46,7 @@ class ShadowSwiftTests: XCTestCase
         
         do
         {
-            let serverPersistentPrivateKey = try P256.KeyAgreement.PrivateKey(rawRepresentation: serverPersistentPrivateKeyData)
+            _ = try P256.KeyAgreement.PrivateKey(rawRepresentation: serverPersistentPrivateKeyData)
         }
         catch
         {
@@ -534,7 +534,7 @@ class ShadowSwiftTests: XCTestCase
         }
     }
 
-    func testDarkStarServer()
+    func testDarkStarClientAndServer()
     {
         let privateKeyHex = "dd5e9e88d13e66017eb2087b128c1009539d446208f86173e30409a898ada148"
         guard let privateKeyBytes = Data(hex: privateKeyHex) else {return}
@@ -554,7 +554,7 @@ class ShadowSwiftTests: XCTestCase
             {
                 let connection = try server.accept()
                 
-                connection.write(string: "test\n")
+                _ = connection.write(string: "test\n")
                 print("Sent!")
             }
             catch
@@ -616,7 +616,7 @@ class ShadowSwiftTests: XCTestCase
         do
         {
             let connection = try server.accept()
-            connection.write(string: "test\n")
+            _ = connection.write(string: "test\n")
             print("Sent!")
             wait(for: [sent], timeout: 30)  // 30 seconds
         }
@@ -734,7 +734,7 @@ class ShadowSwiftTests: XCTestCase
         // TODO: insert some data into the bloom filter.
         //bloomFilter.insert(<#T##filterData#>)
         
-        // TODO: Uncomment & save the results to the bloom filter JSON file.
+        // TODO: save  the bloom filter JSON file.
         //bloomFilter.save(filePath: bloomFilterDirectory.path)
     }
 }

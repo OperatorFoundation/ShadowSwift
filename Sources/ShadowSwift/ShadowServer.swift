@@ -14,10 +14,11 @@ import TransmissionTransport
 
 public class ShadowServer: Transmission.Listener
 {
-    var bloomFilter: BloomFilter
+    var bloomFilter: BloomFilter<Data>
     
     // TODO: Ask how to pursue the closing
-    public func close() {
+    public func close()
+    {
         listener.close()
     }
     
@@ -56,14 +57,21 @@ public class ShadowServer: Transmission.Listener
         }
         
         let bloomFilterPath = supportDirectoryURL.path + "/" + "BloomFilter"
-        self.bloomFilter = BloomFilter<Data>(withFileAtPath: bloomFilterPath)
+        
+        guard let newBloomFilter = BloomFilter<Data>(withFileAtPath: bloomFilterPath) else
+        {
+            logger.error("Failed to initialize ShadowServer: Unabale to create a BloomFilter with the file at \(bloomFilterPath)")
+            return nil
+        }
+        
+        self.bloomFilter = newBloomFilter
     }
 
     public func accept() throws -> Transmission.Connection
     {
         let connection = try self.listener.accept()
 
-        guard let shadow = DarkStarConnection(connection: connection, endpoint: self.endpoint, parameters: .tcp, config: self.config, isClient: false, logger: self.log) else
+        guard let shadow = DarkStarServerConnection(connection: connection, endpoint: self.endpoint, parameters: .tcp, config: self.config, bloomFilter: self.bloomFilter, logger: self.log) else
         {
             let transport = TransmissionToTransportConnection({return connection})
             
