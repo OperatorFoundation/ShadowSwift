@@ -73,7 +73,7 @@ This can be done through the Xcode GUI or by updating your Package.swift file
 ```
 dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/OperatorFoundation/ShadowSwift.git", from: "3.0.2"),
+        .package(url: "https://github.com/OperatorFoundation/ShadowSwift.git", from: "3.0.3"),
     ],
 ```
 
