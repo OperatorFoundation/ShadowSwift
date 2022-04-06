@@ -534,7 +534,7 @@ class ShadowSwiftTests: XCTestCase
         }
     }
 
-    func testDarkStarServer()
+    func testDarkStarClientAndServer()
     {
         let privateKeyHex = "dd5e9e88d13e66017eb2087b128c1009539d446208f86173e30409a898ada148"
         guard let privateKeyBytes = Data(hex: privateKeyHex) else {return}
