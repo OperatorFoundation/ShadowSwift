@@ -734,15 +734,15 @@ class ShadowSwiftTests: XCTestCase
         
         let testString = "something"
         let testData = Data(string: testString)
-        
-        // instantiate a bloom filter.
         let bloomFilterPath = supportDirectoryURL.appendingPathComponent("BloomFilter.json")
         
-        // insert some data into the bloom filter.
+        // instantiate a bloom filter.
         var bloomFilter = BloomFilter<Data>()
+        
+        // insert some data into the bloom filter.
         bloomFilter.insert(testData)
         
-        // save  the bloom filter JSON file.
+        // save the bloom filter JSON file.
         print("Saving BloomFilter to \(bloomFilterPath)")
         let filterSaved = bloomFilter.save(pathURL: bloomFilterPath)
         XCTAssertTrue(filterSaved)
