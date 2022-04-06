@@ -41,7 +41,7 @@ use from the command line, take a look at the dispatcher instead:
 
 ShadowSwift implements the Pluggable Transports 3.0 specification available here:
 <https://github.com/Pluggable-Transports/Pluggable-Transports-spec/tree/main/releases/PTSpecV3.0> Specifically,
-they implement the [Swift Transports API v3.0]<https://github.com/Pluggable-Transports/Pluggable-Transports-spec/blob/main/releases/PTSpecV3.0/Pluggable%20Transport%20Specification%20v3.0%20-%20Swift%20Transport%20API%20v3.0.md>.
+they implement the [Swift Transports API v3.0](https://github.com/Pluggable-Transports/Pluggable-Transports-spec/blob/main/releases/PTSpecV3.0/Pluggable%20Transport%20Specification%20v3.0%20-%20Swift%20Transport%20API%20v3.0.md).
 
 The purpose of the transport library is to provide a set of different
 transports. Each transport implements a different method of shapeshifting
