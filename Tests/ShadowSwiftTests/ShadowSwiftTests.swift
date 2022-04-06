@@ -725,17 +725,44 @@ class ShadowSwiftTests: XCTestCase
     
     func testBloomFilterSave()
     {
-        // store the bloomFilter JSON file in a variable.
-        let bloomFilterDirectory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop", isDirectory: true).appendingPathComponent("Configs", isDirectory: true).appendingPathComponent("bloom.json", isDirectory: false)
+        guard let supportDirectoryURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else
+        {
+            logger.error("Could not get application support directory path.")
+            XCTFail()
+            return
+        }
         
-        // TODO: instantiate a bloom filter.
-        //let bloomFilter = BloomFilter()
+        let testString = "something"
+        let testData = Data(string: testString)
         
-        // TODO: insert some data into the bloom filter.
-        //bloomFilter.insert(<#T##filterData#>)
+        // instantiate a bloom filter.
+        let bloomFilterPath = supportDirectoryURL.appendingPathComponent("BloomFilter.json")
         
-        // TODO: save  the bloom filter JSON file.
-        //bloomFilter.save(filePath: bloomFilterDirectory.path)
+        // insert some data into the bloom filter.
+        var bloomFilter = BloomFilter<Data>()
+        bloomFilter.insert(testData)
+        
+        // save  the bloom filter JSON file.
+        print("Saving BloomFilter to \(bloomFilterPath)")
+        let filterSaved = bloomFilter.save(pathURL: bloomFilterPath)
+        XCTAssertTrue(filterSaved)
+        
+        if FileManager.default.fileExists(atPath: bloomFilterPath.path)
+        {
+            guard let savedBloomFilter = BloomFilter<Data>(withFileAtPath: bloomFilterPath.path) else
+            {
+                XCTFail()
+                return
+            }
+            
+            XCTAssertTrue(savedBloomFilter.contains(testData))
+            
+        }
+        else
+        {
+            XCTFail()
+            return
+        }
     }
 }
 

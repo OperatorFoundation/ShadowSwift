@@ -6,8 +6,9 @@
 //
 
 import Foundation
-import Net
 import Logging
+
+import Net
 import Transmission
 import Transport
 import TransmissionTransport
@@ -56,11 +57,12 @@ public class ShadowServer: Transmission.Listener
             return nil
         }
         
-        let bloomFilterPath = supportDirectoryURL.path + "/" + "BloomFilter"
+        let bloomFilterURL = supportDirectoryURL.appendingPathComponent(bloomFilterFilename)
         
-        guard let newBloomFilter = BloomFilter<Data>(withFileAtPath: bloomFilterPath) else
+        // Load BloomFilter from file at start-up
+        guard let newBloomFilter = BloomFilter<Data>(withFileAtPath: bloomFilterURL.path) else
         {
-            logger.error("Failed to initialize ShadowServer: Unabale to create a BloomFilter with the file at \(bloomFilterPath)")
+            logger.error("Failed to initialize ShadowServer: Unabale to create a BloomFilter with the file at \(bloomFilterURL)")
             return nil
         }
         

@@ -149,7 +149,7 @@ public class DarkStarServer
     }
 
     // TODO: Logging
-    public init?(serverPersistentPrivateKey: P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint, connection: Connection)
+    public init?(serverPersistentPrivateKey: P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint, connection: Connection, bloomFilter: BloomFilter<Data>)
     {
         let serverPersistentPublicKey = serverPersistentPrivateKey.publicKey
 
@@ -159,6 +159,7 @@ public class DarkStarServer
             let transport = TransmissionToTransportConnection({return connection})
             
             let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
+            
             return nil
         }
 
@@ -166,6 +167,7 @@ public class DarkStarServer
         guard DarkStarServer.handleClientConfirmationCode(connection: connection, theirPublicKey: clientEphemeralPublicKey, myPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else
         {
             print("DarkStarServer received an invalid client confirmation code.")
+            
             return nil
         }
 

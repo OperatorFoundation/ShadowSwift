@@ -8,6 +8,8 @@
 import Foundation
 import Transport
 
+let bloomFilterFilename = "BloomFilter.json"
+
 // BloomFilter is a generic type with a type argument, Data.
 // Data must conform to Hashable rules/protocol for code to work.
 // Entire struct must conform to Codeable.
@@ -85,7 +87,7 @@ public struct BloomFilter<filterData: Hashable>: Codable
     }
     
     // Use Codable to save as JSON
-    func save(filePath: String)
+    func save(pathURL: URL) -> Bool
     {
         // create an encoder
         let jsonEncoder = JSONEncoder()
@@ -97,28 +99,20 @@ public struct BloomFilter<filterData: Hashable>: Codable
             var fileURL: URL
             var directoryURL: URL
             
-            // try to convert filePath to a URL
-            guard let pathUrl = URL.init(string: filePath)
-            else
-            {
-                print("Failed to create a URL from filePath: \(filePath)")
-                return
-            }
-            
-            if pathUrl.isDirectory // filePath provided is a directory. Does not include filename
+            if pathURL.isDirectory // filePath provided is a directory. Does not include filename
             {
                 // add a filename to the path provided for fileURL
-                fileURL = pathUrl.appendingPathComponent("BloomFilter.json")
+                fileURL = pathURL.appendingPathComponent("BloomFilter.json")
                 // filePath is a directory
-                directoryURL = pathUrl
+                directoryURL = pathURL
             }
             else // filePath provided includes the filename
             {
                 // user provided the complete filePath
                 // save the URL version of this to fileURL
-                fileURL = pathUrl
+                fileURL = pathURL
                 // create directoryURL by removing the filename from the path provided
-                directoryURL = pathUrl.deletingLastPathComponent()
+                directoryURL = pathURL.deletingLastPathComponent()
             }
             
             // create the directory if it doesn't exist
@@ -138,7 +132,33 @@ public struct BloomFilter<filterData: Hashable>: Codable
         catch (let jsonEncodeError)
         {
             print("Failed to encode Bloom as JSON: \(jsonEncodeError)")
-            return
+            return false
+        }
+        
+        return true
+    }
+    
+    static func createNewBloomFilterFile<dataType: Hashable>() -> BloomFilter<dataType>?
+    {
+        guard let supportDirectoryURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else
+        {
+            print("Could not get application support directory path.")
+            
+            return nil
+        }
+        
+        let bloomFilterURL = supportDirectoryURL.appendingPathComponent(bloomFilterFilename)
+        
+        let newBloomFilter = BloomFilter<dataType>()
+        if newBloomFilter.save(pathURL: bloomFilterURL)
+        {
+            print("Saved your BloomFilter to: \(bloomFilterURL.path)")
+            
+            return newBloomFilter
+        }
+        else
+        {
+            return nil
         }
     }
 }
