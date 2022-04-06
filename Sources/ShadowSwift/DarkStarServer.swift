@@ -171,21 +171,29 @@ public class DarkStarServer
 
         // Send server ephemeral key
         guard let (serverEphemeralPrivateKey, _) = DarkStar.handleServerEphemeralKey(connection: connection) else
-        {return nil}
+        {
+            return nil
+        }
 
         // Create shared key
         guard let serverToClientSharedKey = DarkStarServer.createServerToClientSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: endpoint) else
-        {return nil}
+        {
+            return nil
+        }
         
         self.serverToClientSharedKey = serverToClientSharedKey
 
         guard let clientToServerSharedKey = DarkStarServer.createClientToServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: endpoint) else
-        {return nil}
+        {
+            return nil
+        }
         
         self.clientToServerSharedKey = clientToServerSharedKey
 
         // Send server confirmation code
         guard DarkStarServer.handleServerConfirmationCode(connection: connection, endpoint: endpoint, serverStaticPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else
-        {return nil}
+        {
+            return nil
+        }
     }
 }
