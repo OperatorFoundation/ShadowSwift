@@ -28,7 +28,7 @@ several other tools available to you:
 
 If you want a end user that is trying to circumvent filtering on your network or
 you are a developer that wants to add pluggable transports to an existing tool
-that is not written in the Go programming language, then you probably want the
+that is not written in the Swift programming language, then you probably want the
 dispatcher. Please note that familiarity with executing programs on the command
 line is necessary to use this tool.
 <https://github.com/OperatorFoundation/shapeshifter-dispatcher>
