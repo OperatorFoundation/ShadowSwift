@@ -1,3 +1,55 @@
+# The Operator Foundation
+
+[Operator](https://operatorfoundation.org) makes usable tools to help people around the world with censorship, security, and privacy.
+
+## Shapeshifter
+
+The Shapeshifter project provides network protocol shapeshifting technology
+(also sometimes referred to as obfuscation). The purpose of this technology is
+to change the characteristics of network traffic so that it is not identified
+and subsequently blocked by network filtering devices.
+
+There are two components to Shapeshifter: transports and the dispatcher. Each
+transport provide different approach to shapeshifting. These transports are
+provided as a Go library which can be integrated directly into applications.
+The dispatcher is a command line tool which provides a proxy that wraps the
+transport library. It has several different proxy modes and can proxy both
+TCP and UDP traffic.
+
+If you are a tool developer working in the Go programming language, then you
+probably want to use the transports library directly in your application.
+<https://github.com/OperatorFoundation/shapeshifter-transports>
+
+If you want a end user that is trying to circumvent filtering on your network or
+you are a developer that wants to add pluggable transports to an existing tool
+that is not written in the Go programming language, then you probably want the
+dispatcher. Please note that familiarity with executing programs on the command
+line is necessary to use this tool.
+<https://github.com/OperatorFoundation/shapeshifter-dispatcher>
+
+If you are looking for a complete, easy-to-use VPN that incorporates
+shapeshifting technology and has a graphical user interface, consider
+[Moonbounce](https://github.com/OperatorFoundation/Moonbounce), an application for macOS which incorporates shapeshifting without
+the need to write code or use the command line.
+
+### Shapeshifter Transports
+
+This is the repository for the shapeshifter transports library for the Go
+programming language. If you are looking for a tool which you can install and
+use from the command line, take a look at the dispatcher instead:
+<https://github.com/OperatorFoundation/shapeshifter-transports>
+
+ShadowSwift implements the Pluggable Transports 3.0 specification available here:
+<https://github.com/Pluggable-Transports/Pluggable-Transports-spec/tree/main/releases/PTSpecV3.0> Specifically,
+they implement the [Swift Transports API v3.0]<https://github.com/Pluggable-Transports/Pluggable-Transports-spec/blob/main/releases/PTSpecV3.0/Pluggable%20Transport%20Specification%20v3.0%20-%20Swift%20Transport%20API%20v3.0.md>.
+
+The purpose of the transport library is to provide a set of different
+transports. Each transport implements a different method of shapeshifting
+network traffic. The goal is for application traffic to be sent over the network
+in a shapeshifted form that bypasses network filtering, allowing
+the application to work on networks where it would otherwise be blocked or
+heavily throttled.
+
 # ShadowSwift
 
 Shadowsocks is a fast, free, and open-source encrypted proxy project, used to circumvent Internet censorship by utilizing a simple, but effective encryption and a shared password. ShadowSwift is a wrapper for Shadowsocks that makes it available as a Pluggable Transport. 
