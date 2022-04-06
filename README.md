@@ -40,10 +40,11 @@ the need to write code or use the command line.
 
 ### Shapeshifter Transports
 
-This is the repository for the shapeshifter transports library for the Go
-programming language. If you are looking for a tool which you can install and
-use from the command line, take a look at the dispatcher instead:
-<https://github.com/OperatorFoundation/shapeshifter-transports>
+Shapeshifter Transports is a suite of pluggable transports implemented in a variety of langauges. This repository 
+is an implementation of the Shadow transport in the Swift programming language. 
+
+If you are looking for a tool which you can install and
+use from the command line, take a look at [shapeshifter-dispatcher](https://github.com/OperatorFoundation/shapeshifter-dispatcher.git) instead.
 
 ShadowSwift implements the Pluggable Transports 3.0 specification available here:
 <https://github.com/Pluggable-Transports/Pluggable-Transports-spec/tree/main/releases/PTSpecV3.0> Specifically,
