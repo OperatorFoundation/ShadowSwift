@@ -26,30 +26,51 @@ public struct BloomFilter<filterData: Hashable>: Codable
         // seeds here are generating random numbers to be mapped
         seeds = (0..<hashCount).map({ _ in Int.random(in: 0..<Int.max) })
     }
-    // using the init that was declared just above, but giving hard coded values 512 & 3.
+    
+    /// Initializes a bloom filter with (size: 512,  hashCount: 3) and saves it
     init()
     {
         self.init(size: 512, hashCount: 3)
+        
+        guard let bloomFilterURL = BloomFilter.getBloomFileURL() else
+        {
+            print("Could not save a new bloom filter, we could not find the application support directory.")
+            return
+        }
+                
+        guard self.save(pathURL: bloomFilterURL) else
+        {
+            print("Failed to initialize and save a new BloomFilter at \(bloomFilterURL.path)")
+            return
+        }
     }
     
-    // Use Codable to load from JSON
-    // Load will take the data from the filename and put it in the data array.
+    /// This initializer will load a bloom filter if it already exists as a JSON file at the file path
+    /// Or it will create a new one and save it at that path
     public init?(withFileAtPath filePath: String)
     {
-        let jsonDecoder = JSONDecoder()
-        let url = URL(fileURLWithPath: filePath)
-        
-        
-        do
+        if FileManager.default.fileExists(atPath: filePath) // If the file exists, load it
         {
-            let data = try Data(contentsOf: url)
-            let decoded = try jsonDecoder.decode(BloomFilter.self, from: data)
-            self = decoded
+            let jsonDecoder = JSONDecoder()
+            let url = URL(fileURLWithPath: filePath)
+            
+            do
+            {
+                let data = try Data(contentsOf: url)
+                let decoded = try jsonDecoder.decode(BloomFilter.self, from: data)
+                self = decoded
+            }
+            catch (let jsonDecodeError)
+            {
+              print("Failed to decode Bloom from JSON: \(jsonDecodeError)")
+                return nil
+            }
+            
         }
-        catch (let jsonDecodeError)
+        else // Otherwise make a new one
         {
-          print("Failed to decode Bloom from JSON: \(jsonDecodeError)")
-            return nil
+            // instantiate a new bloom filter and save it
+            self.init()
         }
     }
     
@@ -61,6 +82,7 @@ public struct BloomFilter<filterData: Hashable>: Codable
         .forEach({ hash in
             data[hash % data.count] = true
         })
+        
     }
     
     // Takes the salt we give it, and checks the array if there is a match. If it matches it returns true, false if not.
@@ -138,7 +160,7 @@ public struct BloomFilter<filterData: Hashable>: Codable
         return true
     }
     
-    static func createNewBloomFilterFile<dataType: Hashable>() -> BloomFilter<dataType>?
+    static func getBloomFileURL() -> URL?
     {
         guard let supportDirectoryURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else
         {
@@ -149,17 +171,7 @@ public struct BloomFilter<filterData: Hashable>: Codable
         
         let bloomFilterURL = supportDirectoryURL.appendingPathComponent(bloomFilterFilename)
         
-        let newBloomFilter = BloomFilter<dataType>()
-        if newBloomFilter.save(pathURL: bloomFilterURL)
-        {
-            print("Saved your BloomFilter to: \(bloomFilterURL.path)")
-            
-            return newBloomFilter
-        }
-        else
-        {
-            return nil
-        }
+        return bloomFilterURL
     }
 }
 
