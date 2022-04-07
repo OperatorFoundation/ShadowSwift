@@ -4,13 +4,13 @@
 //
 //  Created by Dr. Brandon Wiley on 9/24/21.
 //
-
-import Foundation
 import Crypto
-import Transmission
+
 import Datable
-import SwiftHexTools
+import Foundation
 import Net
+import SwiftHexTools
+import Transmission
 
 let P256KeySize = 32 // compact format
 let ConfirmationSize = 32
@@ -41,10 +41,16 @@ public struct DarkStar
     #if os(macOS)
     static public func generateServerConfirmationCode(theirPublicKey: P256.KeyAgreement.PublicKey, myPrivateEphemeralKey: SecureEnclave.P256.KeyAgreement.PrivateKey, myPrivateStaticKey: SecureEnclave.P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint) -> Data?
     {
-        guard let ecdh = try? myPrivateStaticKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else {return nil}
+        guard let ecdh = try? myPrivateStaticKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else
+        {
+            return nil
+        }
         let ecdhData = DarkStar.sharedSecretToData(secret: ecdh)
 
-        guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else {return nil}
+        guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
+        {
+            return nil
+        }
         let serverPersistentPublicKeyData = myPrivateStaticKey.publicKey.compactRepresentation!
         let clientEphemeralPublicKeyData = theirPublicKey.compactRepresentation!
 
@@ -62,10 +68,16 @@ public struct DarkStar
     #else
     static public func generateServerConfirmationCode(theirPublicKey: P256.KeyAgreement.PublicKey, myPrivateEphemeralKey: P256.KeyAgreement.PrivateKey, myPrivateStaticKey: P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint) -> Data?
     {
-        guard let ecdh = try? myPrivateStaticKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else {return nil}
+        guard let ecdh = try? myPrivateStaticKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else
+        {
+            return nil
+        }
         let ecdhData = DarkStar.sharedSecretToData(secret: ecdh)
 
-        guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else {return nil}
+        guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
+        {
+            return nil
+        }
         let serverPersistentPublicKeyData = myPrivateStaticKey.publicKey.compactRepresentation!
         let clientEphemeralPublicKeyData = theirPublicKey.compactRepresentation!
 
@@ -89,7 +101,10 @@ public struct DarkStar
         let myEphemeralPublicKey = myEphemeralPrivateKey.publicKey
         let myEphemeralPublicKeyData = myEphemeralPublicKey.compactRepresentation!
 
-        guard connection.write(data: myEphemeralPublicKeyData) else {return nil}
+        guard connection.write(data: myEphemeralPublicKeyData) else
+        {
+            return nil
+        }
 
         return (myEphemeralPrivateKey, myEphemeralPublicKey)
     }
@@ -97,21 +112,33 @@ public struct DarkStar
     #if os(macOS)
     static public func handleClientEphemeralKey(connection: Connection) -> (SecureEnclave.P256.KeyAgreement.PrivateKey, P256.KeyAgreement.PublicKey)?
     {
-        guard let myEphemeralPrivateKey = try? SecureEnclave.P256.KeyAgreement.PrivateKey() else {return nil}
+        guard let myEphemeralPrivateKey = try? SecureEnclave.P256.KeyAgreement.PrivateKey() else
+        {
+            return nil
+        }
         let myEphemeralPublicKey = myEphemeralPrivateKey.publicKey
         let myEphemeralPublicKeyData = myEphemeralPublicKey.compactRepresentation!
 
-        guard connection.write(data: myEphemeralPublicKeyData) else {return nil}
+        guard connection.write(data: myEphemeralPublicKeyData) else
+        {
+            return nil
+        }
 
         return (myEphemeralPrivateKey, myEphemeralPublicKey)
     }
     
     static public func generateClientConfirmationCode(connection: Connection, theirPublicKey: P256.KeyAgreement.PublicKey, myPrivateKey: SecureEnclave.P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint, serverPersistentPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Data?
     {
-        guard let ecdh = try? myPrivateKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else {return nil}
+        guard let ecdh = try? myPrivateKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else
+        {
+            return nil
+        }
         let ecdhData = DarkStar.sharedSecretToData(secret: ecdh)
 
-        guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else {return nil}
+        guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
+        {
+            return nil
+        }
         let serverPersistentPublicKeyData = serverPersistentPublicKey.compactRepresentation!
         let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation!
 
@@ -130,21 +157,33 @@ public struct DarkStar
     #else
     static public func handleClientEphemeralKey(connection: Connection) -> (P256.KeyAgreement.PrivateKey, P256.KeyAgreement.PublicKey)?
     {
-        guard let myEphemeralPrivateKey = try? P256.KeyAgreement.PrivateKey() else {return nil}
+        guard let myEphemeralPrivateKey = try? P256.KeyAgreement.PrivateKey() else
+        {
+            return nil
+        }
         let myEphemeralPublicKey = myEphemeralPrivateKey.publicKey
         let myEphemeralPublicKeyData = myEphemeralPublicKey.compactRepresentation!
 
-        guard connection.write(data: myEphemeralPublicKeyData) else {return nil}
+        guard connection.write(data: myEphemeralPublicKeyData) else
+        {
+            return nil
+        }
 
         return (myEphemeralPrivateKey, myEphemeralPublicKey)
     }
     
     static public func generateClientConfirmationCode(connection: Connection, theirPublicKey: P256.KeyAgreement.PublicKey, myPrivateKey: P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint, serverPersistentPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Data?
     {
-        guard let ecdh = try? myPrivateKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else {return nil}
+        guard let ecdh = try? myPrivateKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else
+        {
+            return nil
+        }
         let ecdhData = DarkStar.sharedSecretToData(secret: ecdh)
 
-        guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else {return nil}
+        guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
+        {
+            return nil
+        }
         let serverPersistentPublicKeyData = serverPersistentPublicKey.compactRepresentation!
         let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation!
 
@@ -231,7 +270,10 @@ public struct DarkStar
         switch endpoint
         {
             case .hostPort(let host, let port):
-                guard let portData = port.rawValue.maybeNetworkData else {return nil}
+                guard let portData = port.rawValue.maybeNetworkData else
+                {
+                    return nil
+                }
                 switch host
                 {
                     case .ipv4(let ipv4):
