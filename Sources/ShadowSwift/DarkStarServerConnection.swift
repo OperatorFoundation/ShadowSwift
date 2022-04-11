@@ -261,9 +261,6 @@ open class DarkStarServerConnection: Transport.Connection
             return
         }
         
-        // TODO: use decryptingCipher counter to see if this is the first time we have received something from the server
-        // TODO: if it is the first time and decryption fails, hang up and try again
-        // TODO: it it is not the first time and we fail to decrypt, hang up and walk away
         guard let lengthData = self.decryptingCipher.unpack(encrypted: someData, expectedCiphertextLength: Cipher.lengthSize)
         else
         {

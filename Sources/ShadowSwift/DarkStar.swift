@@ -210,15 +210,31 @@ public struct DarkStar
             return nil
         }
         
-        if let serverBloomFilter = bloomFilter // Server
+        if var serverBloomFilter = bloomFilter // Server
         {
-            // TODO: See if theirEphemeralPublicKeyData is in the BloomFilter, return nil if it is.
-            
-            // TODO: If it's not in a BloomFilter, add it to the BloomFilter and Save the BloomFilter
-        }
-        else // Client
-        {
-            
+            // See if theirEphemeralPublicKeyData is in the BloomFilter, return nil if it is.
+            if serverBloomFilter.contains(theirEphemeralPublicKeyData)
+            {
+                return nil
+            }
+            // If it's not in a BloomFilter, add it to the BloomFilter and Save the BloomFilter
+            else
+            {
+                serverBloomFilter.insert(theirEphemeralPublicKeyData)
+                
+                if let bloomFilterURL = BloomFilter<Data>.getBloomFileURL()
+                {
+                    let filterSaved = serverBloomFilter.save(pathURL: bloomFilterURL)
+                    if !filterSaved
+                    {
+                        print("Warning: Failed to save the updated BloomFilter")
+                    }
+                }
+                else
+                {
+                    print("Warning: Unable to save BloomFilter. Unabale to resolve the directory URL.")
+                }
+            }
         }
 
         guard let theirEphemeralPublicKey = try? P256.KeyAgreement.PublicKey(compactRepresentation: theirEphemeralPublicKeyData) else

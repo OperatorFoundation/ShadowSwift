@@ -35,6 +35,7 @@ import SwiftHexTools
 import Crypto
 import Net
 import Transmission
+import Network
 
 open class DarkStarClientConnection: Transport.Connection
 {
@@ -262,9 +263,21 @@ open class DarkStarClientConnection: Transport.Connection
         guard let lengthData = self.decryptingCipher.unpack(encrypted: someData, expectedCiphertextLength: Cipher.lengthSize)
         else
         {
-            let _ = BlackHole(timeoutDelaySeconds: 30, socket: self)
-            completion(maybeData, .defaultMessage, false, NWError.posix(POSIXErrorCode.EINVAL))
-            return
+            // TODO: use decryptingCipher counter to see if this is the first time we have received something from the server
+            if decryptingCipher.decryptCounter == 1
+            {
+                // TODO: if it is the first time and decryption fails, hang up and try again
+                cancel()
+                completion(nil, .defaultMessage, false, NWError.posix(POSIXErrorCode.EAUTH))
+                return
+            }
+            else
+            {
+                // It is not the first time and we fail to decrypt, hang up and walk away
+                cancel()
+                completion(nil, .defaultMessage, false, NWError.posix(POSIXErrorCode.EAUTH))
+                return
+            }
         }
 
         DatableConfig.endianess = .big
