@@ -51,13 +51,21 @@ open class ShadowConnectionFactory: ConnectionFactory
 
     public convenience init?(url: URL, serverid: UUID, logger: Logger)
     {
-        guard let jsonConfig = JsonConfig(url: url) else {return nil}
+        guard let jsonConfig = JsonConfig(url: url) else
+        {
+            return nil
+        }
+        
         self.init(jsonConfig: jsonConfig, serverid: serverid, logger: logger)
     }
 
     public convenience init?(path: String, serverid: UUID, logger: Logger)
     {
-        guard let jsonConfig = JsonConfig(path: path) else {return nil}
+        guard let jsonConfig = JsonConfig(path: path) else
+        {
+            return nil
+        }
+        
         self.init(jsonConfig: jsonConfig, serverid: serverid, logger: logger)
     }
 
@@ -71,8 +79,17 @@ open class ShadowConnectionFactory: ConnectionFactory
 
             return config.id == serverid.uuidString
         }
-        guard let serverConfig = maybeServerConfig else {return nil}
-        guard let shadowConfig = serverConfig.shadowConfig else {return nil}
+        
+        guard let serverConfig = maybeServerConfig else
+        {
+            return nil
+        }
+        
+        guard let shadowConfig = serverConfig.shadowConfig else
+        {
+            return nil
+        }
+        
         self.config = shadowConfig
 
         self.host = NWEndpoint.Host(serverConfig.server)

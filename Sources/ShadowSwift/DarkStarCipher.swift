@@ -25,10 +25,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+import Crypto
 import Foundation
 import Logging
 
-import Crypto
 import Datable
 import Net
 
@@ -73,7 +73,10 @@ class DarkStarCipher
         let result = nonce(counter: self.encryptCounter, personalizationString: personalizationString.data)
 
         let (newCounter, didOverflow) = self.encryptCounter.addingReportingOverflow(1)
-        guard !didOverflow else {return nil}
+        guard !didOverflow else
+        {
+            return nil
+        }
 
         self.encryptCounter = newCounter
 
@@ -96,7 +99,10 @@ class DarkStarCipher
         let result = nonce(counter: self.decryptCounter, personalizationString: personalizationString.data)
 
         let (newCounter, didOverflow) = self.decryptCounter.addingReportingOverflow(1)
-        guard !didOverflow else {return nil}
+        guard !didOverflow else
+        {
+            return nil
+        }
 
         self.decryptCounter = newCounter
 
@@ -155,11 +161,17 @@ class DarkStarCipher
          trailing (i.e., rightmost) 64 bits hold the invocation field.
         */
 
-        guard let invocationField = counter.maybeNetworkData else {return nil}
+        guard let invocationField = counter.maybeNetworkData else
+        {
+            return nil
+        }
 
         let nonceData = fixedField + invocationField
 
-        guard let nonce = try? AES.GCM.Nonce(data: nonceData) else {return nil}
+        guard let nonce = try? AES.GCM.Nonce(data: nonceData) else
+        {
+            return nil
+        }
         
         return nonce
     }
@@ -167,7 +179,10 @@ class DarkStarCipher
     init?(key: SymmetricKey, endpoint: NWEndpoint, isServerConnection: Bool, logger: Logger)
     {
         self.key = key
-        guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else {return nil}
+        guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
+        {
+            return nil
+        }
         self.serverIdentifier = serverIdentifier
         self.isServerConnection = isServerConnection
         self.log = logger
@@ -177,21 +192,29 @@ class DarkStarCipher
     func pack(plaintext: Data) -> Data?
     {
         // Check for integer overflow
-        guard plaintext.count < UInt16.max else {return nil}
+        guard plaintext.count < UInt16.max else
+        {
+            return nil
+        }
+        
         let payloadLength = UInt16(plaintext.count)
         DatableConfig.endianess = .big
 
-        guard payloadLength <= Cipher.maxPayloadSize
-        else
+        guard payloadLength <= Cipher.maxPayloadSize else
         {
             log.error("Requested payload size \(plaintext.count) is greater than the maximum allowed \(Cipher.maxPayloadSize). Unable to send payload.")
             return nil
         }
 
-        guard let (encryptedPayloadLength, lengthTag) = encrypt(plaintext: payloadLength.data)
-        else { return nil }
-        guard let (encryptedPayload, payloadTag) = encrypt(plaintext: plaintext)
-        else { return nil }
+        guard let (encryptedPayloadLength, lengthTag) = encrypt(plaintext: payloadLength.data) else
+        {
+            return nil
+        }
+        
+        guard let (encryptedPayload, payloadTag) = encrypt(plaintext: plaintext) else
+        {
+            return nil
+        }
 
         return encryptedPayloadLength + lengthTag + encryptedPayload + payloadTag
     }
@@ -228,8 +251,7 @@ class DarkStarCipher
         let tag = Data(encrypted[expectedCiphertextLength...])
 
         // Quality Check
-        guard tag.count == Cipher.tagSize
-        else
+        guard tag.count == Cipher.tagSize else
         {
             log.error("Attempted to decrypt a message with an incorrect tag size. \nGot:  \(tag.count)\nExpected: \(Cipher.tagSize)")
             return nil

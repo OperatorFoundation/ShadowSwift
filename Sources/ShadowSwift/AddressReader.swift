@@ -24,8 +24,7 @@ class AddressReader
         let typeLength = 1
         let portLength = 2
         
-        guard let addrType = AddrType(rawValue: Int(buffer[0]))
-        else
+        guard let addrType = AddrType(rawValue: Int(buffer[0])) else
         {
             return nil
         }
@@ -38,8 +37,7 @@ class AddressReader
             let addrLength = typeLength + 1 + hostLength + portLength
             
             // Quality check to make sure that our address data is the right size
-            guard buffer.count >= addrLength
-            else
+            guard buffer.count >= addrLength else
             {
                 return nil
             }
@@ -55,14 +53,12 @@ class AddressReader
             // The port is the last 2 bytes
             let portData = addressData[(2 + hostLength)...]
             
-            guard let hostString = String(data: hostData, encoding: .utf8)
-                else
+            guard let hostString = String(data: hostData, encoding: .utf8) else
             {
                 return nil
             }
             
-            guard let portString = String(data: portData, encoding: .utf8)
-            else
+            guard let portString = String(data: portData, encoding: .utf8) else
             {
                 return nil
             }
@@ -73,8 +69,7 @@ class AddressReader
         case .ipV4:
             let ipV4Length = 4
             let addressLength = typeLength + ipV4Length + portLength
-            guard buffer.count >= addressLength
-                else
+            guard buffer.count >= addressLength else
             {
                 return nil
             }
@@ -87,14 +82,12 @@ class AddressReader
             // The port is the last 2 bytes
             let portData = addressData[(typeLength + ipV4Length)...]
             
-            guard let hostString = String(data: hostData, encoding: .utf8)
-            else
+            guard let hostString = String(data: hostData, encoding: .utf8) else
             {
                 return nil
             }
             
-            guard let portString = String(data: portData, encoding: .utf8)
-                else
+            guard let portString = String(data: portData, encoding: .utf8) else
             {
                 return nil
             }
@@ -105,8 +98,7 @@ class AddressReader
         case .ipV6:
             let ipV6Length = 16
             let addressLength = typeLength + ipV6Length + portLength
-            guard buffer.count >= addressLength
-            else
+            guard buffer.count >= addressLength else
             {
                 return nil
             }
@@ -117,14 +109,13 @@ class AddressReader
             let hostData = addressData[1...ipV6Length]
             let portData = addressData[(typeLength + ipV6Length)...]
             
-            guard let hostString = String(data: hostData, encoding: .utf8)
-                else
+            guard let hostString = String(data: hostData, encoding: .utf8) else
             {
                 return nil
             }
             
             guard let portString = String(data: portData, encoding: .utf8)
-                else
+            else
             {
                 return nil
             }

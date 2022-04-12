@@ -5,9 +5,8 @@
 //  Created by Mafalda on 8/18/20.
 //
 
-import Foundation
-
 import Crypto
+import Foundation
 
 public struct ShadowConfig: Codable
 {

@@ -25,17 +25,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+import Crypto
 import Foundation
 import Logging
+import Network
 
 import Chord
 import Datable
-import Transport
-import SwiftHexTools
-import Crypto
 import Net
+import SwiftHexTools
 import Transmission
-import Network
+import Transport
 
 open class DarkStarClientConnection: Transport.Connection
 {
@@ -76,8 +76,7 @@ open class DarkStarClientConnection: Transport.Connection
         }
 
         let endpoint = NWEndpoint.hostPort(host: host, port: port)
-        guard let newConnection = Transmission.TransmissionConnection(host: hostString, port: Int(port.rawValue))
-        else
+        guard let newConnection = Transmission.TransmissionConnection(host: hostString, port: Int(port.rawValue)) else
         {
             logger.error("Failed to initialize a ShadowConnection because we could not create a Network Connection using host \(host) and port \(Int(port.rawValue)).")
             return nil
@@ -147,8 +146,7 @@ open class DarkStarClientConnection: Transport.Connection
 
     public func start(queue: DispatchQueue)
     {
-        guard let updateHandler = stateUpdateHandler
-        else
+        guard let updateHandler = stateUpdateHandler else
         {
             log.info("Called start when there is no stateUpdateHandler.")
             return
@@ -175,8 +173,7 @@ open class DarkStarClientConnection: Transport.Connection
     /// Gets content and encrypts it before passing it along to the network
     public func send(content: Data?, contentContext: NWConnection.ContentContext, isComplete: Bool, completion: NWConnection.SendCompletion)
     {
-        guard let someData = content
-        else
+        guard let someData = content else
         {
             log.debug("Shadow connection received a send command with no content.")
             
@@ -207,8 +204,7 @@ open class DarkStarClientConnection: Transport.Connection
             }
         }
 
-        guard let encrypted = encryptingCipher.pack(plaintext: someData)
-        else
+        guard let encrypted = encryptingCipher.pack(plaintext: someData) else
         {
             log.error("Failed to encrypt shadow send content.")
             switch completion
@@ -252,16 +248,14 @@ open class DarkStarClientConnection: Transport.Connection
         let maybeData = network.read(size: encryptedLengthSize)
         
         // Nothing to decrypt
-        guard let someData = maybeData
-        else
+        guard let someData = maybeData else
         {
             self.log.debug("Shadow receive called, but there was no data.")
             completion(nil, .defaultMessage, false, NWError.posix(.ENODATA))
             return
         }
         
-        guard let lengthData = self.decryptingCipher.unpack(encrypted: someData, expectedCiphertextLength: Cipher.lengthSize)
-        else
+        guard let lengthData = self.decryptingCipher.unpack(encrypted: someData, expectedCiphertextLength: Cipher.lengthSize) else
         {
             // TODO: use decryptingCipher counter to see if this is the first time we have received something from the server
             if decryptingCipher.decryptCounter == 1
@@ -282,8 +276,7 @@ open class DarkStarClientConnection: Transport.Connection
 
         DatableConfig.endianess = .big
 
-        guard let lengthUInt16 = lengthData.uint16
-        else
+        guard let lengthUInt16 = lengthData.uint16 else
         {
             self.log.error("Failed to get encrypted data's expected length. Length data could not be converted to UInt16")
             completion(maybeData, .defaultMessage, false, NWError.posix(POSIXErrorCode.EINVAL))
@@ -315,8 +308,7 @@ open class DarkStarClientConnection: Transport.Connection
         }
 
         // Nothing to decrypt
-        guard let someData = maybeData
-        else
+        guard let someData = maybeData else
         {
             self.log.debug("Shadow receive called, but there was no data.")
             
@@ -337,8 +329,7 @@ open class DarkStarClientConnection: Transport.Connection
         let dCipher = self.decryptingCipher
 
         // Attempt to decrypt the data we received before passing it along
-        guard let decrypted = dCipher.unpack(encrypted: someData, expectedCiphertextLength: payloadLength)
-        else
+        guard let decrypted = dCipher.unpack(encrypted: someData, expectedCiphertextLength: payloadLength) else
         {
             let _ = BlackHole(timeoutDelaySeconds: 30, socket: self)
             self.log.error("Shadow failed to decrypt received data.")
@@ -359,8 +350,7 @@ open class DarkStarClientConnection: Transport.Connection
     func sendAddress()
     {
         let address = AddressReader().createAddr()
-        guard let encryptedAddress = encryptingCipher.pack(plaintext: address)
-        else
+        guard let encryptedAddress = encryptingCipher.pack(plaintext: address) else
         {
             self.log.error("Failed to encrypt our address. Cancelling connection.")
             network.close()

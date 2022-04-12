@@ -45,12 +45,14 @@ public struct DarkStar
         {
             return nil
         }
+        
         let ecdhData = DarkStar.sharedSecretToData(secret: ecdh)
 
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
         {
             return nil
         }
+        
         let serverPersistentPublicKeyData = myPrivateStaticKey.publicKey.compactRepresentation!
         let clientEphemeralPublicKeyData = theirPublicKey.compactRepresentation!
 
@@ -72,12 +74,14 @@ public struct DarkStar
         {
             return nil
         }
+        
         let ecdhData = DarkStar.sharedSecretToData(secret: ecdh)
 
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
         {
             return nil
         }
+        
         let serverPersistentPublicKeyData = myPrivateStaticKey.publicKey.compactRepresentation!
         let clientEphemeralPublicKeyData = theirPublicKey.compactRepresentation!
 
@@ -116,6 +120,7 @@ public struct DarkStar
         {
             return nil
         }
+        
         let myEphemeralPublicKey = myEphemeralPrivateKey.publicKey
         let myEphemeralPublicKeyData = myEphemeralPublicKey.compactRepresentation!
 
@@ -133,12 +138,14 @@ public struct DarkStar
         {
             return nil
         }
+        
         let ecdhData = DarkStar.sharedSecretToData(secret: ecdh)
 
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
         {
             return nil
         }
+        
         let serverPersistentPublicKeyData = serverPersistentPublicKey.compactRepresentation!
         let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation!
 
@@ -161,6 +168,7 @@ public struct DarkStar
         {
             return nil
         }
+        
         let myEphemeralPublicKey = myEphemeralPrivateKey.publicKey
         let myEphemeralPublicKeyData = myEphemeralPublicKey.compactRepresentation!
 
@@ -178,12 +186,14 @@ public struct DarkStar
         {
             return nil
         }
+        
         let ecdhData = DarkStar.sharedSecretToData(secret: ecdh)
 
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
         {
             return nil
         }
+        
         let serverPersistentPublicKeyData = serverPersistentPublicKey.compactRepresentation!
         let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation!
 
@@ -290,6 +300,7 @@ public struct DarkStar
                 {
                     return nil
                 }
+            
                 switch host
                 {
                     case .ipv4(let ipv4):

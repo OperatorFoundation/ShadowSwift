@@ -6,8 +6,9 @@
 //
 
 import Crypto
-import Datable
 import Foundation
+
+import Datable
 import Net
 import SwiftHexTools
 import Transmission
@@ -20,10 +21,18 @@ public class DarkStarServer
 
     static public func handleServerConfirmationCode(connection: Connection, endpoint: NWEndpoint, serverStaticPrivateKey: P256.KeyAgreement.PrivateKey, serverEphemeralPrivateKey: P256.KeyAgreement.PrivateKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Bool
     {
-        guard let ecdh = try? serverStaticPrivateKey.sharedSecretFromKeyAgreement(with: clientEphemeralPublicKey) else {return false}
+        guard let ecdh = try? serverStaticPrivateKey.sharedSecretFromKeyAgreement(with: clientEphemeralPublicKey) else
+        {
+            return false
+        }
+        
         let ecdhData = DarkStar.sharedSecretToData(secret: ecdh)
 
-        guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else {return false}
+        guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
+        {
+            return false
+        }
+        
         let serverPersistentPublicKeyData = serverStaticPrivateKey.publicKey.compactRepresentation!
         let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation!
 
@@ -119,11 +128,17 @@ public class DarkStarServer
 
     static func createServerSharedKey(serverPersistentPrivateKey: P256.KeyAgreement.PrivateKey, serverEphemeralPrivateKey: P256.KeyAgreement.PrivateKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey, serverEndpoint: NWEndpoint, personalizationString: String) -> SymmetricKey?
     {
-        guard let ephemeralECDH = try? serverEphemeralPrivateKey.sharedSecretFromKeyAgreement(with: clientEphemeralPublicKey) else {return nil}
+        guard let ephemeralECDH = try? serverEphemeralPrivateKey.sharedSecretFromKeyAgreement(with: clientEphemeralPublicKey) else
+        {
+            return nil
+        }
 
        let ephemeralECDHData = DarkStar.sharedSecretToData(secret: ephemeralECDH)
 
-        guard let persistentECDH = try? serverPersistentPrivateKey.sharedSecretFromKeyAgreement(with: clientEphemeralPublicKey) else {return nil}
+        guard let persistentECDH = try? serverPersistentPrivateKey.sharedSecretFromKeyAgreement(with: clientEphemeralPublicKey) else
+        {
+            return nil
+        }
 
         let persistentECDHData = DarkStar.sharedSecretToData(secret: persistentECDH)
 
@@ -132,7 +147,10 @@ public class DarkStarServer
         let serverEphemeralPublicKey = serverEphemeralPrivateKey.publicKey
         let serverEphemeralPublicKeyData = serverEphemeralPublicKey.compactRepresentation!
 
-        guard let serverIdentifier = DarkStar.makeServerIdentifier(serverEndpoint) else {return nil}
+        guard let serverIdentifier = DarkStar.makeServerIdentifier(serverEndpoint) else
+        {
+            return nil
+        }
         
         var hash = SHA256()
         hash.update(data: ephemeralECDHData)

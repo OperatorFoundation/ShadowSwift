@@ -10,8 +10,8 @@ import Logging
 
 import Net
 import Transmission
-import Transport
 import TransmissionTransport
+import Transport
 
 public class ShadowServer: Transmission.Listener
 {
