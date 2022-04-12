@@ -110,6 +110,6 @@ open class ShadowConnectionFactory: ConnectionFactory
             return nil
         }
 
-        return DarkStarClientConnection(host: currentHost, port: currentPort, parameters: parameters, config: config, logger: log)
+        return DarkStarRetryingClientConnection(host: currentHost, port: currentPort, parameters: parameters, config: config, logger: log)
     }
 }

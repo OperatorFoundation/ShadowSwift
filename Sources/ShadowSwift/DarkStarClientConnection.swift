@@ -262,7 +262,7 @@ open class DarkStarClientConnection: Transport.Connection
             {
                 // TODO: if it is the first time and decryption fails, hang up and try again
                 cancel()
-                completion(nil, .defaultMessage, false, NWError.posix(POSIXErrorCode.EAUTH))
+                completion(nil, .defaultMessage, false, NWError.posix(POSIXErrorCode.EBADF))
                 return
             }
             else
