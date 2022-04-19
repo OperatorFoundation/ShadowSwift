@@ -118,16 +118,19 @@ public class DarkStarServer
 
     static public func createServerToClientSharedKey(serverPersistentPrivateKey: P256.KeyAgreement.PrivateKey, serverEphemeralPrivateKey: P256.KeyAgreement.PrivateKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey, serverEndpoint: NWEndpoint) -> SymmetricKey?
     {
-        createServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: serverEndpoint, personalizationString: ClientString)
+        print("**createServerToClientSharedKey**")
+        return createServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: serverEndpoint, personalizationString: ClientString)
     }
 
     static public func createClientToServerSharedKey(serverPersistentPrivateKey: P256.KeyAgreement.PrivateKey, serverEphemeralPrivateKey: P256.KeyAgreement.PrivateKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey, serverEndpoint: NWEndpoint) -> SymmetricKey?
     {
-        createServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: serverEndpoint, personalizationString: ServerString)
+        print("**createClientToServerSharedKey**")
+        return createServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: serverEndpoint, personalizationString: ServerString)
     }
 
     static func createServerSharedKey(serverPersistentPrivateKey: P256.KeyAgreement.PrivateKey, serverEphemeralPrivateKey: P256.KeyAgreement.PrivateKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey, serverEndpoint: NWEndpoint, personalizationString: String) -> SymmetricKey?
     {
+        print("Generating a key:")
         guard let ephemeralECDH = try? serverEphemeralPrivateKey.sharedSecretFromKeyAgreement(with: clientEphemeralPublicKey) else
         {
             return nil
@@ -153,16 +156,24 @@ public class DarkStarServer
         }
         
         var hash = SHA256()
+        
+        print("ephemeralECDHData: \(ephemeralECDHData.hex)")
         hash.update(data: ephemeralECDHData)
+        print("persistentECDHData: \(persistentECDHData.hex)")
         hash.update(data: persistentECDHData)
+        print("serverIdentifier: \(serverIdentifier.hex)")
         hash.update(data: serverIdentifier)
+        print("clientEphemeralPublicKeyData: \(clientEphemeralPublicKeyData)")
         hash.update(data: clientEphemeralPublicKeyData)
+        print("serverEphemeralPublicKeyData: \(serverEphemeralPublicKeyData)")
         hash.update(data: serverEphemeralPublicKeyData)
+        print("DarkStarString: \(DarkStarString.data.hex)")
         hash.update(data: DarkStarString.data)
+        print("personalizationString.data: \(personalizationString.data.hex)")
         hash.update(data: personalizationString.data) // Destination
         let hashed = hash.finalize()
         let hashedData = Data(hashed)
-        
+        print("hashedData: \(hashedData.hex)")
         return SymmetricKey(data: hashedData)
     }
 

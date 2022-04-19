@@ -256,7 +256,7 @@ open class DarkStarClientConnection: Transport.Connection
         
         guard let lengthData = self.decryptingCipher.unpack(encrypted: someData, expectedCiphertextLength: Cipher.lengthSize) else
         {
-            // TODO: use decryptingCipher counter to see if this is the first time we have received something from the server
+            // use decryptingCipher counter to see if this is the first time we have received something from the server
             if decryptingCipher.decryptCounter == 1
             {
                 // TODO: if it is the first time and decryption fails, hang up and try again
