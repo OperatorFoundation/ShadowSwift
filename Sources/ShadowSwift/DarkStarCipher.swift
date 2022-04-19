@@ -270,6 +270,12 @@ class DarkStarCipher
                 return nil
             }
             
+            print("Attempting to decrypt some bytes:")
+            print("key: \(self.key.description)")
+            print("nonce: \(nonce.description)")
+            print("encrypted (\(encrypted.count) bytes): \(encrypted.hex)")
+            print("tag (\(tag.count) bytes): \(tag.hex)")
+            
             let sealedBox = try AES.GCM.SealedBox(nonce: nonce, ciphertext: encrypted, tag: tag)
             let plaintext = try AES.GCM.open(sealedBox, using: self.key)
             
