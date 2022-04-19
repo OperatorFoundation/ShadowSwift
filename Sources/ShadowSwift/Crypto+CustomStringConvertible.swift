@@ -36,7 +36,7 @@ extension P256.KeyAgreement.PrivateKey: CustomStringConvertible
 {
     public var description: String
     {
-        return ""
+        return self.rawRepresentation.hex
     }
 }
 
@@ -44,7 +44,7 @@ extension P256.KeyAgreement.PublicKey: CustomStringConvertible
 {
     public var description: String
     {
-        return ""
+        return self.compactRepresentation!.hex
     }
 }
 
@@ -52,7 +52,7 @@ extension P256.Signing.PrivateKey: CustomStringConvertible
 {
     public var description: String
     {
-        return ""
+        return self.rawRepresentation.hex
     }
 }
 
@@ -60,6 +60,6 @@ extension P256.Signing.PublicKey: CustomStringConvertible
 {
     public var description: String
     {
-        return ""
+        return self.compactRepresentation!.hex
     }
 }
