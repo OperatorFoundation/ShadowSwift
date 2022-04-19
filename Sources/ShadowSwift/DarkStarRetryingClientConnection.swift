@@ -28,7 +28,6 @@
 import Crypto
 import Foundation
 import Logging
-import Network
 
 import Chord
 import Datable
