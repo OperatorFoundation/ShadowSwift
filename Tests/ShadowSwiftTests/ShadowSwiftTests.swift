@@ -764,5 +764,8 @@ class ShadowSwiftTests: XCTestCase
             return
         }
     }
+    
+    /// possible test?
+    // func testBlackHole()
 }
 

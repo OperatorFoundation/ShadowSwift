@@ -197,21 +197,27 @@ public class DarkStarServer
         {
             print("DarkStarServer received an invalid client confirmation code.")
             
-            // FIXME: Use the hole :)
+            let transport = TransmissionToTransportConnection({return connection})
+            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
+            
             return nil
         }
 
         // Send server ephemeral key
         guard let (serverEphemeralPrivateKey, _) = DarkStar.handleServerEphemeralKey(connection: connection) else
         {
-            // FIXME: Use the hole :)
+            let transport = TransmissionToTransportConnection({return connection})
+            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
+            
             return nil
         }
 
         // Create shared key
         guard let serverToClientSharedKey = DarkStarServer.createServerToClientSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: endpoint) else
         {
-            // FIXME: Use the hole :)
+            let transport = TransmissionToTransportConnection({return connection})
+            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
+            
             return nil
         }
         
@@ -219,7 +225,9 @@ public class DarkStarServer
 
         guard let clientToServerSharedKey = DarkStarServer.createClientToServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: endpoint) else
         {
-            // FIXME: Use the hole :)
+            let transport = TransmissionToTransportConnection({return connection})
+            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
+            
             return nil
         }
         
@@ -228,7 +236,9 @@ public class DarkStarServer
         // Send server confirmation code
         guard DarkStarServer.handleServerConfirmationCode(connection: connection, endpoint: endpoint, serverStaticPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else
         {
-            // FIXME: Use the hole :)
+            let transport = TransmissionToTransportConnection({return connection})
+            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
+            
             return nil
         }
     }
