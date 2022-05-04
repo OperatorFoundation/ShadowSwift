@@ -631,34 +631,81 @@ class ShadowSwiftTests: XCTestCase
     func testDarkStarClientOnly()
     {
         let ready = XCTestExpectation(description: "Ready!")
+        let sent = XCTestExpectation(description: "Sent!")
+        let received = XCTestExpectation(description: "Received")
         
-        let publicKeyData = Data(hex: "d089c225ef8cda8d477a586f062b31a756270124d94944e458edf1a9e1e41ed6")
-        let publicKeyHex = publicKeyData!.hex
-        print(publicKeyHex)
+        // TODO: Enter your server public key.
+        let serverPublicKeyHex = "9caa4132c724f137c67928e9338c72cfe37e0dd28b298d14d5b5981effa038c9"
         
-        let factory = ShadowConnectionFactory(config: ShadowConfig(key: publicKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR), logger: self.logger)
-        guard var client = factory.connect(using: .tcp) else
+        // TODO: Enter your server IP and Port.
+        let shadowConfig = ShadowConfig(key: serverPublicKeyHex, serverIP: "164.92.71.230", port: 1234, mode: .DARKSTAR)
+        let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: self.logger)
+        let httpRequestData = Data("GET / HTTP/1.0\r\nConnection: close\r\n\r\n")
+        
+        guard var shadowClientConnection = shadowFactory.connect(using: .tcp) else
         {
             XCTFail()
             return
         }
 
-        client.stateUpdateHandler={
+        shadowClientConnection.stateUpdateHandler =
+        {
             state in
 
             switch state
             {
                 case .ready:
-                    print("Ready!")
+                    print(">>>>>> Shadow Client connection is ready.")
                     ready.fulfill()
+                    shadowClientConnection.send(content: httpRequestData, contentContext: .defaultMessage, isComplete: true, completion: NWConnection.SendCompletion.contentProcessed(
+                    {
+                        maybeError in
+                        
+                        if let error = maybeError
+                        {
+                            print(">>>>>> shadowClientConnection received an error on send: \(error)")
+                            XCTFail()
+                            return
+                        }
+                        else
+                        {
+                            sent.fulfill()
+                            print(">>>>>> shadowClientConnection successfully sent data to the server.")
+                            
+                            shadowClientConnection.receive(minimumIncompleteLength: 2, maximumLength: 10)
+                            {
+                                maybeData, maybeContext, isComplete, maybeReceiveError in
+                                
+                                if let error = maybeReceiveError
+                                {
+                                    print(">>>>>> shadowClientConnection received an error on receive: \(error)")
+                                    XCTFail()
+                                    return
+                                }
+                                else
+                                {
+                                    guard let receivedData = maybeData else
+                                    {
+                                        print(">>>>>> Shadow client received a nil data response.")
+                                        XCTFail()
+                                        return
+                                    }
+                                    
+                                    print(">>>>>> shadowClientConnection received some data from the server: \(receivedData.string)")
+                                    received.fulfill()
+                                }
+                            }
+                        }
+                    }))
                 default:
                     XCTFail()
                     return
             }
         }
         let queue2 = DispatchQueue(label: "Client")
-        client.start(queue: queue2)
-        wait(for: [ready], timeout: 30)  // 30 seconds
+        shadowClientConnection.start(queue: queue2)
+        
+        wait(for: [ready, sent, received], timeout: 30)  // 30 seconds
     }
 
     func testGenerateKeys()

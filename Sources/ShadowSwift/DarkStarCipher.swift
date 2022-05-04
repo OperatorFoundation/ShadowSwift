@@ -237,11 +237,11 @@ class DarkStarCipher
             cipherText = sealedBox.ciphertext
             tag = sealedBox.tag
             
-            print("Encrypting some data: 🔒")
-            print("key: \(self.key.description)")
-            print("nonce: \(nonce.description)")
-            print("cipherText (\(cipherText.count) bytes): \(cipherText.hex)")
-            print("tag (\(tag.count) bytes): \(tag.hex)")
+//            print("Encrypting some data: 🔒")
+//            print("key: \(self.key.description)")
+//            print("nonce: \(nonce.description)")
+//            print("cipherText (\(cipherText.count) bytes): \(cipherText.hex)")
+//            print("tag (\(tag.count) bytes): \(tag.hex)")
         }
         catch let encryptError
         {
