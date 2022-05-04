@@ -237,7 +237,7 @@ class ShadowSwiftTests: XCTestCase
                 logger.info("\nConnected state ready\n")
                 connected.fulfill()
                 
-                shadowConnection.send(content: Data("GET / HTTP/1.0\r\n\r\n"), contentContext: .defaultMessage, isComplete: true, completion: NWConnection.SendCompletion.contentProcessed(
+                    shadowConnection.send(content: Data(string: "GET / HTTP/1.0\r\n\r\n"), contentContext: .defaultMessage, isComplete: true, completion: NWConnection.SendCompletion.contentProcessed(
                 {
                     (maybeError) in
                     
