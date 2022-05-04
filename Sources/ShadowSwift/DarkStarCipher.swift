@@ -236,12 +236,6 @@ class DarkStarCipher
             let sealedBox = try AES.GCM.seal(plaintext, using: self.key, nonce: nonce)
             cipherText = sealedBox.ciphertext
             tag = sealedBox.tag
-            
-//            print("Encrypting some data: 🔒")
-//            print("key: \(self.key.description)")
-//            print("nonce: \(nonce.description)")
-//            print("cipherText (\(cipherText.count) bytes): \(cipherText.hex)")
-//            print("tag (\(tag.count) bytes): \(tag.hex)")
         }
         catch let encryptError
         {
@@ -275,12 +269,6 @@ class DarkStarCipher
                 log.error("DarkStarCipher failed to decrypt the nonce.")
                 return nil
             }
-            
-            print("Attempting to decrypt some bytes: 🔐")
-            print("key: \(self.key.description)")
-            print("nonce: \(nonce.description)")
-            print("encrypted (\(encrypted.count) bytes): \(encrypted.hex)")
-            print("tag (\(tag.count) bytes): \(tag.hex)")
             
             let sealedBox = try AES.GCM.SealedBox(nonce: nonce, ciphertext: encrypted, tag: tag)
             let plaintext = try AES.GCM.open(sealedBox, using: self.key)

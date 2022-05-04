@@ -297,8 +297,6 @@ open class DarkStarClientConnection: Transport.Connection
                        maybeError: NWError?,
                        completion: @escaping (Data?, NWConnection.ContentContext?, Bool, NWError?) -> Void)
     {
-        print("\(#file) shadowReceive()")
-
         if let error = maybeError
         {
             self.log.error("Shadow receive called, but we got an error: \(error)")
