@@ -23,6 +23,7 @@ public class DarkStarServer
     {
         guard let ecdh = try? serverStaticPrivateKey.sharedSecretFromKeyAgreement(with: clientEphemeralPublicKey) else
         {
+            print("DarkStarServer failed to generate a shared secret.")
             return false
         }
         
@@ -30,6 +31,7 @@ public class DarkStarServer
 
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
         {
+            print("DarkStarServer failed to generate the server identifier.")
             return false
         }
         
@@ -71,6 +73,7 @@ public class DarkStarServer
         }
         else
         {
+            print("DarkStarServer failed to confirm a client confirmation code.")
             return false
         }
     }

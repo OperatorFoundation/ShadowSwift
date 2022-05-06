@@ -10,7 +10,7 @@ import Foundation
 enum ShadowError: Error
 {
     case failedToUnpackLength
-    case failedToDecodeLenght
+    case failedToDecodeLength
     case failedToEncrypt
     case failedToDecrypt
 }

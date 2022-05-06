@@ -66,19 +66,19 @@ open class DarkStarServerConnection: Transport.Connection
                 maybeHostString = "\(data[0]).\(data[1]).\(data[2]).\(data[3])"
             default:
                 maybeHostString = nil
-                logger.error("Failed to initialize a ShadowConnection because we could not create a Network Connection using host \(host). Only IPV4 is currently supported.")
+                logger.error("Failed to initialize a DarkStarServerConnection because we could not create a Network Connection using host \(host). Only IPV4 is currently supported.")
         }
         
         guard let hostString = maybeHostString else
         {
-            logger.error("Failed to initialize a ShadowConnection because we could not resolve the host string.")
+            logger.error("Failed to initialize a DarkStarServerConnection because we could not resolve the host string.")
             return nil
         }
 
         let endpoint = NWEndpoint.hostPort(host: host, port: port)
         guard let newConnection = Transmission.TransmissionConnection(host: hostString, port: Int(port.rawValue)) else
         {
-            logger.error("Failed to initialize a ShadowConnection because we could not create a Network Connection using host \(host) and port \(Int(port.rawValue)).")
+            logger.error("Failed to initialize a DarkStarServerConnection because we could not create a Network Connection using host \(host) and port \(Int(port.rawValue)).")
             return nil
         }
         
@@ -92,37 +92,37 @@ open class DarkStarServerConnection: Transport.Connection
 
         guard config.mode == .DARKSTAR else
         {
-            log.error("Attempted a connection with \(config.mode.rawValue), Currently DarkStar is the only supported shadow mode.")
+            log.error("Attempted a DarkStarServerConnection with \(config.mode.rawValue), Currently DarkStar is the only supported shadow mode.")
             return nil
         }
         
         guard let serverPersistentPrivateKeyData = Data(hex: config.password) else
         {
-            logger.error("Failed to parse password from config.")
+            logger.error("DarkStarServerConnection: Failed to parse password from config.")
             return nil
         }
         
         guard let serverPersistentPrivateKey = try? P256.KeyAgreement.PrivateKey(rawRepresentation: serverPersistentPrivateKeyData) else
         {
-            logger.error("Failed to generate key from data.")
+            logger.error("DarkStarServerConnection: Failed to generate key from data.")
             return nil
         }
 
         guard let server = DarkStarServer(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection, bloomFilter: bloomFilter) else
         {
-            logger.error("Failed to init DarkStarServer")
+            logger.error("DarkStarServerConnection: Failed to init DarkStarServer")
             return nil
         }
 
         guard let eCipher = DarkStarCipher(key: server.serverToClientSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
         {
-            logger.error("Failed to create the encryption cipher.")
+            logger.error("DarkStarServerConnection: Failed to create the encryption cipher.")
             return nil
         }
         
         guard let dCipher = DarkStarCipher(key: server.clientToServerSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
         {
-            logger.error("Failed to create the decryption cipher.")
+            logger.error("DarkStarServerConnection: Failed to create the decryption cipher.")
             return nil
         }
 
@@ -148,7 +148,7 @@ open class DarkStarServerConnection: Transport.Connection
     {
         guard let updateHandler = stateUpdateHandler else
         {
-            log.info("Called start when there is no stateUpdateHandler.")
+            log.info("DarkStarServerConnection: Called start when there is no stateUpdateHandler.")
             return
         }
 
@@ -157,6 +157,8 @@ open class DarkStarServerConnection: Transport.Connection
 
     public func cancel()
     {
+        log.info("DarkStarServerConnection: Received a cancel request, closing the connection.")
+        
          network.close()
 
         if let stateUpdate = self.stateUpdateHandler
@@ -175,7 +177,7 @@ open class DarkStarServerConnection: Transport.Connection
     {
         guard let someData = content else
         {
-            log.debug("Shadow connection received a send command with no content.")
+            log.debug("DarkStarServerConnection: Shadow connection received a send command with nil content.")
             
             if isComplete // We're done, close the connection
             {
@@ -194,6 +196,8 @@ open class DarkStarServerConnection: Transport.Connection
         
         guard someData.count > 0 else
         {
+            log.error("DarkStarServerConnection: Shadow connection received a send command with no content.")
+            
             switch completion
             {
                 case .contentProcessed(let handler):
@@ -222,8 +226,10 @@ open class DarkStarServerConnection: Transport.Connection
         switch completion
         {
             case .contentProcessed(let handler):
-                if written { handler(nil) }
-                else { handler(NWError.posix(.EIO)) }
+                if written
+                { handler(nil) }
+                else
+                { handler(NWError.posix(.EIO)) }
                 return
             default:
                 return
@@ -250,13 +256,14 @@ open class DarkStarServerConnection: Transport.Connection
         // Nothing to decrypt
         guard let someData = maybeData else
         {
-            self.log.debug("Shadow receive called, but there was no data.")
+            log.error("DarkStarServerConnection: network.read returned nil.")
             completion(nil, .defaultMessage, false, NWError.posix(.ENODATA))
             return
         }
         
         guard let lengthData = self.decryptingCipher.unpack(encrypted: someData, expectedCiphertextLength: Cipher.lengthSize) else
         {
+            log.error("DarkStarServerConnection: decryption failure.")
             let _ = BlackHole(timeoutDelaySeconds: 30, socket: self)
             completion(maybeData, .defaultMessage, false, NWError.posix(POSIXErrorCode.EINVAL))
             return
@@ -266,7 +273,7 @@ open class DarkStarServerConnection: Transport.Connection
 
         guard let lengthUInt16 = lengthData.uint16 else
         {
-            self.log.error("Failed to get encrypted data's expected length. Length data could not be converted to UInt16")
+            log.error("DarkStarServerConnection: Failed to get encrypted data's expected length. Length data could not be converted to UInt16")
             completion(maybeData, .defaultMessage, false, NWError.posix(POSIXErrorCode.EINVAL))
             return
         }
@@ -288,7 +295,7 @@ open class DarkStarServerConnection: Transport.Connection
     {
         if let error = maybeError
         {
-            self.log.error("Shadow receive called, but we got an error: \(error)")
+            log.error("DarkStarServerConnection: shadowReceive error - \(error).")
             completion(maybeData, maybeContext, connectionComplete, error)
             return
         }
@@ -296,7 +303,7 @@ open class DarkStarServerConnection: Transport.Connection
         // Nothing to decrypt
         guard let someData = maybeData else
         {
-            self.log.debug("Shadow receive called, but there was no data.")
+            log.debug("DarkStarServerConnection: shadowReceive called with nil data.")
             
             if connectionComplete
             {
@@ -306,7 +313,7 @@ open class DarkStarServerConnection: Transport.Connection
             }
             else // This should never happen
             {
-                self.log.debug("We did not received any data but the connection is not complete.")
+                self.log.error("We did not received any data but the connection is not complete.")
                 completion(nil, maybeContext, connectionComplete, NWError.posix(.ENODATA))
                 return
             }
@@ -317,8 +324,9 @@ open class DarkStarServerConnection: Transport.Connection
         // Attempt to decrypt the data we received before passing it along
         guard let decrypted = dCipher.unpack(encrypted: someData, expectedCiphertextLength: payloadLength) else
         {
+            log.error("DarkStarServerConnection: shadowReceive decryption failure.")
+            
             let _ = BlackHole(timeoutDelaySeconds: 30, socket: self)
-            self.log.error("Shadow failed to decrypt received data.")
             completion(someData, maybeContext, connectionComplete, NWError.posix(POSIXErrorCode.EBADMSG))
             return
         }
@@ -338,7 +346,7 @@ open class DarkStarServerConnection: Transport.Connection
         let address = AddressReader().createAddr()
         guard let encryptedAddress = encryptingCipher.pack(plaintext: address) else
         {
-            self.log.error("Failed to encrypt our address. Cancelling connection.")
+            self.log.error("DarkStarServerConnection: Failed to encrypt our address. Cancelling connection.")
             network.close()
             
             if let actualStateUpdateHandler = self.stateUpdateHandler
@@ -369,6 +377,7 @@ open class DarkStarServerConnection: Transport.Connection
         }
         else
         {
+            self.log.error("DarkStarServerConnection: network.write Failed. Cancelling connection.")
             network.close()
             
             if let actualStateUpdateHandler = self.stateUpdateHandler

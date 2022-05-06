@@ -43,6 +43,7 @@ public struct DarkStar
     {
         guard let ecdh = try? myPrivateStaticKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else
         {
+            print("Darkstar: Failed to generate the shared secret.")
             return nil
         }
         
@@ -50,6 +51,7 @@ public struct DarkStar
 
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
         {
+            print("Darkstar: Failed to generate the server identifier.")
             return nil
         }
         
@@ -72,6 +74,7 @@ public struct DarkStar
     {
         guard let ecdh = try? myPrivateStaticKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else
         {
+            print("Darkstar: Failed to generate the shared secret.")
             return nil
         }
         
@@ -79,6 +82,7 @@ public struct DarkStar
 
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
         {
+            print("Darkstar: Failed to generate the server identifier.")
             return nil
         }
         
@@ -107,6 +111,7 @@ public struct DarkStar
 
         guard connection.write(data: myEphemeralPublicKeyData) else
         {
+            print("Darkstar.handleServerEphemeralKey: failed to write to the connection.")
             return nil
         }
 
@@ -118,6 +123,7 @@ public struct DarkStar
     {
         guard let myEphemeralPrivateKey = try? SecureEnclave.P256.KeyAgreement.PrivateKey() else
         {
+            print("Darkstar.handleClientEphemeralKey: failed to retrieve a private key.")
             return nil
         }
         
@@ -136,6 +142,7 @@ public struct DarkStar
     {
         guard let ecdh = try? myPrivateKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else
         {
+            print("Darkstar.generateClientConfirmationCode: failed to generate the shared secret.")
             return nil
         }
         
@@ -143,6 +150,7 @@ public struct DarkStar
 
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
         {
+            print("Darkstar.generateClientConfirmationCode: failed to write to the connection.")
             return nil
         }
         
@@ -166,6 +174,7 @@ public struct DarkStar
     {
         guard let myEphemeralPrivateKey = try? P256.KeyAgreement.PrivateKey() else
         {
+            print("Darkstar.handleClientEphemeralKey: failed to retrieve a private key.")
             return nil
         }
         
@@ -174,6 +183,7 @@ public struct DarkStar
 
         guard connection.write(data: myEphemeralPublicKeyData) else
         {
+            print("Darkstar.handleClientEphemeralKey: failed to write to the connection.")
             return nil
         }
 
@@ -184,6 +194,7 @@ public struct DarkStar
     {
         guard let ecdh = try? myPrivateKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else
         {
+            print("Darkstar.generateClientConfirmationCode: failed to generate the shared secret.")
             return nil
         }
         
@@ -191,6 +202,7 @@ public struct DarkStar
 
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
         {
+            print("Darkstar.generateClientConfirmationCode: failed to generate a serverIdentifier.")
             return nil
         }
         
@@ -217,6 +229,7 @@ public struct DarkStar
         // Receive their ephemeral key
         guard let theirEphemeralPublicKeyData = connection.read(size: P256KeySize) else
         {
+            print("Darkstar.handleTheirEphemeralPublicKey: failed to read from the connection.")
             return nil
         }
         
@@ -225,6 +238,7 @@ public struct DarkStar
             // See if theirEphemeralPublicKeyData is in the BloomFilter, return nil if it is.
             if serverBloomFilter.contains(theirEphemeralPublicKeyData)
             {
+                print("Darkstar.handleTheirEphemeralPublicKey: something look familiar...")
                 return nil
             }
             // If it's not in a BloomFilter, add it to the BloomFilter and Save the BloomFilter
@@ -249,6 +263,7 @@ public struct DarkStar
 
         guard let theirEphemeralPublicKey = try? P256.KeyAgreement.PublicKey(compactRepresentation: theirEphemeralPublicKeyData) else
         {
+            print("Darkstar.handleTheirEphemeralPublicKey: failed to convert received bytes to a valid key type.")
             return nil
         }
         
