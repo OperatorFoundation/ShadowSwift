@@ -132,6 +132,7 @@ public struct DarkStar
 
         guard connection.write(data: myEphemeralPublicKeyData) else
         {
+            print("Darkstar.handleClientEphemeralKey: failed to write the ephemeral key data to the connection.")
             return nil
         }
 

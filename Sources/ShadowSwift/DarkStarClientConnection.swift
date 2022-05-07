@@ -328,9 +328,10 @@ open class DarkStarClientConnection: Transport.Connection
         // Attempt to decrypt the data we received before passing it along
         guard let decrypted = dCipher.unpack(encrypted: someData, expectedCiphertextLength: payloadLength) else
         {
-            let _ = BlackHole(timeoutDelaySeconds: 30, socket: self)
-            self.log.error("Shadow failed to decrypt received data.")
-            completion(someData, maybeContext, connectionComplete, NWError.posix(POSIXErrorCode.EBADMSG))
+            self.log.error("ShadowSwift: client failed to decrypt received data. Closing the connection")
+            
+            cancel()
+            completion(nil, .defaultMessage, false, NWError.posix(POSIXErrorCode.EBADF))
             return
         }
         

@@ -40,15 +40,17 @@ class ShadowSwiftTests: XCTestCase
         let serverPublicKeyHex = "9caa4132c724f137c67928e9338c72cfe37e0dd28b298d14d5b5981effa038c9"
         
         // TODO: Enter your server IP and Port.
-        let shadowConfig = ShadowConfig(key: serverPublicKeyHex, serverIP: "164.92.71.230", port: 1234, mode: .DARKSTAR)
+        let shadowConfig = ShadowConfig(key: serverPublicKeyHex, serverIP: "", port: 1234, mode: .DARKSTAR)
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: self.logger)
         let httpRequestData = Data("GET / HTTP/1.0\r\nConnection: close\r\n\r\n")
+        print(">>>>>> Created a Shadow connection factory.")
         
         guard var shadowClientConnection = shadowFactory.connect(using: .tcp) else
         {
             XCTFail()
             return
         }
+        print(">>>>>> Created a Shadow Client connection .")
 
         shadowClientConnection.stateUpdateHandler =
         {
@@ -93,7 +95,10 @@ class ShadowSwiftTests: XCTestCase
                                         return
                                     }
                                     
-                                    print(">>>>>> shadowClientConnection received some data from the server: \(receivedData.string)")
+                                    let receivedString = receivedData.string
+                                    print(">>>>>> shadowClientConnection received some data from the server:\n\(receivedString)")
+                                    
+                                    XCTAssertTrue(receivedString.contains("Yeah!"))
                                     received.fulfill()
                                 }
                             }
@@ -813,7 +818,6 @@ class ShadowSwiftTests: XCTestCase
         }
     }
     
-    /// possible test?
-    // func testBlackHole()
+    // TODO: func testBlackHole()
 }
 
