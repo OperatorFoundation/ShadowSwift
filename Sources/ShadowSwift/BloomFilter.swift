@@ -45,11 +45,12 @@ public struct BloomFilter<filterData: Hashable>: Codable
         }
     }
     
-    /// This initializer will load a bloom filter if it already exists as a JSON file at the file path
-    /// Or it will create a new one and save it at that path
+    // This initializer will load a bloom filter if it already exists as a JSON file at the file path
+    // Or it will create a new one and save it at that path
     public init?(withFileAtPath filePath: String)
     {
-        if FileManager.default.fileExists(atPath: filePath) // If the file exists, load it
+        // If the file exists, load it
+        if FileManager.default.fileExists(atPath: filePath)
         {
             let jsonDecoder = JSONDecoder()
             let url = URL(fileURLWithPath: filePath)
@@ -67,7 +68,8 @@ public struct BloomFilter<filterData: Hashable>: Codable
             }
             
         }
-        else // Otherwise make a new one
+        // Otherwise make a new one
+        else
         {
             // instantiate a new bloom filter and save it
             self.init()
@@ -121,14 +123,16 @@ public struct BloomFilter<filterData: Hashable>: Codable
             var fileURL: URL
             var directoryURL: URL
             
-            if pathURL.isDirectory // filePath provided is a directory. Does not include filename
+            // filePath provided is a directory. Does not include filename
+            if pathURL.isDirectory
             {
                 // add a filename to the path provided for fileURL
                 fileURL = pathURL.appendingPathComponent("BloomFilter.json")
                 // filePath is a directory
                 directoryURL = pathURL
             }
-            else // filePath provided includes the filename
+            // filePath provided includes the filename
+            else
             {
                 // user provided the complete filePath
                 // save the URL version of this to fileURL
