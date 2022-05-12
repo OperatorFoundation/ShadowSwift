@@ -80,7 +80,6 @@ public class ShadowServer: Transmission.Listener
         guard let shadow = DarkStarServerConnection(connection: connection, endpoint: self.endpoint, parameters: .tcp, config: self.config, bloomFilter: self.bloomFilter, logger: self.log) else
         {
             log.error("ShadowServer.Error: incoming connection cannot be used to create a DarkStarServerConnection.")
-            
             throw ShadowServerError.darkStarConnectionError
         }
         

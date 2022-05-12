@@ -143,9 +143,7 @@ public class DarkStarServer
         }
 
         let persistentECDHData = DarkStar.sharedSecretToData(secret: persistentECDH)
-
         let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation!
-
         let serverEphemeralPublicKey = serverEphemeralPrivateKey.publicKey
         let serverEphemeralPublicKeyData = serverEphemeralPublicKey.compactRepresentation!
 
