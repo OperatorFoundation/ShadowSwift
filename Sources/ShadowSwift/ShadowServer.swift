@@ -15,20 +15,14 @@ import Transport
 
 public class ShadowServer: Transmission.Listener
 {
-    var bloomFilter: BloomFilter<Data>
-    
-    public func close()
-    {
-        listener.close()
-    }
-    
     let config: ShadowConfig
     var log: Logger
 
     let listener: Transmission.Listener
     let endpoint: NWEndpoint
+    let bloomFilterURL: URL
 
-    public init?(host: String, port: Int, config: ShadowConfig, logger: Logger)
+    public init?(host: String, port: Int, config: ShadowConfig, logger: Logger, bloomFilterURL: URL)
     {
         if host == "0.0.0.0"
         {
@@ -54,30 +48,27 @@ public class ShadowServer: Transmission.Listener
         }
         
         self.listener = listener
-        
+        self.bloomFilterURL = bloomFilterURL
+    }
+    
+    public convenience init?(host: String, port: Int, config: ShadowConfig, logger: Logger)
+    {
         guard let supportDirectoryURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else
         {
             logger.error("Failed to start the Shadow server: we could not get application support directory path.")
             return nil
         }
         
-        let bloomFilterURL = supportDirectoryURL.appendingPathComponent(bloomFilterFilename)
+        let bloomURL = supportDirectoryURL.appendingPathComponent(bloomFilterFilename)
         
-        // Load BloomFilter from file at start-up
-        guard let newBloomFilter = BloomFilter<Data>(withFileAtPath: bloomFilterURL.path) else
-        {
-            logger.error("Failed to initialize ShadowServer: Unable to create a BloomFilter with the file at \(bloomFilterURL)")
-            return nil
-        }
-        
-        self.bloomFilter = newBloomFilter
+        self.init(host: host, port: port, config: config, logger: logger, bloomFilterURL: bloomURL)
     }
 
     public func accept() throws -> Transmission.Connection
     {
         let connection = try self.listener.accept()
 
-        guard let shadow = DarkStarServerConnection(connection: connection, endpoint: self.endpoint, parameters: .tcp, config: self.config, bloomFilter: self.bloomFilter, logger: self.log) else
+        guard let shadow = DarkStarServerConnection(connection: connection, endpoint: self.endpoint, parameters: .tcp, config: self.config, logger: self.log, bloomFilterURL: self.bloomFilterURL) else
         {
             log.error("ShadowServer.Error: incoming connection cannot be used to create a DarkStarServerConnection.")
             throw ShadowServerError.darkStarConnectionError
@@ -90,6 +81,11 @@ public class ShadowServer: Transmission.Listener
         }
         
         return transmissionConnection
+    }
+    
+    public func close()
+    {
+        listener.close()
     }
     
     enum ShadowServerError: LocalizedError

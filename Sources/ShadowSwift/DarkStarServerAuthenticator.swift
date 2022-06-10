@@ -14,16 +14,84 @@ import SwiftHexTools
 import Transmission
 import TransmissionTransport
 
-public class DarkStarServer
+public class DarkStarServerAuthenticator
 {
     let serverToClientSharedKey: SymmetricKey
     let clientToServerSharedKey: SymmetricKey
+    
+    public init?(serverPersistentPrivateKey: P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint, connection: Connection, bloomFilter: BloomFilter<Data>)
+    {
+        let serverPersistentPublicKey = serverPersistentPrivateKey.publicKey
+
+        // Receive client ephemeral key
+        guard let clientEphemeralPublicKey = DarkStar.handleTheirEphemeralPublicKey(connection: connection, bloomFilter: bloomFilter) else
+        {
+            print("ShadowSwift: Failed to receive the client ephemeral key 🕳.")
+            let transport = TransmissionToTransportConnection({return connection})
+            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
+            
+            return nil
+        }
+
+        // Receive and validate client confirmation code
+        guard DarkStarServerAuthenticator.handleClientConfirmationCode(connection: connection, theirPublicKey: clientEphemeralPublicKey, myPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else
+        {
+            print("ShadowSwift: received an invalid client confirmation code 🕳.")
+            let transport = TransmissionToTransportConnection({return connection})
+            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
+            
+            return nil
+        }
+
+        // Send server ephemeral key
+        guard let (serverEphemeralPrivateKey, _) = DarkStar.handleServerEphemeralKey(connection: connection) else
+        {
+            print("ShadowSwift: Failed to send the server ephemeral key 🕳.")
+            let transport = TransmissionToTransportConnection({return connection})
+            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
+            
+            return nil
+        }
+
+        // Create shared key
+        guard let serverToClientSharedKey = DarkStarServerAuthenticator.createServerToClientSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: endpoint) else
+        {
+            print("ShadowSwift: Failed to create serverToClientSharedKey 🕳.")
+            let transport = TransmissionToTransportConnection({return connection})
+            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
+            
+            return nil
+        }
+        
+        self.serverToClientSharedKey = serverToClientSharedKey
+
+        guard let clientToServerSharedKey = DarkStarServerAuthenticator.createClientToServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: endpoint) else
+        {
+            print("ShadowSwift: Failed to create clientToServerSharedKey 🕳.")
+            let transport = TransmissionToTransportConnection({return connection})
+            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
+            
+            return nil
+        }
+        
+        self.clientToServerSharedKey = clientToServerSharedKey
+
+        // Send server confirmation code
+        guard DarkStarServerAuthenticator.handleServerConfirmationCode(connection: connection, endpoint: endpoint, serverStaticPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else
+        {
+            print("ShadowSwift: Failed to send the server confirmation code 🕳.")
+            let transport = TransmissionToTransportConnection({return connection})
+            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
+            
+            return nil
+        }
+    }
 
     static public func handleServerConfirmationCode(connection: Connection, endpoint: NWEndpoint, serverStaticPrivateKey: P256.KeyAgreement.PrivateKey, serverEphemeralPrivateKey: P256.KeyAgreement.PrivateKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Bool
     {
         guard let ecdh = try? serverStaticPrivateKey.sharedSecretFromKeyAgreement(with: clientEphemeralPublicKey) else
         {
-            print("DarkStarServer failed to generate a shared secret.")
+            print("DarkStarServerAuthenticator failed to generate a shared secret.")
             return false
         }
         
@@ -31,7 +99,7 @@ public class DarkStarServer
 
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
         {
-            print("DarkStarServer failed to generate the server identifier.")
+            print("DarkStarServerAuthenticator failed to generate the server identifier.")
             return false
         }
         
@@ -56,14 +124,14 @@ public class DarkStarServer
     {
         guard let data = connection.read(size: ConfirmationSize) else
         {
-            print("DarkStarServer failed to read confirmation data.")
+            print("DarkStarServerAuthenticator failed to read confirmation data.")
             return false
         }
 
         guard let code = generateClientConfirmationCode(connection: connection, theirPublicKey: theirPublicKey, myPrivateKey: myPrivateKey, endpoint: endpoint, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey)
         else
         {
-            print("DarkStarServer failed to generate a client confirmation code.")
+            print("DarkStarServerAuthenticator failed to generate a client confirmation code.")
             return false
         }
         
@@ -73,7 +141,7 @@ public class DarkStarServer
         }
         else
         {
-            print("DarkStarServer failed to confirm a client confirmation code.")
+            print("DarkStarServerAuthenticator failed to confirm a client confirmation code.")
             return false
         }
     }
@@ -82,7 +150,7 @@ public class DarkStarServer
     {
         guard let ecdh = try? myPrivateKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else
         {
-            print("DarkStarServer failed to generate a shared secret.")
+            print("DarkStarServerAuthenticator failed to generate a shared secret.")
             return nil
         }
         
@@ -90,19 +158,19 @@ public class DarkStarServer
         
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
         {
-            print("DarkStarServer failed to make a server identifier.")
+            print("DarkStarServerAuthenticator failed to make a server identifier.")
             return nil
         }
                         
         guard let serverPersistentPublicKeyData = serverPersistentPublicKey.compactRepresentation else
         {
-            print("DarkStarServer failed to get public key data.")
+            print("DarkStarServerAuthenticator failed to get public key data.")
             return nil
         }
                 
         guard let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation else
         {
-            print("DarkStarServer failed failed to create ephemeral public key data.")
+            print("DarkStarServerAuthenticator failed failed to create ephemeral public key data.")
             return nil
         }
         
@@ -169,71 +237,4 @@ public class DarkStarServer
     }
 
     // TODO: Logging
-    public init?(serverPersistentPrivateKey: P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint, connection: Connection, bloomFilter: BloomFilter<Data>)
-    {
-        let serverPersistentPublicKey = serverPersistentPrivateKey.publicKey
-
-        // Receive client ephemeral key
-        guard let clientEphemeralPublicKey = DarkStar.handleTheirEphemeralPublicKey(connection: connection, bloomFilter: bloomFilter) else
-        {
-            print("ShadowSwift: Failed to receive the client ephemeral key 🕳.")
-            let transport = TransmissionToTransportConnection({return connection})
-            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
-            
-            return nil
-        }
-
-        // Receive and validate client confirmation code
-        guard DarkStarServer.handleClientConfirmationCode(connection: connection, theirPublicKey: clientEphemeralPublicKey, myPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else
-        {
-            print("ShadowSwift: received an invalid client confirmation code 🕳.")
-            let transport = TransmissionToTransportConnection({return connection})
-            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
-            
-            return nil
-        }
-
-        // Send server ephemeral key
-        guard let (serverEphemeralPrivateKey, _) = DarkStar.handleServerEphemeralKey(connection: connection) else
-        {
-            print("ShadowSwift: Failed to send the server ephemeral key 🕳.")
-            let transport = TransmissionToTransportConnection({return connection})
-            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
-            
-            return nil
-        }
-
-        // Create shared key
-        guard let serverToClientSharedKey = DarkStarServer.createServerToClientSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: endpoint) else
-        {
-            print("ShadowSwift: Failed to create serverToClientSharedKey 🕳.")
-            let transport = TransmissionToTransportConnection({return connection})
-            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
-            
-            return nil
-        }
-        
-        self.serverToClientSharedKey = serverToClientSharedKey
-
-        guard let clientToServerSharedKey = DarkStarServer.createClientToServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: endpoint) else
-        {
-            print("ShadowSwift: Failed to create clientToServerSharedKey 🕳.")
-            let transport = TransmissionToTransportConnection({return connection})
-            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
-            
-            return nil
-        }
-        
-        self.clientToServerSharedKey = clientToServerSharedKey
-
-        // Send server confirmation code
-        guard DarkStarServer.handleServerConfirmationCode(connection: connection, endpoint: endpoint, serverStaticPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else
-        {
-            print("ShadowSwift: Failed to send the server confirmation code 🕳.")
-            let transport = TransmissionToTransportConnection({return connection})
-            let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
-            
-            return nil
-        }
-    }
 }

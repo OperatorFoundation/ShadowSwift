@@ -38,6 +38,8 @@ import Transport
 
 open class DarkStarServerConnection: Transport.Connection
 {
+    static var bloomFilter: BloomFilter<Data> = BloomFilter<Data>()
+    
     public var stateUpdateHandler: ((NWConnection.State) -> Void)?
     public var viabilityUpdateHandler: ((Bool) -> Void)?
     public var log: Logger
@@ -46,9 +48,8 @@ open class DarkStarServerConnection: Transport.Connection
     let encryptingCipher: DarkStarCipher
     var decryptingCipher: DarkStarCipher
     var network: Transmission.Connection
-    var bloomFilter: BloomFilter<Data>
 
-    public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig, bloomFilter: BloomFilter<Data>, logger: Logger)
+    public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig, logger: Logger)
     {
         #if os(macOS)
         // Only support Apple devices with secure enclave.
@@ -82,12 +83,39 @@ open class DarkStarServerConnection: Transport.Connection
             return nil
         }
         
-        self.init(connection: newConnection, endpoint: endpoint, parameters: parameters, config: config, bloomFilter: bloomFilter, logger: logger)
+        self.init(connection: newConnection, endpoint: endpoint, parameters: parameters, config: config, logger: logger)
+    }
+    
+    public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig, logger: Logger, bloomFilterURL: URL)
+    {
+        // Load BloomFilter from file at start-up
+        guard let newBloomFilter = BloomFilter<Data>(withFileAtPath: bloomFilterURL.path) else
+        {
+            logger.error("Failed to initialize DarkStarServerConnection: Unable to create a BloomFilter with the file at \(bloomFilterURL)")
+            return nil
+        }
+        
+        DarkStarServerConnection.bloomFilter = newBloomFilter
+        
+        self.init(host: host, port: port, parameters: parameters, config: config, logger: logger)
+    }
+    
+    public convenience init?(connection: Transmission.Connection, endpoint: NWEndpoint, parameters: NWParameters, config: ShadowConfig, logger: Logger, bloomFilterURL: URL)
+    {
+        // Load BloomFilter from file at start-up
+        guard let newBloomFilter = BloomFilter<Data>(withFileAtPath: bloomFilterURL.path) else
+        {
+            logger.error("Failed to initialize DarkStarServerConnection: Unable to create a BloomFilter with the file at \(bloomFilterURL)")
+            return nil
+        }
+        
+        DarkStarServerConnection.bloomFilter = newBloomFilter
+        
+        self.init(connection: connection, endpoint: endpoint, parameters: parameters, config: config, logger: logger)
     }
 
-    public init?(connection: Transmission.Connection, endpoint: NWEndpoint, parameters: NWParameters, config: ShadowConfig, bloomFilter: BloomFilter<Data>, logger: Logger)
+    public init?(connection: Transmission.Connection, endpoint: NWEndpoint, parameters: NWParameters, config: ShadowConfig, logger: Logger)
     {
-        self.bloomFilter = bloomFilter
         self.log = logger
 
         guard config.mode == .DARKSTAR else
@@ -108,19 +136,19 @@ open class DarkStarServerConnection: Transport.Connection
             return nil
         }
 
-        guard let server = DarkStarServer(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection, bloomFilter: bloomFilter) else
+        guard let authenticator = DarkStarServerAuthenticator(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection, bloomFilter: DarkStarServerConnection.bloomFilter) else
         {
             logger.error("ShadowSwift: DarkStarServerConnection init failed. The DarkStar handshake was unsuccessful.")
             return nil
         }
 
-        guard let eCipher = DarkStarCipher(key: server.serverToClientSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
+        guard let eCipher = DarkStarCipher(key: authenticator.serverToClientSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
         {
             logger.error("ShadowSwift: DarkStarServerConnection init failed. Unable to create the encryption cipher.")
             return nil
         }
         
-        guard let dCipher = DarkStarCipher(key: server.clientToServerSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
+        guard let dCipher = DarkStarCipher(key: authenticator.clientToServerSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
         {
             logger.error("ShadowSwift: DarkStarServerConnection init failed. unable to create the decryption cipher.")
             return nil

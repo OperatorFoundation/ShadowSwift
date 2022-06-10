@@ -234,22 +234,22 @@ public struct DarkStar
             return nil
         }
         
-        if var serverBloomFilter = bloomFilter // Server
+        if let bloomFilter = bloomFilter // Server
         {
             // See if theirEphemeralPublicKeyData is in the BloomFilter, return nil if it is.
-            if serverBloomFilter.contains(theirEphemeralPublicKeyData)
+            if bloomFilter.contains(theirEphemeralPublicKeyData)
             {
-                print("Darkstar.handleTheirEphemeralPublicKey: something look familiar...")
+                print("Darkstar.handleTheirEphemeralPublicKey: something looks familiar...")
                 return nil
             }
             // If it's not in a BloomFilter, add it to the BloomFilter and Save the BloomFilter
             else
             {
-                serverBloomFilter.insert(theirEphemeralPublicKeyData)
+                bloomFilter.insert(theirEphemeralPublicKeyData)
                 
-                if let bloomFilterURL = BloomFilter<Data>.getBloomFileURL()
+                if let bloomFilterURL = bloomFilter.getBloomFileURL()
                 {
-                    let filterSaved = serverBloomFilter.save(pathURL: bloomFilterURL)
+                    let filterSaved = bloomFilter.save(pathURL: bloomFilterURL)
                     if !filterSaved
                     {
                         print("Warning: Failed to save the updated BloomFilter")

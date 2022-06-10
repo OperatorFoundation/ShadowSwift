@@ -37,7 +37,7 @@ class ShadowSwiftTests: XCTestCase
         let received = XCTestExpectation(description: "Received")
         
         // TODO: Enter your server public key.
-        let serverPublicKeyHex = "9caa4132c724f137c67928e9338c72cfe37e0dd28b298d14d5b5981effa038c9"
+        let serverPublicKeyHex = ""
         
         // TODO: Enter your server IP and Port.
         let shadowConfig = ShadowConfig(key: serverPublicKeyHex, serverIP: "", port: 1234, mode: .DARKSTAR)
@@ -112,7 +112,7 @@ class ShadowSwiftTests: XCTestCase
         let queue2 = DispatchQueue(label: "Client")
         shadowClientConnection.start(queue: queue2)
         
-        wait(for: [ready, sent, received], timeout: 30)  // 30 seconds
+        wait(for: [ready, sent, received], timeout: 60)  // 30 seconds
     }
     
     
@@ -145,7 +145,7 @@ class ShadowSwiftTests: XCTestCase
 //        let host = NWEndpoint.Host(config.serverIP)
 //        let endpoint = NWEndpoint.hostPort(host: host, port: port!)
 //
-//        guard let server = DarkStarServer(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: ) else
+//        guard let server = DarkStarServerAuthenticator(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: ) else
 //        {
 //            XCTFail()
 //            return
@@ -790,7 +790,7 @@ class ShadowSwiftTests: XCTestCase
         let bloomFilterPath = supportDirectoryURL.appendingPathComponent("BloomFilter.json")
         
         // instantiate a bloom filter.
-        var bloomFilter = BloomFilter<Data>()
+        let bloomFilter = BloomFilter<Data>()
         
         // insert some data into the bloom filter.
         bloomFilter.insert(testData)
