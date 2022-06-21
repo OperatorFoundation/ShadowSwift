@@ -63,7 +63,7 @@ Shadowsocks is a fast, free, and open-source encrypted proxy project, used to ci
 
 ## Prerequisites
 
-The Swift programming language minimum version 5.5. If you are using a Linux system follow the instructions on swift.org to install Swift. If you are using macOS we reccomend that you install Xcode.
+The Swift programming language minimum version 5.6. If you are using a Linux system follow the instructions on swift.org to install Swift. If you are using macOS we recommend that you install Xcode.
 
 ## Using the Library
 
