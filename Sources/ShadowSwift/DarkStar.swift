@@ -265,7 +265,6 @@ public struct DarkStar
         guard let theirEphemeralPublicKey = try? P256.KeyAgreement.PublicKey(compactRepresentation: theirEphemeralPublicKeyData) else
         {
             print("Darkstar.handleTheirEphemeralPublicKey: failed to convert received bytes to a valid key type.")
-            print("badKey: \(theirEphemeralPublicKeyData.hex)")
             return nil
         }
         
