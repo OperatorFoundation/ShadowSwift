@@ -247,9 +247,9 @@ open class DarkStarClientConnection: Transport.Connection
         let maybeData = network.read(size: encryptedLengthSize)
         
         // Nothing to decrypt
-        guard let someData = maybeData else
+        guard let someData = maybeData, someData.count == (Cipher.lengthSize + Cipher.tagSize) else
         {
-            self.log.debug("Shadow receive called, but there was no data.")
+            self.log.debug("Shadow receive called, but there was no data, or the data was the wrong size.")
             completion(nil, .defaultMessage, false, NWError.posix(.ENODATA))
             return
         }

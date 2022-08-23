@@ -249,7 +249,7 @@ class DarkStarCipher
     {
         guard encrypted.count == expectedCiphertextLength + Cipher.tagSize else
         {
-            log.error("Attempted to unpack data of the wrong size.")
+            log.error("\nAttempted to unpack data of the wrong size. Encrypted data size: \(encrypted.count)")
             return nil
         }
         
