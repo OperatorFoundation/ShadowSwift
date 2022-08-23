@@ -247,6 +247,12 @@ class DarkStarCipher
 
     func unpack(encrypted: Data, expectedCiphertextLength: Int) -> Data?
     {
+        guard encrypted.count == expectedCiphertextLength + Cipher.tagSize else
+        {
+            log.error("Attempted to unpack data of the wrong size.")
+            return nil
+        }
+        
         let ciphertext = Data(encrypted[0..<expectedCiphertextLength])
         let tag = Data(encrypted[expectedCiphertextLength...])
 
