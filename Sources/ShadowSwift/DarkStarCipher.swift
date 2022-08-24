@@ -202,7 +202,7 @@ class DarkStarCipher
 
         guard payloadLength <= Cipher.maxPayloadSize else
         {
-            log.error("Requested payload size \(plaintext.count) is greater than the maximum allowed \(Cipher.maxPayloadSize). Unable to send payload.")
+            log.error("\nDarkStarCipher - Requested payload size \(plaintext.count) is greater than the maximum allowed \(Cipher.maxPayloadSize). Unable to send payload.")
             return nil
         }
 
@@ -229,7 +229,7 @@ class DarkStarCipher
         {
             guard let nonce = self.encryptNonce else
             {
-                log.error("Failed to encrypt, nonce is nil.")
+                log.error("\nDarkStarCipher - Failed to encrypt, nonce is nil.")
                 return nil
             }
             
@@ -239,7 +239,7 @@ class DarkStarCipher
         }
         catch let encryptError
         {
-            log.error("Error running AESGCM encryption: \(encryptError)")
+            log.error("\nDarkStarCipher - Error running AESGCM encryption: \(encryptError)")
         }
 
         return (cipherText, tag)
@@ -249,7 +249,7 @@ class DarkStarCipher
     {
         guard encrypted.count == expectedCiphertextLength + Cipher.tagSize else
         {
-            log.error("\nAttempted to unpack data of the wrong size. Encrypted data size: \(encrypted.count)")
+            log.error("\nDarkStarCipher - Attempted to unpack data of the wrong size. Encrypted data size: \(encrypted.count)")
             return nil
         }
         
@@ -259,7 +259,7 @@ class DarkStarCipher
         // Quality Check
         guard tag.count == Cipher.tagSize else
         {
-            log.error("Attempted to decrypt a message with an incorrect tag size. \nGot:  \(tag.count)\nExpected: \(Cipher.tagSize)")
+            log.error("\nDarkStarCipher - Attempted to decrypt a message with an incorrect tag size. \nGot:  \(tag.count)\nExpected: \(Cipher.tagSize)")
             return nil
         }
 
@@ -272,7 +272,7 @@ class DarkStarCipher
         {
             guard let nonce = self.decryptNonce else
             {
-                log.error("DarkStarCipher failed to decrypt the nonce.")
+                log.error("\nDarkStarCipher - failed to decrypt the nonce.")
                 return nil
             }
             
@@ -283,7 +283,7 @@ class DarkStarCipher
         }
         catch let decryptError
         {
-            log.error("Error running AESGCM decryption: \(decryptError.localizedDescription)")
+            log.error("\nDarkStarCipher - Error running AESGCM decryption: \(decryptError.localizedDescription)")
             return nil
         }
     }
