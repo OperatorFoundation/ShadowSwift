@@ -48,6 +48,7 @@ open class DarkStarServerConnection: Transport.Connection
     let encryptingCipher: DarkStarCipher
     var decryptingCipher: DarkStarCipher
     var network: Transmission.Connection
+    var networkClosed = false
 
     public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig, logger: Logger)
     {
@@ -185,18 +186,22 @@ open class DarkStarServerConnection: Transport.Connection
 
     public func cancel()
     {
-        log.info("ShadowSwift: DarkStarServerConnection received a cancel request, closing the connection.")
-        
-         network.close()
-
-        if let stateUpdate = self.stateUpdateHandler
+        if !networkClosed
         {
-            stateUpdate(NWConnection.State.cancelled)
-        }
+            log.info("ShadowSwift: DarkStarServerConnection received a cancel request, closing the connection.")
+            
+            if let stateUpdate = self.stateUpdateHandler
+            {
+                stateUpdate(NWConnection.State.cancelled)
+            }
 
-        if let viabilityUpdate = self.viabilityUpdateHandler
-        {
-            viabilityUpdate(false)
+            if let viabilityUpdate = self.viabilityUpdateHandler
+            {
+                viabilityUpdate(false)
+            }
+            
+            network.close()
+            networkClosed = true
         }
     }
 
