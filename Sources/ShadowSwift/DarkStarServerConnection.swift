@@ -188,6 +188,7 @@ open class DarkStarServerConnection: Transport.Connection
     {
         if !networkClosed
         {
+            networkClosed = true
             log.info("ShadowSwift: DarkStarServerConnection received a cancel request, closing the connection.")
             
             if let stateUpdate = self.stateUpdateHandler
@@ -201,7 +202,6 @@ open class DarkStarServerConnection: Transport.Connection
             }
             
             network.close()
-            networkClosed = true
         }
     }
 
