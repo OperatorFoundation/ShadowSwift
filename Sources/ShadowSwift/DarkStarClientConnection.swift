@@ -46,6 +46,7 @@ open class DarkStarClientConnection: Transport.Connection
     let encryptingCipher: DarkStarCipher
     var decryptingCipher: DarkStarCipher
     var network: Transmission.Connection
+    var networkClosed = false
 
     public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig, logger: Logger)
     {
@@ -156,16 +157,21 @@ open class DarkStarClientConnection: Transport.Connection
 
     public func cancel()
     {
-         network.close()
-
-        if let stateUpdate = self.stateUpdateHandler
+         if !networkClosed
         {
-            stateUpdate(NWConnection.State.cancelled)
-        }
+             networkClosed = true
+             
+             if let stateUpdate = self.stateUpdateHandler
+             {
+                 stateUpdate(.cancelled)
+             }
 
-        if let viabilityUpdate = self.viabilityUpdateHandler
-        {
-            viabilityUpdate(false)
+             if let viabilityUpdate = self.viabilityUpdateHandler
+             {
+                 viabilityUpdate(false)
+             }
+             
+             network.close()
         }
     }
 
@@ -178,7 +184,7 @@ open class DarkStarClientConnection: Transport.Connection
             
             if isComplete // We're done, close the connection
             {
-                network.close()
+                cancel()
             }
             
             switch completion
@@ -318,7 +324,7 @@ open class DarkStarClientConnection: Transport.Connection
             
             if connectionComplete
             {
-                network.close()
+                cancel()
                 completion(nil, maybeContext, connectionComplete, nil)
                 return
             }
@@ -344,7 +350,7 @@ open class DarkStarClientConnection: Transport.Connection
         
         if connectionComplete
         {
-            network.close()
+            cancel()
         }
         
         completion(decrypted, maybeContext, false, nil)
@@ -358,7 +364,7 @@ open class DarkStarClientConnection: Transport.Connection
         guard let encryptedAddress = encryptingCipher.pack(plaintext: address) else
         {
             self.log.error("Failed to encrypt our address. Cancelling connection.")
-            network.close()
+            
             
             if let actualStateUpdateHandler = self.stateUpdateHandler
             {
@@ -369,7 +375,9 @@ open class DarkStarClientConnection: Transport.Connection
             {
                 actualViabilityUpdateHandler(false)
             }
-
+            
+            cancel()
+            
             return
         }
 
@@ -388,8 +396,6 @@ open class DarkStarClientConnection: Transport.Connection
         }
         else
         {
-            network.close()
-            
             if let actualStateUpdateHandler = self.stateUpdateHandler
             {
                 actualStateUpdateHandler(.cancelled)
@@ -399,6 +405,8 @@ open class DarkStarClientConnection: Transport.Connection
             {
                 actualViabilityUpdateHandler(false)
             }
+            
+            cancel()
         }
     }
 }
