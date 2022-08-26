@@ -86,6 +86,7 @@ open class DarkStarRetryingClientConnection: Transport.Connection
     }
     
     var network: DarkStarClientConnection
+    var networkClosed = false
 
     public init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig, logger: Logger)
     {
@@ -107,7 +108,11 @@ open class DarkStarRetryingClientConnection: Transport.Connection
 
     public func cancel()
     {
-        network.cancel()
+        if !networkClosed
+        {
+            networkClosed = true
+            network.cancel()
+        }
     }
 
     /// Gets content and encrypts it before passing it along to the network
