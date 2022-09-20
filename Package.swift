@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "ShadowSwift",
     platforms: [
-        .macOS(.v10_15),
+        .macOS(.v12),
         .iOS(.v15)
     ],
     products: [
@@ -17,13 +17,14 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/OperatorFoundation/Chord.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Datable.git", branch: "main"),
-        .package(url: "https://github.com/apple/swift-log.git", from: "1.4.2"),
+        .package(url: "https://github.com/OperatorFoundation/Net.git", branch: "main"),
+        .package(url: "https://github.com/OperatorFoundation/Straw.git", branch: "main"),
+        .package(url: "https://github.com/apple/swift-crypto", from: "2.0.0"),
         .package(url: "https://github.com/OperatorFoundation/SwiftHexTools.git", branch: "main"),
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.4.2"),
         .package(url: "https://github.com/OperatorFoundation/Transmission.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/TransmissionTransport.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Transport.git", from: "2.3.12"),
-        .package(url: "https://github.com/apple/swift-crypto", from: "2.0.0"),
-        .package(url: "https://github.com/OperatorFoundation/Net.git", branch: "main"),
     ],
     targets: [
         .target(
@@ -32,6 +33,7 @@ let package = Package(
                 "Net",
                 "Chord",
                 "Datable",
+                "Straw",
                 "Transmission",
                 "TransmissionTransport",
                 "Transport",
