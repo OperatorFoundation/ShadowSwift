@@ -79,7 +79,7 @@ public struct ShadowConfig: Codable
         return (serverConfig, clientConfig)
     }
     
-    public static func createNewConfigPairFiles(inDirectory saveDirectory: URL, serverIP: String, serverPort: UInt16) -> (saved: Bool, error: Error?)
+    public static func createNewConfigFiles(inDirectory saveDirectory: URL, serverIP: String, serverPort: UInt16) -> (saved: Bool, error: Error?)
     {
         guard saveDirectory.isDirectory else
         {
