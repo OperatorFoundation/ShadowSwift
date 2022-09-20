@@ -140,28 +140,6 @@ class ShadowSwiftTests: XCTestCase
             XCTFail()
             return
         }
-        
-//        let port = NWEndpoint.Port(rawValue: config.port)
-//        let host = NWEndpoint.Host(config.serverIP)
-//        let endpoint = NWEndpoint.hostPort(host: host, port: port!)
-//
-//        guard let server = DarkStarServerAuthenticator(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: ) else
-//        {
-//            XCTFail()
-//            return
-//        }
-//
-//        guard let eCipher = DarkStarCipher(key: server.serverToClientSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
-//        {
-//            XCTFail()
-//            return
-//        }
-//
-//        guard let dCipher = DarkStarCipher(key: server.clientToServerSharedKey, endpoint: endpoint, isServerConnection: true, logger: logger) else
-//        {
-//            XCTFail()
-//            return
-//        }
     }
     
     func testShadowConnection()
@@ -400,7 +378,7 @@ class ShadowSwiftTests: XCTestCase
             return
         }
         
-        let shadowConfig = ShadowConfig(key: "d089c225ef8cda8d477a586f062b31a756270124d94944e458edf1a9e1e41ed6", serverIP: testIPString, port: testPort, mode: .DARKSTAR)
+        let shadowConfig = ShadowConfig(key: "", serverIP: testIPString, port: testPort, mode: .DARKSTAR)
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
         
         guard var shadowConnection = shadowFactory.connect(using: .tcp)
@@ -604,7 +582,7 @@ class ShadowSwiftTests: XCTestCase
     
     func testJSONConfig()
     {
-        let shadowConfig = ShadowConfig(key: "d089c225ef8cda8d477a586f062b31a756270124d94944e458edf1a9e1e41ed6", serverIP: testIPString, port: testPort, mode: .DARKSTAR)
+        let shadowConfig = ShadowConfig(key: "", serverIP: testIPString, port: testPort, mode: .DARKSTAR)
         let encoder = JSONEncoder()
         let json = try? encoder.encode(shadowConfig)
         
