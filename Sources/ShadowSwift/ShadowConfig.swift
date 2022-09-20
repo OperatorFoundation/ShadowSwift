@@ -60,7 +60,7 @@ public struct ShadowConfig: Codable
         }        
     }
     
-    static func generateNewConfigPair(serverIP: String, serverPort: UInt16) -> (serverConfig: ShadowConfig, clientConfig: ShadowConfig)
+    static func generateNewConfigPair(serverIP: String, serverPort: UInt16, cipher: CipherMode) -> (serverConfig: ShadowConfig, clientConfig: ShadowConfig)
     {
         let privateKey = P256.KeyAgreement.PrivateKey()
         let privateKeyData = privateKey.rawRepresentation
@@ -73,20 +73,20 @@ public struct ShadowConfig: Codable
         print("Server Key: \(privateKeyHex)")
         print("Client Key: \(publicKeyHex)")
         
-        let serverConfig = ShadowConfig(key: privateKeyHex, serverIP: serverIP, port: serverPort, mode: .DARKSTAR)
-        let clientConfig = ShadowConfig(key: publicKeyHex, serverIP: serverIP, port: serverPort, mode: .DARKSTAR)
+        let serverConfig = ShadowConfig(key: privateKeyHex, serverIP: serverIP, port: serverPort, mode: cipher)
+        let clientConfig = ShadowConfig(key: publicKeyHex, serverIP: serverIP, port: serverPort, mode: cipher)
         
         return (serverConfig, clientConfig)
     }
     
-    public static func createNewConfigFiles(inDirectory saveDirectory: URL, serverIP: String, serverPort: UInt16) -> (saved: Bool, error: Error?)
+    public static func createNewConfigFiles(inDirectory saveDirectory: URL, serverIP: String, serverPort: UInt16, cipher: CipherMode) -> (saved: Bool, error: Error?)
     {
         guard saveDirectory.isDirectory else
         {
             return(false, ShadowConfigError.urlIsNotDirectory)
         }
         
-        let configPair = ShadowConfig.generateNewConfigPair(serverIP: serverIP, serverPort: serverPort)
+        let configPair = ShadowConfig.generateNewConfigPair(serverIP: serverIP, serverPort: serverPort, cipher: cipher)
         let encoder = JSONEncoder()
         
         do
