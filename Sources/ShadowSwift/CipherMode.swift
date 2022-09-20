@@ -24,6 +24,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+ 
+import ArgumentParser
 import Crypto
 import Foundation
 import Logging
@@ -52,7 +54,7 @@ class Cipher
     }
 }
 
-public enum CipherMode: String, Codable
+public enum CipherMode: String, Codable, ExpressibleByArgument
 {
     // Old cipher modes were removed due to lack of security
 
