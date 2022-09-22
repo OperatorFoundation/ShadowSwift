@@ -59,13 +59,7 @@ class ShadowTransmissionClientConnection: Transmission.Connection
         }
         
         let endpointHost = NWEndpoint.Host.ipv4(ipvHost)
-        
-        guard let endpointPort = NWEndpoint.Port(rawValue: UInt16(port)) else
-        {
-            log.error("\nDarkStarClientConnection - unable to resolve \(port) as a valid port.")
-            return nil
-        }
-        
+        let endpointPort = NWEndpoint.Port(integerLiteral: UInt16(port))
         let endpoint = NWEndpoint.hostPort(host: endpointHost, port: endpointPort)
 
         guard config.mode == .DARKSTAR else
