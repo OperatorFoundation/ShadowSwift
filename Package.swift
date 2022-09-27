@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "ShadowSwift",
     platforms: [
-        .macOS(.v10_10),
+        .macOS(.v12),
         .iOS(.v15)
     ],
     products: [
