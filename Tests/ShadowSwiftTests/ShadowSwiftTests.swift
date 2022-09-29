@@ -580,6 +580,30 @@ class ShadowSwiftTests: XCTestCase
         }
     }
     
+    func testCreateNewConfigPair()
+    {
+        let saveDirectory = FileManager.default.homeDirectoryForCurrentUser
+        let result = ShadowConfig.createNewConfigFiles(inDirectory: saveDirectory, serverIP: "127.0.0.1", serverPort: 000, cipher: .DARKSTAR)
+        
+        if result.saved
+        {
+            print("New config files have been saved to \(saveDirectory)")
+        }
+        else
+        {
+            if let error = result.error
+            {
+                print("Failed to create or save new a new ShadowConfig pair. Error: \(error)")
+            }
+            else
+            {
+                print("Failed to create or save new a new ShadowConfig pair. No error information was provided.")
+            }
+            
+            XCTFail()
+        }
+    }
+    
     func testJSONConfig()
     {
         let shadowConfig = ShadowConfig(key: "", serverIP: testIPString, port: testPort, mode: .DARKSTAR)
