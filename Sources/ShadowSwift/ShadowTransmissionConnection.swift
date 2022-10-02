@@ -18,7 +18,7 @@ import Transport
 import Straw
 
 // TODO: FIX THE LOG MESSAGES
-class ShadowTransmissionClientConnection: Transmission.Connection
+public class ShadowTransmissionClientConnection: Transmission.Connection
 {
     public var viabilityUpdateHandler: ((Bool) -> Void)?
     public var log: Logger
