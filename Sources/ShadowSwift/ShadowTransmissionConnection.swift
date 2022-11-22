@@ -123,6 +123,26 @@ public class ShadowTransmissionClientConnection: Transmission.Connection
             return nil
         }
     }
+
+    public func unsafeRead(size: Int) -> Data?
+    {
+        while strawBuffer.count < size
+        {
+            guard networkRead() else
+            {
+                return nil
+            }
+        }
+
+        do
+        {
+            return try self.strawBuffer.read(size: size)
+        }
+        catch
+        {
+            return nil
+        }
+    }
     
     public func read(maxSize: Int) -> Data?
     {
