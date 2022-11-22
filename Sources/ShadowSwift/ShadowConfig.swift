@@ -60,7 +60,7 @@ public struct ShadowConfig: Codable
         }        
     }
     
-    static func generateNewConfigPair(serverIP: String, serverPort: UInt16, cipher: CipherMode) -> (serverConfig: ShadowConfig, clientConfig: ShadowConfig)
+    public static func generateNewConfigPair(serverIP: String, serverPort: UInt16, cipher: CipherMode) -> (serverConfig: ShadowConfig, clientConfig: ShadowConfig)
     {
         let privateKey = P256.KeyAgreement.PrivateKey()
         let privateKeyData = privateKey.rawRepresentation

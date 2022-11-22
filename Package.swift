@@ -16,7 +16,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser.git", exact: "1.0.3"),
-        .package(url: "https://github.com/apple/swift-crypto", from: "2.0.0"),
+        .package(url: "https://github.com/apple/swift-crypto", from: "2.1.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.4.2"),
         .package(url: "https://github.com/OperatorFoundation/Chord.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Datable.git", branch: "main"),

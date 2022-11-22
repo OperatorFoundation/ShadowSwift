@@ -209,7 +209,7 @@ public class BloomFilter<filterData: Hashable>: Codable
 
 extension URL
 {
-    var isDirectory: Bool
+    public var isDirectory: Bool
     {
         (try? resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true
     }
