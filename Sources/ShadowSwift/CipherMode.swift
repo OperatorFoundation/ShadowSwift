@@ -58,6 +58,6 @@ public enum CipherMode: String, Codable, ExpressibleByArgument
     // Old cipher modes were removed due to lack of security
 
     // New cipher modes
-    case DARKSTAR = "DarkStar"
+    case DARKSTAR = "darkstar"
 }
 

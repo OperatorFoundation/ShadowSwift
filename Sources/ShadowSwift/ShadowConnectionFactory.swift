@@ -36,65 +36,66 @@ open class ShadowConnectionFactory: ConnectionFactory
     var log: Logger
     
     public var name = "Shadow"
-    public var config: ShadowConfig
+    public var config: ShadowConfig.ShadowClientConfig
     public var connection: Connection?
     public var host: NWEndpoint.Host?
     public var port: NWEndpoint.Port?
 
-    public init(config: ShadowConfig, logger: Logger)
+    public init(config: ShadowConfig.ShadowClientConfig, logger: Logger)
     {
-        self.host = NWEndpoint.Host(config.serverIP)
-        self.port = NWEndpoint.Port(rawValue: config.port)
+        var addressArray = config.serverAddress.split(separator: ":")
+        self.host = NWEndpoint.Host(addressArray[0].base)
+        self.port = NWEndpoint.Port(rawValue: addressArray[1].base.uint16)
         self.config = config
         self.log = logger
     }
 
-    public convenience init?(url: URL, serverid: UUID, logger: Logger)
-    {
-        guard let jsonConfig = JsonConfig(url: url) else
-        {
-            return nil
-        }
-        
-        self.init(jsonConfig: jsonConfig, serverid: serverid, logger: logger)
-    }
-
-    public convenience init?(path: String, serverid: UUID, logger: Logger)
-    {
-        guard let jsonConfig = JsonConfig(path: path) else
-        {
-            return nil
-        }
-        
-        self.init(jsonConfig: jsonConfig, serverid: serverid, logger: logger)
-    }
-
-    init?(jsonConfig: JsonConfig, serverid: UUID, logger: Logger)
-    {
-        self.log = logger
-
-        let maybeServerConfig = jsonConfig.servers.first
-        {
-            (config: ServerConfig) -> Bool in
-
-            return config.id == serverid.uuidString
-        }
-        
-        guard let serverConfig = maybeServerConfig else
-        {
-            return nil
-        }
-        
-        guard let shadowConfig = serverConfig.shadowConfig else
-        {
-            return nil
-        }
-        
-        self.config = shadowConfig
-
-        self.host = NWEndpoint.Host(serverConfig.server)
-        self.port = NWEndpoint.Port(integerLiteral: UInt16(serverConfig.server_port))
-    }
+//    public convenience init?(url: URL, serverid: UUID, logger: Logger)
+//    {
+//        guard let jsonConfig = JsonConfig(url: url) else
+//        {
+//            return nil
+//        }
+//
+//        self.init(jsonConfig: jsonConfig, serverid: serverid, logger: logger)
+//    }
+//
+//    public convenience init?(path: String, serverid: UUID, logger: Logger)
+//    {
+//        guard let jsonConfig = JsonConfig(path: path) else
+//        {
+//            return nil
+//        }
+//
+//        self.init(jsonConfig: jsonConfig, serverid: serverid, logger: logger)
+//    }
+//
+//    init?(jsonConfig: JsonConfig, serverid: UUID, logger: Logger)
+//    {
+//        self.log = logger
+//
+//        let maybeServerConfig = jsonConfig.servers.first
+//        {
+//            (config: ServerConfig) -> Bool in
+//
+//            return config.id == serverid.uuidString
+//        }
+//
+//        guard let serverConfig = maybeServerConfig else
+//        {
+//            return nil
+//        }
+//
+//        guard let shadowConfig = serverConfig.shadowConfig else
+//        {
+//            return nil
+//        }
+//
+//        self.config = ShadowConfig.ShadowServerConfig
+//
+//        self.host = NWEndpoint.Host(serverConfig.server)
+//        self.port = NWEndpoint.Port(integerLiteral: UInt16(serverConfig.server_port))
+//    }
     
     public func connect(using parameters: NWParameters) -> Connection?
     {

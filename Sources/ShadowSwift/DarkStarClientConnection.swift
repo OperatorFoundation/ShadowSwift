@@ -47,7 +47,7 @@ open class DarkStarClientConnection: Transport.Connection
     var network: Transmission.Connection
     var networkClosed = false
 
-    public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig, logger: Logger)
+    public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig.ShadowClientConfig, logger: Logger)
     {
         #if os(macOS)
         // Only support Apple devices with secure enclave.
@@ -85,7 +85,7 @@ open class DarkStarClientConnection: Transport.Connection
         self.init(connection: newConnection, endpoint: endpoint, parameters: parameters, config: config, logger: logger)
     }
 
-    public init?(connection: Transmission.Connection, endpoint: NWEndpoint, parameters: NWParameters, config: ShadowConfig, logger: Logger)
+    public init?(connection: Transmission.Connection, endpoint: NWEndpoint, parameters: NWParameters, config: ShadowConfig.ShadowClientConfig, logger: Logger)
     {
         self.log = logger
 
@@ -95,7 +95,7 @@ open class DarkStarClientConnection: Transport.Connection
             return nil
         }
         
-        guard let serverPersistentPublicKeyData = Data(base64Encoded: config.password) else
+        guard let serverPersistentPublicKeyData = Data(base64Encoded: config.serverPublicKey) else
         {
             log.error("\nDarkStarClientConnection - failed to decode password as base64.")
             return nil

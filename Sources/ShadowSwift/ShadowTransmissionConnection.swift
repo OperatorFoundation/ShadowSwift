@@ -29,7 +29,7 @@ public class ShadowTransmissionClientConnection: Transmission.Connection
     var networkClosed = false
     var strawBuffer = Straw()
     
-    public convenience init?(host: String, port: Int, config: ShadowConfig, logger: Logger)
+    public convenience init?(host: String, port: Int, config: ShadowConfig.ShadowClientConfig, logger: Logger)
     {
         #if os(macOS)
         // Only support Apple devices with secure enclave.
@@ -48,7 +48,7 @@ public class ShadowTransmissionClientConnection: Transmission.Connection
         self.init(connection: newConnection, host: host, port: port, config: config, logger: logger)
     }
 
-    public init?(connection: Transmission.Connection, host: String, port: Int, config: ShadowConfig, logger: Logger)
+    public init?(connection: Transmission.Connection, host: String, port: Int, config: ShadowConfig.ShadowClientConfig, logger: Logger)
     {
         self.log = logger
         guard let ipvHost = IPv4Address(host) else
@@ -67,7 +67,7 @@ public class ShadowTransmissionClientConnection: Transmission.Connection
             return nil
         }
         
-        guard let serverPersistentPublicKeyData = Data(base64Encoded: config.password) else
+        guard let serverPersistentPublicKeyData = Data(base64Encoded: config.serverPublicKey) else
         {
             log.error("\nDarkStarClientConnection - failed to decode password as base64.")
             return nil

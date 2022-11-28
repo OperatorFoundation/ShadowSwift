@@ -49,7 +49,7 @@ open class DarkStarServerConnection: Transport.Connection
     var network: Transmission.Connection
     var networkClosed = false
 
-    public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig, logger: Logger)
+    public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig.ShadowServerConfig, logger: Logger)
     {
         #if os(macOS)
         // Only support Apple devices with secure enclave.
@@ -86,7 +86,7 @@ open class DarkStarServerConnection: Transport.Connection
         self.init(connection: newConnection, endpoint: endpoint, parameters: parameters, config: config, logger: logger)
     }
     
-    public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig, logger: Logger, bloomFilterURL: URL)
+    public convenience init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig.ShadowServerConfig, logger: Logger, bloomFilterURL: URL)
     {
         // Load BloomFilter from file at start-up
         guard let newBloomFilter = BloomFilter<Data>(withFileAtPath: bloomFilterURL.path) else
@@ -100,7 +100,7 @@ open class DarkStarServerConnection: Transport.Connection
         self.init(host: host, port: port, parameters: parameters, config: config, logger: logger)
     }
     
-    public convenience init?(connection: Transmission.Connection, endpoint: NWEndpoint, parameters: NWParameters, config: ShadowConfig, logger: Logger, bloomFilterURL: URL)
+    public convenience init?(connection: Transmission.Connection, endpoint: NWEndpoint, parameters: NWParameters, config: ShadowConfig.ShadowServerConfig, logger: Logger, bloomFilterURL: URL)
     {
         // Load BloomFilter from file at start-up
         guard let newBloomFilter = BloomFilter<Data>(withFileAtPath: bloomFilterURL.path) else
@@ -114,7 +114,7 @@ open class DarkStarServerConnection: Transport.Connection
         self.init(connection: connection, endpoint: endpoint, parameters: parameters, config: config, logger: logger)
     }
 
-    public init?(connection: Transmission.Connection, endpoint: NWEndpoint, parameters: NWParameters, config: ShadowConfig, logger: Logger)
+    public init?(connection: Transmission.Connection, endpoint: NWEndpoint, parameters: NWParameters, config: ShadowConfig.ShadowServerConfig, logger: Logger)
     {
         self.log = logger
 
@@ -124,7 +124,7 @@ open class DarkStarServerConnection: Transport.Connection
             return nil
         }
         
-        guard let serverPersistentPrivateKeyData = Data(base64Encoded: config.password) else
+        guard let serverPersistentPrivateKeyData = Data(base64Encoded: config.serverPrivateKey) else
         {
             logger.error("ShadowSwift: DarkStarServerConnection init failed. Unable to parse the config password.")
             return nil

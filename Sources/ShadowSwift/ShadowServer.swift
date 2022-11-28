@@ -15,14 +15,14 @@ import Transport
 
 public class ShadowServer: Transmission.Listener
 {
-    let config: ShadowConfig
+    let config: ShadowConfig.ShadowServerConfig
     var log: Logger
 
     let listener: Transmission.Listener
     let endpoint: NWEndpoint
     let bloomFilterURL: URL
 
-    public init?(host: String, port: Int, config: ShadowConfig, logger: Logger, bloomFilterURL: URL)
+    public init?(host: String, port: Int, config: ShadowConfig.ShadowServerConfig, logger: Logger, bloomFilterURL: URL)
     {
         if host == "0.0.0.0"
         {
@@ -51,7 +51,7 @@ public class ShadowServer: Transmission.Listener
         self.bloomFilterURL = bloomFilterURL
     }
     
-    public convenience init?(host: String, port: Int, config: ShadowConfig, logger: Logger)
+    public convenience init?(host: String, port: Int, config: ShadowConfig.ShadowServerConfig, logger: Logger)
     {
         guard let supportDirectoryURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else
         {

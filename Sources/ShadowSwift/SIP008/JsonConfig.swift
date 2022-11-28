@@ -94,9 +94,9 @@ extension JsonConfig
 
 extension ServerConfig
 {
-    public var shadowConfig: ShadowConfig?
+    public var shadowConfig: ShadowConfig.ShadowServerConfig?
     {
         guard let mode = CipherMode(rawValue: self.method) else {return nil}
-        return ShadowConfig(key: self.password, serverIP: server, port: server_port, mode: mode)
+        return ShadowConfig.ShadowServerConfig(serverAddress: "\(server):\(server_port)", serverPrivateKey: self.password, mode: mode, transport: "shadow")
     }
 }

@@ -42,7 +42,7 @@ open class DarkStarRetryingClientConnection: Transport.Connection
         let host: NWEndpoint.Host
         let port: NWEndpoint.Port
         let parameters: NWParameters
-        let config: ShadowConfig
+        let config: ShadowConfig.ShadowClientConfig
         let logger: Logger
     }
     
@@ -87,7 +87,7 @@ open class DarkStarRetryingClientConnection: Transport.Connection
     var network: DarkStarClientConnection
     var networkClosed = false
 
-    public init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig, logger: Logger)
+    public init?(host: NWEndpoint.Host, port: NWEndpoint.Port, parameters: NWParameters, config: ShadowConfig.ShadowClientConfig, logger: Logger)
     {
         guard let newDarkStarConnection = DarkStarClientConnection(host: host, port: port, parameters: parameters, config: config, logger: logger) else
         {
