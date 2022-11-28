@@ -31,7 +31,6 @@ import Foundation
 import Logging
 
 import Datable
-import SwiftHexTools
 
 class Cipher
 {

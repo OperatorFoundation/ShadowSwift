@@ -22,7 +22,6 @@ let package = Package(
         .package(url: "https://github.com/OperatorFoundation/Datable.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Net.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Straw.git", branch: "main"),
-        .package(url: "https://github.com/OperatorFoundation/SwiftHexTools.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Transmission.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/TransmissionTransport.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Transport.git", from: "2.3.12"),
@@ -47,7 +46,6 @@ let package = Package(
             dependencies: [
                         "Datable",
                         "ShadowSwift",
-                        "SwiftHexTools",
                         "Chord",
                         .product(name: "Logging", package: "swift-log")],
             exclude: ["Info.plist", "testsip008.json"]),

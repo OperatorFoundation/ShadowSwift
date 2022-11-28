@@ -10,7 +10,6 @@ import Logging
 
 import Crypto
 import Datable
-import SwiftHexTools
 import Chord
 import Net
 import Transmission
@@ -37,10 +36,10 @@ class ShadowSwiftTests: XCTestCase
         let received = XCTestExpectation(description: "Received")
         
         // TODO: Enter your server public key.
-        let serverPublicKeyHex = ""
+        let publicKeyString = "6LukZ8KqZLQ7eOdaTVFkBVqMA8NS1AUxwqG17L/kHnQ="
         
         // TODO: Enter your server IP and Port.
-        let shadowConfig = ShadowConfig(key: serverPublicKeyHex, serverIP: "", port: 1234, mode: .DARKSTAR)
+        let shadowConfig = ShadowConfig(key: publicKeyString, serverIP: "178.128.240.180", port: 443, mode: .DARKSTAR)
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: self.logger)
         let httpRequestData = Data("GET / HTTP/1.0\r\nConnection: close\r\n\r\n")
         print(">>>>>> Created a Shadow connection factory.")
@@ -124,7 +123,7 @@ class ShadowSwiftTests: XCTestCase
             return
         }
         
-        guard let serverPersistentPrivateKeyData = Data(hex: config.password) else
+        guard let serverPersistentPrivateKeyData = Data(base64Encoded: config.password) else
         {
             XCTFail()
             return
@@ -622,18 +621,27 @@ class ShadowSwiftTests: XCTestCase
         }
     }
 
+    func testbytesToPrivateKey() throws {
+        let privateKeyString = "RaHouPFVOazVSqInoMm8BSO9o/7J493y4cUVofmwXAU="
+        guard let privateKeyData = Data(base64Encoded: privateKeyString) else {return}
+        let privateKey = try P256.KeyAgreement.PrivateKey(rawRepresentation: privateKeyData)
+        let publicKey = privateKey.publicKey
+        guard let publicKeyData = publicKey.compactRepresentation else {return}
+        print(publicKeyData.base64EncodedString())
+    }
+    
     func testDarkStarClientAndServer()
     {
-        let privateKeyHex = "dd5e9e88d13e66017eb2087b128c1009539d446208f86173e30409a898ada148"
-        guard let privateKeyBytes = Data(hex: privateKeyHex) else {return}
+        let privateKeyString = "RaHouPFVOazVSqInoMm8BSO9o/7J493y4cUVofmwXAU="
+        guard let privateKeyBytes = Data(base64Encoded: privateKeyString) else {return}
         guard let privateKey = try? P256.KeyAgreement.PrivateKey(rawRepresentation: privateKeyBytes) else {return}
         let publicKey = privateKey.publicKey
 
         let publicKeyData = publicKey.compactRepresentation!
-        let publicKeyHex = publicKeyData.hex
-        print(publicKeyHex)
+        let publicKeyString = publicKeyData.base64EncodedString()
+        print(publicKeyString)
 
-        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(key: privateKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR), logger: self.logger) else {return}
+        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(key: privateKeyString, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR), logger: self.logger) else {return}
 
         let queue = DispatchQueue(label: "Client")
         queue.async
@@ -654,7 +662,7 @@ class ShadowSwiftTests: XCTestCase
             
         }
 
-        let factory = ShadowConnectionFactory(config: ShadowConfig(key: publicKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR), logger: self.logger)
+        let factory = ShadowConnectionFactory(config: ShadowConfig(key: publicKeyString, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR), logger: self.logger)
         guard var client = factory.connect(using: .tcp) else {return}
 
         client.stateUpdateHandler={
@@ -677,8 +685,8 @@ class ShadowSwiftTests: XCTestCase
     {
         let sent = XCTestExpectation(description: "Sent!")
         
-        let privateKeyHex = "dd5e9e88d13e66017eb2087b128c1009539d446208f86173e30409a898ada148"
-        guard let privateKeyBytes = Data(hex: privateKeyHex) else
+        let privateKeyString = "RaHouPFVOazVSqInoMm8BSO9o/7J493y4cUVofmwXAU="
+        guard let privateKeyBytes = Data(base64Encoded: privateKeyString) else
         {
             XCTFail()
             return
@@ -692,10 +700,10 @@ class ShadowSwiftTests: XCTestCase
         
         let publicKey = privateKey.publicKey
         let publicKeyData = publicKey.compactRepresentation!
-        let publicKeyHex = publicKeyData.hex
-        print(publicKeyHex)
+        let publicKeyString = publicKeyData.base64EncodedString()
+        print(publicKeyString)
 
-        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(key: privateKeyHex, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR), logger: self.logger) else
+        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig(key: privateKeyString, serverIP: "127.0.0.1", port: 1234, mode: .DARKSTAR), logger: self.logger) else
         {
             XCTFail()
             return
@@ -720,20 +728,20 @@ class ShadowSwiftTests: XCTestCase
     {
         let privateKey = P256.KeyAgreement.PrivateKey()
         let privateKeyData = privateKey.rawRepresentation
-        let privateKeyHex = privateKeyData.hex
+        let privateKeyString = privateKeyData.base64EncodedString()
 
         let publicKey = privateKey.publicKey
         let publicKeyData = publicKey.compactRepresentation
-        let publicKeyHex = publicKeyData!.hex
+        let publicKeyString = publicKeyData!.base64EncodedString()
 
-        print("Private key: \(privateKeyHex)")
-        print("Public key: \(publicKeyHex)")
+        print("Private key: \(privateKeyString)")
+        print("Public key: \(publicKeyString)")
     }
     
     func testPublicKeyFromPrivateKey()
     {
-        let privateKeyHex = "e7afafe8098d06d9cac98cfdd5179bd031e81761717a04d0415765f0d8d5f4d0"
-        guard let privateKeyData = Data(hex: privateKeyHex) else {
+        let privateKeyString = "RaHouPFVOazVSqInoMm8BSO9o/7J493y4cUVofmwXAU="
+        guard let privateKeyData = Data(base64Encoded: privateKeyString) else {
             XCTFail()
             return
         }
@@ -741,10 +749,10 @@ class ShadowSwiftTests: XCTestCase
             let privateKey = try P256.KeyAgreement.PrivateKey(rawRepresentation: privateKeyData)
             let publicKey = privateKey.publicKey
             let publicKeyData = publicKey.compactRepresentation
-            let publicKeyHex = publicKeyData!.hex
+            let publicKeyString = publicKeyData!.base64EncodedString()
 
-            print("Private key: \(privateKeyHex)")
-            print("Public key: \(publicKeyHex)")
+            print("Private key: \(privateKeyString)")
+            print("Public key: \(publicKeyString)")
         } catch {
             XCTFail()
         }

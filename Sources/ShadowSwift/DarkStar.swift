@@ -9,7 +9,6 @@ import Crypto
 import Datable
 import Foundation
 import Net
-import SwiftHexTools
 import Transmission
 
 let P256KeySize = 32 // compact format

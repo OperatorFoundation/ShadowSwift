@@ -12,7 +12,6 @@ import Logging
 import Chord
 import Datable
 import Net
-import SwiftHexTools
 import Transmission
 import Transport
 import Straw
@@ -68,9 +67,9 @@ public class ShadowTransmissionClientConnection: Transmission.Connection
             return nil
         }
         
-        guard let serverPersistentPublicKeyData = Data(hex: config.password) else
+        guard let serverPersistentPublicKeyData = Data(base64Encoded: config.password) else
         {
-            log.error("\nDarkStarClientConnection - failed to decode password as hex.")
+            log.error("\nDarkStarClientConnection - failed to decode password as base64.")
             return nil
         }
         

@@ -32,7 +32,6 @@ import Logging
 import Chord
 import Datable
 import Net
-import SwiftHexTools
 import Transmission
 import Transport
 
@@ -125,7 +124,7 @@ open class DarkStarServerConnection: Transport.Connection
             return nil
         }
         
-        guard let serverPersistentPrivateKeyData = Data(hex: config.password) else
+        guard let serverPersistentPrivateKeyData = Data(base64Encoded: config.password) else
         {
             logger.error("ShadowSwift: DarkStarServerConnection init failed. Unable to parse the config password.")
             return nil

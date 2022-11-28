@@ -32,7 +32,6 @@ import Logging
 import Chord
 import Datable
 import Net
-import SwiftHexTools
 import Transmission
 import Transport
 

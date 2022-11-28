@@ -10,7 +10,6 @@ import Foundation
 
 import Datable
 import Net
-import SwiftHexTools
 import Transmission
 import TransmissionTransport
 

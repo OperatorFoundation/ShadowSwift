@@ -64,17 +64,17 @@ public struct ShadowConfig: Codable
     {
         let privateKey = P256.KeyAgreement.PrivateKey()
         let privateKeyData = privateKey.rawRepresentation
-        let privateKeyHex = privateKeyData.hex
+        let privateKeyString = privateKeyData.base64EncodedString()
 
         let publicKey = privateKey.publicKey
         let publicKeyData = publicKey.compactRepresentation
-        let publicKeyHex = publicKeyData!.hex
+        let publicKeyString = publicKeyData!.base64EncodedString()
 
-        print("Server Key: \(privateKeyHex)")
-        print("Client Key: \(publicKeyHex)")
+        print("Server Key: \(privateKeyString)")
+        print("Client Key: \(publicKeyString)")
         
-        let serverConfig = ShadowConfig(key: privateKeyHex, serverIP: serverIP, port: serverPort, mode: cipher)
-        let clientConfig = ShadowConfig(key: publicKeyHex, serverIP: serverIP, port: serverPort, mode: cipher)
+        let serverConfig = ShadowConfig(key: privateKeyString, serverIP: serverIP, port: serverPort, mode: cipher)
+        let clientConfig = ShadowConfig(key: publicKeyString, serverIP: serverIP, port: serverPort, mode: cipher)
         
         return (serverConfig, clientConfig)
     }
