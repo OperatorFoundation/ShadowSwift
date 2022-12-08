@@ -753,7 +753,27 @@ class ShadowSwiftTests: XCTestCase
             XCTFail()
         }
     }
+    
+    
+    func testPublicKeyFromPrivateKeyHex()
+    {
+        let privateKeyString = "e7afafe8098d06d9cac98cfdd5179bd031e81761717a04d0415765f0d8d5f4d0"
+        guard let privateKeyData = Data(hex: privateKeyString) else {
+            XCTFail()
+            return
+        }
+        do {
+            let privateKey = try P256.KeyAgreement.PrivateKey(rawRepresentation: privateKeyData)
+            let publicKey = privateKey.publicKey
+            let publicKeyData = publicKey.compactRepresentation
+            let publicKeyString = publicKeyData!.hex
 
+            print("Private key: \(privateKeyString)")
+            print("Public key: \(publicKeyString)")
+        } catch {
+            XCTFail()
+        }
+    }
 //    func testSIP008()
 //    {
 //        let ready = XCTestExpectation(description: "Ready!")
