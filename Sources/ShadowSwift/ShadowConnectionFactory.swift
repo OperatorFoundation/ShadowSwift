@@ -43,7 +43,7 @@ open class ShadowConnectionFactory: ConnectionFactory
 
     public init(config: ShadowConfig.ShadowClientConfig, logger: Logger)
     {
-        var addressArray = config.serverAddress.split(separator: ":")
+        let addressArray = config.serverAddress.split(separator: ":")
         self.host = NWEndpoint.Host(addressArray[0].base)
         self.port = NWEndpoint.Port(rawValue: addressArray[1].base.uint16)
         self.config = config

@@ -136,6 +136,12 @@ open class DarkStarServerConnection: Transport.Connection
             return nil
         }
 
+        guard serverPersistentPrivateKey.publicKey.compactRepresentation != nil else
+        {
+            logger.error("ShadowSwift: server persistent public key does not have a compact representation")
+            return nil
+        }
+
         guard let authenticator = DarkStarServerAuthenticator(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection, bloomFilter: DarkStarServerConnection.bloomFilter) else
         {
             logger.error("ShadowSwift: DarkStarServerConnection init failed. The DarkStar handshake was unsuccessful.")
