@@ -67,16 +67,15 @@ public class ShadowTransmissionClientConnection: Transmission.Connection
             return nil
         }
         
-        guard let serverPersistentPublicKeyData = Data(base64Encoded: config.serverPublicKey) else
+        let serverPersistentPublicKey: P256.KeyAgreement.PublicKey
+        switch config.serverPublicKey
         {
-            log.error("\nDarkStarClientConnection - failed to decode password as base64.")
-            return nil
-        }
-        
-        guard let serverPersistentPublicKey = try? P256.KeyAgreement.PublicKey(compactRepresentation: serverPersistentPublicKeyData) else
-        {
-            log.error("\nDarkStarClientConnection - failed to parse the key as a compact representation P256 Public key.")
-            return nil
+            case .P256KeyAgreement(let publicKey):
+                serverPersistentPublicKey = publicKey
+
+            default:
+                print("Wrong public key type")
+                return nil
         }
 
         guard let client = DarkStarClient(serverPersistentPublicKey: serverPersistentPublicKey, endpoint: endpoint, connection: connection) else

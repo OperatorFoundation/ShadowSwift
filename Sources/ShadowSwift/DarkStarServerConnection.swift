@@ -124,22 +124,15 @@ open class DarkStarServerConnection: Transport.Connection
             return nil
         }
         
-        guard let serverPersistentPrivateKeyData = Data(base64Encoded: config.serverPrivateKey) else
+        let serverPersistentPrivateKey: P256.KeyAgreement.PrivateKey
+        switch config.serverPrivateKey
         {
-            logger.error("ShadowSwift: DarkStarServerConnection init failed. Unable to parse the config password.")
-            return nil
-        }
-        
-        guard let serverPersistentPrivateKey = try? P256.KeyAgreement.PrivateKey(rawRepresentation: serverPersistentPrivateKeyData) else
-        {
-            logger.error("ShadowSwift: DarkStarServerConnection init failed. Failed to generate a key from data.")
-            return nil
-        }
+            case .P256KeyAgreement(let privateKey):
+                serverPersistentPrivateKey = privateKey
 
-        guard serverPersistentPrivateKey.publicKey.compactRepresentation != nil else
-        {
-            logger.error("ShadowSwift: server persistent public key does not have a compact representation")
-            return nil
+            default:
+                print("Wrong private key type")
+                return nil
         }
 
         guard let authenticator = DarkStarServerAuthenticator(serverPersistentPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, connection: connection, bloomFilter: DarkStarServerConnection.bloomFilter) else

@@ -43,6 +43,9 @@
 
 import Foundation
 
+import Datable
+import KeychainTypes
+
 public struct JsonConfig: Codable
 {
     let version: Int
@@ -96,7 +99,25 @@ extension ServerConfig
 {
     public var shadowConfig: ShadowConfig.ShadowServerConfig?
     {
-        guard let mode = CipherMode(rawValue: self.method) else {return nil}
-        return ShadowConfig.ShadowServerConfig(serverAddress: "\(server):\(server_port)", serverPrivateKey: self.password, mode: mode, transport: "shadow")
+        guard let mode = CipherMode(rawValue: self.method) else
+        {
+            return nil
+        }
+
+        guard let serverPrivateKeyData = Data(base64: self.password) else
+        {
+            return nil
+        }
+
+        do
+        {
+            let serverPrivateKey = try PrivateKey(type: .P256KeyAgreement, data: serverPrivateKeyData)
+            return ShadowConfig.ShadowServerConfig(serverAddress: "\(server):\(server_port)", serverPrivateKey: serverPrivateKey, mode: mode, transport: "shadow")
+        }
+        catch
+        {
+            print(error)
+            return nil
+        }
     }
 }

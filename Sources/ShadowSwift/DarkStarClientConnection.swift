@@ -94,17 +94,16 @@ open class DarkStarClientConnection: Transport.Connection
             log.error("\nDarkStarClientConnection - Attempted a connection with \(config.mode.rawValue), Currently DarkStar is the only supported shadow mode.")
             return nil
         }
-        
-        guard let serverPersistentPublicKeyData = Data(base64Encoded: config.serverPublicKey) else
+
+        let serverPersistentPublicKey: P256.KeyAgreement.PublicKey
+        switch config.serverPublicKey
         {
-            log.error("\nDarkStarClientConnection - failed to decode password as base64.")
-            return nil
-        }
-        
-        guard let serverPersistentPublicKey = try? P256.KeyAgreement.PublicKey(compactRepresentation: serverPersistentPublicKeyData) else
-        {
-            log.error("\nDarkStarClientConnection - failed to parse the key as a compact representation P256 Public key.")
-            return nil
+            case .P256KeyAgreement(let publicKey):
+                serverPersistentPublicKey = publicKey
+
+            default:
+                print("Wrong public key type")
+                return nil
         }
 
         guard let client = DarkStarClient(serverPersistentPublicKey: serverPersistentPublicKey, endpoint: endpoint, connection: connection) else
@@ -128,7 +127,6 @@ open class DarkStarClientConnection: Transport.Connection
         self.encryptingCipher = eCipher
         self.decryptingCipher = dCipher
         self.network = connection
-        
 
         if let actualStateUpdateHandler = self.stateUpdateHandler
         {

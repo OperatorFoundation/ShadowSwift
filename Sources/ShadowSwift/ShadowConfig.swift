@@ -7,11 +7,15 @@
 
 import Crypto
 import Foundation
-public class ShadowConfig {
+
+import KeychainTypes
+
+public class ShadowConfig
+{
     public struct ShadowServerConfig: Codable
     {
         public let serverAddress: String
-        public let serverPrivateKey: String
+        public let serverPrivateKey: PrivateKey
         public let mode: CipherMode
         public let transport: String
         
@@ -20,7 +24,7 @@ public class ShadowConfig {
             case serverAddress, serverPrivateKey, mode = "cipherName", transport
         }
         
-        public init(serverAddress: String, serverPrivateKey: String, mode: CipherMode, transport: String)
+        public init(serverAddress: String, serverPrivateKey: PrivateKey, mode: CipherMode, transport: String)
         {
             self.serverAddress = serverAddress
             self.serverPrivateKey = serverPrivateKey
@@ -64,7 +68,7 @@ public class ShadowConfig {
     public struct ShadowClientConfig: Codable
     {
         public let serverAddress: String
-        public let serverPublicKey: String
+        public let serverPublicKey: PublicKey
         public let mode: CipherMode
         public let transport: String
         
@@ -73,7 +77,7 @@ public class ShadowConfig {
             case serverAddress, serverPublicKey, mode = "cipherName", transport
         }
         
-        public init(serverAddress: String, serverPublicKey: String, mode: CipherMode, transport: String)
+        public init(serverAddress: String, serverPublicKey: PublicKey, mode: CipherMode, transport: String)
         {
             self.serverAddress = serverAddress
             self.serverPublicKey = serverPublicKey
@@ -114,21 +118,13 @@ public class ShadowConfig {
         }
     }
 
-    public static func generateNewConfigPair(serverAddress: String, cipher: CipherMode) -> (serverConfig: ShadowServerConfig, clientConfig: ShadowClientConfig)
+    public static func generateNewConfigPair(serverAddress: String, cipher: CipherMode) throws -> (serverConfig: ShadowServerConfig, clientConfig: ShadowClientConfig)
     {
-        let privateKey = P256.KeyAgreement.PrivateKey()
-        let privateKeyData = privateKey.rawRepresentation
-        let privateKeyString = privateKeyData.base64EncodedString()
-
+        let privateKey = try PrivateKey(type: .P256KeyAgreement)
         let publicKey = privateKey.publicKey
-        let publicKeyData = publicKey.compactRepresentation
-        let publicKeyString = publicKeyData!.base64EncodedString()
 
-        print("Server Key: \(privateKeyString)")
-        print("Client Key: \(publicKeyString)")
-        
-        let serverConfig = ShadowServerConfig(serverAddress: serverAddress, serverPrivateKey: privateKeyString, mode: cipher, transport: "shadow")
-        let clientConfig = ShadowClientConfig(serverAddress: serverAddress, serverPublicKey: publicKeyString, mode: cipher, transport: "shadow")
+        let serverConfig = ShadowServerConfig(serverAddress: serverAddress, serverPrivateKey: privateKey, mode: cipher, transport: "shadow")
+        let clientConfig = ShadowClientConfig(serverAddress: serverAddress, serverPublicKey: publicKey, mode: cipher, transport: "shadow")
         
         return (serverConfig, clientConfig)
     }
@@ -139,12 +135,12 @@ public class ShadowConfig {
         {
             return(false, ShadowConfigError.urlIsNotDirectory)
         }
-        
-        let configPair = ShadowConfig.generateNewConfigPair(serverAddress: serverAddress, cipher: cipher)
-        let encoder = JSONEncoder()
-        
+
         do
         {
+            let configPair = try ShadowConfig.generateNewConfigPair(serverAddress: serverAddress, cipher: cipher)
+
+            let encoder = JSONEncoder()
             let serverJson = try encoder.encode(configPair.serverConfig)
             let serverConfigFilename = "ShadowServerConfig.json"
             let serverConfigFilePath = saveDirectory.appendingPathComponent(serverConfigFilename).path
@@ -152,21 +148,22 @@ public class ShadowConfig {
             {
                 return (false, ShadowConfigError.failedToSaveFile(filePath: serverConfigFilePath))
             }
-            
+
             let clientJson = try encoder.encode(configPair.clientConfig)
             let clientConfigFilename = "ShadowClientConfig.json"
             let clientConfigFilePath = saveDirectory.appendingPathComponent(clientConfigFilename).path
-            
+
             guard FileManager.default.createFile(atPath: clientConfigFilePath, contents: clientJson) else
             {
                 return (false, ShadowConfigError.failedToSaveFile(filePath: clientConfigFilePath))
             }
-            
+
             return (true, nil)
         }
         catch
         {
-            return(false, error)
+            print(error)
+            return (false, error)
         }
     }
 
