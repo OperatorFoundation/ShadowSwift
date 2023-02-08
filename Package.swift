@@ -15,7 +15,7 @@ let package = Package(
             targets: ["ShadowSwift"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-argument-parser.git", exact: "1.1.1"),
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.1.1"),
         .package(url: "https://github.com/apple/swift-crypto", from: "2.1.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.4.2"),
 
