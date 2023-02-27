@@ -85,7 +85,7 @@ public class ShadowConfig
             self.transport = transport
         }
         
-        init?(from data: Data)
+        public init?(from data: Data)
         {
             let decoder = JSONDecoder()
             do
