@@ -112,7 +112,7 @@ extension ServerConfig
         do
         {
             let serverPrivateKey = try PrivateKey(type: .P256KeyAgreement, data: serverPrivateKeyData)
-            return ShadowConfig.ShadowServerConfig(serverAddress: "\(server):\(server_port)", serverPrivateKey: serverPrivateKey, mode: mode, transport: "shadow")
+            return ShadowConfig.ShadowServerConfig(serverAddress: "\(server):\(server_port)", serverPrivateKey: serverPrivateKey, mode: mode)
         }
         catch
         {

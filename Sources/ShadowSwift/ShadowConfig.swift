@@ -14,22 +14,22 @@ public class ShadowConfig
 {
     public struct ShadowServerConfig: Codable
     {
+        public static let serverConfigFilename = "ShadowServerConfig.json"
         public let serverAddress: String
         public let serverPrivateKey: PrivateKey
         public let mode: CipherMode
-        public let transport: String
+        public var transportName = "shadow"
         
         private enum CodingKeys : String, CodingKey
         {
-            case serverAddress, serverPrivateKey, mode = "cipherName", transport
+            case serverAddress, serverPrivateKey, mode = "cipherName", transportName = "transport"
         }
         
-        public init(serverAddress: String, serverPrivateKey: PrivateKey, mode: CipherMode, transport: String)
+        public init(serverAddress: String, serverPrivateKey: PrivateKey, mode: CipherMode)
         {
             self.serverAddress = serverAddress
             self.serverPrivateKey = serverPrivateKey
             self.mode = mode
-            self.transport = transport
         }
         
         init?(from data: Data)
@@ -67,22 +67,22 @@ public class ShadowConfig
     
     public struct ShadowClientConfig: Codable
     {
+        public static let clientConfigFilename = "ShadowClientConfig.json"
         public let serverAddress: String
         public let serverPublicKey: PublicKey
         public let mode: CipherMode
-        public let transport: String
+        public var transportName = "shadow"
         
         private enum CodingKeys : String, CodingKey
         {
-            case serverAddress, serverPublicKey, mode = "cipherName", transport
+            case serverAddress, serverPublicKey, mode = "cipherName", transportName = "transport"
         }
         
-        public init(serverAddress: String, serverPublicKey: PublicKey, mode: CipherMode, transport: String)
+        public init(serverAddress: String, serverPublicKey: PublicKey, mode: CipherMode)
         {
             self.serverAddress = serverAddress
             self.serverPublicKey = serverPublicKey
             self.mode = mode
-            self.transport = transport
         }
         
         public init?(from data: Data)
@@ -123,12 +123,13 @@ public class ShadowConfig
         let privateKey = try PrivateKey(type: .P256KeyAgreement)
         let publicKey = privateKey.publicKey
 
-        let serverConfig = ShadowServerConfig(serverAddress: serverAddress, serverPrivateKey: privateKey, mode: cipher, transport: "shadow")
-        let clientConfig = ShadowClientConfig(serverAddress: serverAddress, serverPublicKey: publicKey, mode: cipher, transport: "shadow")
+        let serverConfig = ShadowServerConfig(serverAddress: serverAddress, serverPrivateKey: privateKey, mode: cipher)
+        let clientConfig = ShadowClientConfig(serverAddress: serverAddress, serverPublicKey: publicKey, mode: cipher)
         
         return (serverConfig, clientConfig)
     }
 
+    // FIXME: Make this function signature more Swifty (return types)
     public static func createNewConfigFiles(inDirectory saveDirectory: URL, serverAddress: String, cipher: CipherMode) -> (saved: Bool, error: Error?)
     {
         guard saveDirectory.isDirectory else
@@ -142,16 +143,15 @@ public class ShadowConfig
 
             let encoder = JSONEncoder()
             let serverJson = try encoder.encode(configPair.serverConfig)
-            let serverConfigFilename = "ShadowServerConfig.json"
-            let serverConfigFilePath = saveDirectory.appendingPathComponent(serverConfigFilename).path
+            let serverConfigFilePath = saveDirectory.appendingPathComponent(ShadowServerConfig.serverConfigFilename).path
             guard FileManager.default.createFile(atPath: serverConfigFilePath, contents: serverJson) else
             {
                 return (false, ShadowConfigError.failedToSaveFile(filePath: serverConfigFilePath))
             }
 
             let clientJson = try encoder.encode(configPair.clientConfig)
-            let clientConfigFilename = "ShadowClientConfig.json"
-            let clientConfigFilePath = saveDirectory.appendingPathComponent(clientConfigFilename).path
+            
+            let clientConfigFilePath = saveDirectory.appendingPathComponent(ShadowClientConfig.clientConfigFilename).path
 
             guard FileManager.default.createFile(atPath: clientConfigFilePath, contents: clientJson) else
             {
