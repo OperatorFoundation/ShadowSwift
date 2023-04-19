@@ -27,7 +27,11 @@
 
 import Crypto
 import Foundation
+#if os(macOS) || os(iOS)
+import os.log
+#else
 import Logging
+#endif
 
 import Chord
 import Datable
@@ -79,7 +83,8 @@ open class DarkStarServerConnection: Transport.Connection
         let endpoint = NWEndpoint.hostPort(host: host, port: port)
         guard let newConnection = Transmission.TransmissionConnection(host: hostString, port: Int(port.rawValue)) else
         {
-            logger.error("ShadowSwift: DarkStarServerConnection init failed. Failed to create a network connection using host \(host) and port \(Int(port.rawValue)).")
+            let logString = "ShadowSwift: DarkStarServerConnection init failed. Failed to create a network connection using host \(host) and port \(Int(port.rawValue))."
+            logger.error("\(logString)")
             return nil
         }
         

@@ -6,7 +6,11 @@
 //
 
 import Foundation
+#if os(macOS) || os(iOS)
+import os.log
+#else
 import Logging
+#endif
 
 /*
  Addresses used in Shadowsocks follow the SOCKS5 address format:

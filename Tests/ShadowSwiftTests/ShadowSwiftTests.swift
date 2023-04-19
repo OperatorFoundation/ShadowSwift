@@ -6,8 +6,13 @@
 //
 
 import Crypto
-import Logging
 import XCTest
+
+#if os(macOS) || os(iOS)
+import os.log
+#else
+import Logging
+#endif
 
 import Datable
 import Chord
@@ -20,15 +25,22 @@ import XCTest
 
 class ShadowSwiftTests: XCTestCase
 {
+#if os(macOS) || os(iOS)
+    let logger: Logger = Logger()
+#else
     let logger: Logger = Logger(label: "Shadow Logger")
+#endif
+    
     let testIPString = ""
     let testPort: UInt16 = 2345
     let plainText = Data(array: [0, 1, 2, 3, 4])
 
+#if os(Linux)
     override static func setUp()
     {
         LoggingSystem.bootstrap(StreamLogHandler.standardError)
     }
+#endif
     
     func testDarkStarClientOnly() throws
     {
@@ -154,7 +166,6 @@ class ShadowSwiftTests: XCTestCase
 
         let publicKey = try PublicKey(type: .P256KeyAgreement, data: publicKeyData)
         
-        let logger = Logger(label: "Shadow Logger")
         let shadowConfig = ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
         
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
@@ -173,10 +184,11 @@ class ShadowSwiftTests: XCTestCase
             switch state
             {
             case NWConnection.State.ready:
-                logger.info("\nConnected state ready\n")
+                    self.logger.info("\nConnected state ready\n")
                 connected.fulfill()
             default:
-                logger.debug("\nReceived a state other than ready: \(state)\n")
+                    let logString = "\nReceived a state other than ready: \(state)\n"
+                    self.logger.debug("\(logString)")
                 return
             }
         }
@@ -209,8 +221,6 @@ class ShadowSwiftTests: XCTestCase
         }
 
         let publicKey = try PublicKey(type: .P256KeyAgreement, data: publicKeyData)
-        
-        let logger = Logger(label: "Shadow Logger")
 
         let shadowConfig = ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
         
@@ -238,7 +248,7 @@ class ShadowSwiftTests: XCTestCase
                     
                     if let sendError = maybeError
                     {
-                        logger.error("Send Error: \(sendError)")
+                        self.logger.error("Send Error: \(sendError)")
                         XCTFail()
                         return
                     }
@@ -246,7 +256,8 @@ class ShadowSwiftTests: XCTestCase
                     sent.fulfill()
                 }))
             default:
-                logger.debug("\nReceived a state other than ready: \(state)\n")
+                    let logString = "\nReceived a state other than ready: \(state)\n"
+                    self.logger.debug("\(logString)")
                 return
             }
         }
@@ -297,7 +308,6 @@ class ShadowSwiftTests: XCTestCase
 
         let publicKey = try PublicKey(type: .P256KeyAgreement, data: publicKeyData)
         
-        let logger = Logger(label: "Shadow Logger")
         let shadowConfig = ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
         
@@ -314,7 +324,7 @@ class ShadowSwiftTests: XCTestCase
             switch state
             {
             case NWConnection.State.ready:
-                logger.info("\nConnected state ready\n")
+                    self.logger.info("\nConnected state ready\n")
                 connected.fulfill()
                 
                     shadowConnection.send(content: Data(string: "GET / HTTP/1.0\r\n\r\n"), contentContext: .defaultMessage, isComplete: true, completion: NWConnection.SendCompletion.contentProcessed(
@@ -323,7 +333,7 @@ class ShadowSwiftTests: XCTestCase
                     
                     if let sendError = maybeError
                     {
-                        logger.error("Send Error: \(sendError)")
+                        self.logger.error("Send Error: \(sendError)")
                         XCTFail()
                         return
                     }
@@ -336,20 +346,21 @@ class ShadowSwiftTests: XCTestCase
                         
                         if let receiveError = maybeReceiveError
                         {
-                            logger.error("Got a receive error \(receiveError)")
+                            self.logger.error("Got a receive error \(receiveError)")
                             //XCTFail()
                             //return
                         }
                         
                         if maybeData != nil
                         {
-                            logger.info("Received data!!")
+                            self.logger.info("Received data!!")
                             received.fulfill()
                         }
                     }
                 }))
             default:
-                logger.debug("\nReceived a state other than ready: \(state)\n")
+                    let logString = "\nReceived a state other than ready: \(state)\n"
+                    self.logger.debug("\(logString)")
                 return
             }
         }
@@ -488,7 +499,8 @@ class ShadowSwiftTests: XCTestCase
                     }
                 }))
             default:
-                    self.logger.debug("\nReceived a state other than ready: \(state)\n")
+                    let logString = "\nReceived a state other than ready: \(state)\n"
+                    self.logger.debug("\(logString)")
                 return
             }
         }

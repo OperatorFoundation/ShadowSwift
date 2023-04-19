@@ -26,7 +26,11 @@
 // SOFTWARE.
 
 import Foundation
+#if os(macOS) || os(iOS)
+import os.log
+#else
 import Logging
+#endif
 
 import Net
 import Transport
@@ -107,7 +111,7 @@ open class ShadowConnectionFactory: ConnectionFactory
 
         guard config.mode == .DARKSTAR else
         {
-            log.error("Unable to make a shadow connection using \(config.mode.rawValue). Currently only DarkStar is supported.")
+            log.error("Unable to make a shadow connection using \(self.config.mode.rawValue). Currently only DarkStar is supported.")
             return nil
         }
 

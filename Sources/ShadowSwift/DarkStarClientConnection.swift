@@ -27,7 +27,12 @@
 
 import Crypto
 import Foundation
+
+#if os(macOS) || os(iOS)
+import os.log
+#else
 import Logging
+#endif
 
 import Chord
 import Datable
@@ -65,7 +70,8 @@ open class DarkStarClientConnection: Transport.Connection
                 maybeHostString = "\(data[0]).\(data[1]).\(data[2]).\(data[3])"
             default:
                 maybeHostString = nil
-                logger.error("\nDarkStarClientConnection - Failed to initialize because we could not create a Network Connection using host \(host). Only IPV4 is currently supported.")
+                let logString = "\nDarkStarClientConnection - Failed to initialize because we could not create a Network Connection using host \(host). Only IPV4 is currently supported."
+                logger.error("\(logString)")
         }
         
         guard let hostString = maybeHostString else
@@ -77,7 +83,8 @@ open class DarkStarClientConnection: Transport.Connection
         let endpoint = NWEndpoint.hostPort(host: host, port: port)
         guard let newConnection = Transmission.TransmissionConnection(host: hostString, port: Int(port.rawValue)) else
         {
-            logger.error("\nDarkStarClientConnection - Failed to initialize because we could not create a Network Connection using host \(host) and port \(Int(port.rawValue)).")
+            let logString = "\nDarkStarClientConnection - Failed to initialize because we could not create a Network Connection using host \(host) and port \(Int(port.rawValue))."
+            logger.error("\(logString)")
             return nil
         }
         
