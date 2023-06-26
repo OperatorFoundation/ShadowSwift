@@ -25,6 +25,27 @@ public class ShadowServer: Transmission.Listener
     let listener: Transmission.Listener
     let endpoint: NWEndpoint
     let bloomFilterURL: URL
+    
+    public init?(host: String, port: Int, listener: Transmission.Listener, config: ShadowConfig.ShadowServerConfig, logger: Logger)
+    {
+        guard let supportDirectoryURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else
+        {
+            logger.error("Failed to start the Shadow server: we could not get application support directory path.")
+            return nil
+        }
+        
+        guard let ipv4Address = IPv4Address(host) else
+        {
+            logger.error("Failed to start the Shadow server: \(host) is not a valid IPV4 address.")
+            return nil
+        }
+            
+        self.bloomFilterURL = supportDirectoryURL.appendingPathComponent(bloomFilterFilename)
+        self.endpoint = NWEndpoint.hostPort(host: NWEndpoint.Host.ipv4(ipv4Address), port: NWEndpoint.Port(integerLiteral: UInt16(port)))
+        self.listener = listener
+        self.config = config
+        self.log = logger        
+    }
 
     public init?(host: String, port: Int, config: ShadowConfig.ShadowServerConfig, logger: Logger, bloomFilterURL: URL)
     {
