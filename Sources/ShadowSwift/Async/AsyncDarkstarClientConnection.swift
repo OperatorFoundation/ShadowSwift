@@ -24,12 +24,7 @@
 
 import Crypto
 import Foundation
-
-#if os(macOS) || os(iOS)
-import os.log
-#else
 import Logging
-#endif
 
 import Chord
 import Datable
@@ -129,6 +124,11 @@ public class DarkstarReadable: Readable
     {
         self.network = network
         self.cipher = cipher
+    }
+
+    public func read() async throws -> Data
+    {
+        return try await self.read(1024)
     }
 
     public func read(_ size: Int) async throws -> Data
