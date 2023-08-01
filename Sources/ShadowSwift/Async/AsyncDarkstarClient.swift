@@ -10,7 +10,7 @@ import Crypto
 import Foundation
 
 import Datable
-import Keychain
+import KeychainTypes
 import Net
 import TransmissionAsync
 

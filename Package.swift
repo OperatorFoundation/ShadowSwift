@@ -21,7 +21,6 @@ let package = Package(
 
         .package(url: "https://github.com/OperatorFoundation/Chord.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Datable.git", branch: "main"),
-        .package(url: "https://github.com/OperatorFoundation/Keychain", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/KeychainTypes.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Net.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Straw.git", branch: "main"),
@@ -37,7 +36,6 @@ let package = Package(
                 "Net",
                 "Chord",
                 "Datable",
-                "Keychain",
                 "KeychainTypes",
                 "Straw",
                 "Transmission",

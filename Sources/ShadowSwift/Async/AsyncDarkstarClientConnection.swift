@@ -42,7 +42,7 @@ open class AsyncDarkstarClientConnection: AsyncChannelConnection<DarkstarClientC
         try await self.init(network, config, logger)
     }
 
-    public init(_ network: AsyncTcpSocketConnection, _ config: ShadowConfig.ShadowClientConfig, _ logger: Logger) async throws
+    public init(_ network: AsyncConnection, _ config: ShadowConfig.ShadowClientConfig, _ logger: Logger) async throws
     {
         let channel = try await DarkstarClientChannel(network, config, logger)
 

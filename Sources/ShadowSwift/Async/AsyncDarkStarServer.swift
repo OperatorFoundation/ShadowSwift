@@ -14,7 +14,7 @@ import Logging
 #endif
 
 import Datable
-import Keychain
+import KeychainTypes
 import Net
 import TransmissionAsync
 
