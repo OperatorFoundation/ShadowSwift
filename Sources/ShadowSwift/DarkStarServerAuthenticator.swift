@@ -179,6 +179,13 @@ public class DarkStarServerAuthenticator
             return nil
         }
         
+        print("ecdh data (\(ecdhData.count) bytes): \(ecdhData.hex)")
+        print("serverIdentifier: \(serverIdentifier.hex)")
+        print("serverPersistentPublicKey (\(serverPersistentPublicKeyData.count) bytes): \(serverPersistentPublicKeyData.hex)")
+        print("clientEphemeralPublicKey (\(clientEphemeralPublicKeyData) bytes): \(clientEphemeralPublicKeyData.hex)")
+        print("DarkStarString: \(DarkStarString)")
+        print("ClientString: \(ClientString)")
+        
         var hash = SHA256()
         hash.update(data: ecdhData)
         hash.update(data: serverIdentifier)
