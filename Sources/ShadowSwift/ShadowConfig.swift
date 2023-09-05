@@ -32,7 +32,7 @@ public class ShadowConfig
             self.mode = mode
         }
         
-        init?(from data: Data)
+        public init?(from data: Data)
         {
             let decoder = JSONDecoder()
             do
