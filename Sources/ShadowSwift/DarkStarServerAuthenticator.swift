@@ -141,8 +141,8 @@ public class DarkStarServerAuthenticator
         else
         {
             print("\nDarkStarServerAuthenticator failed to confirm a client confirmation code.")
-            print("data: \(data)")
-            print("code: \(code)")
+            print("data: \(data.hex)")
+            print("code: \(code.hex)")
             print("theirPublicKey: \(theirPublicKey)")
             print("myPrivateKey: \(myPrivateKey)")
             print("srverPersistentPublicKey: \(serverPersistentPublicKey)")
