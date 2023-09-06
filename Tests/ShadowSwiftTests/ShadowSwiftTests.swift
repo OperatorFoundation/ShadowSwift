@@ -59,7 +59,7 @@ class ShadowSwiftTests: XCTestCase
         let publicKey = try PublicKey(type: .P256KeyAgreement, data: publicKeyData)
         
         // TODO: Enter your server IP and Port.
-        let shadowConfig = ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
+        let shadowConfig = try ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: self.logger)
         let httpRequestData = Data("GET / HTTP/1.0\r\nConnection: close\r\n\r\n")
         print(">>>>>> Created a Shadow connection factory.")
@@ -166,7 +166,7 @@ class ShadowSwiftTests: XCTestCase
 
         let publicKey = try PublicKey(type: .P256KeyAgreement, data: publicKeyData)
         
-        let shadowConfig = ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
+        let shadowConfig = try ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
         
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
         
@@ -222,7 +222,7 @@ class ShadowSwiftTests: XCTestCase
 
         let publicKey = try PublicKey(type: .P256KeyAgreement, data: publicKeyData)
 
-        let shadowConfig = ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
+        let shadowConfig = try ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
         
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
         
@@ -308,7 +308,7 @@ class ShadowSwiftTests: XCTestCase
 
         let publicKey = try PublicKey(type: .P256KeyAgreement, data: publicKeyData)
         
-        let shadowConfig = ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
+        let shadowConfig = try ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
         
         guard var shadowConnection = shadowFactory.connect(using: .tcp) else
@@ -414,7 +414,7 @@ class ShadowSwiftTests: XCTestCase
 
         let publicKey = try PublicKey(type: .P256KeyAgreement, data: publicKeyData)
         
-        let shadowConfig = ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
+        let shadowConfig = try ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
         
         guard var shadowConnection = shadowFactory.connect(using: .tcp)
@@ -652,7 +652,7 @@ class ShadowSwiftTests: XCTestCase
 
         let privateKey = try PrivateKey(type: .P256KeyAgreement, data: privateKeyData)
 
-        let shadowConfig = ShadowConfig.ShadowServerConfig(serverAddress: "127.0.0.1:1234", serverPrivateKey: privateKey, mode: .DARKSTAR)
+        let shadowConfig = try ShadowConfig.ShadowServerConfig(serverAddress: "127.0.0.1:1234", serverPrivateKey: privateKey, mode: .DARKSTAR)
         let encoder = JSONEncoder()
         let json = try? encoder.encode(shadowConfig)
         
@@ -677,14 +677,20 @@ class ShadowSwiftTests: XCTestCase
         print(publicKeyData.base64EncodedString())
     }
     
-    func testDarkStarClientAndServer()
+    func testDarkStarClientAndServer() throws
     {
         let privateKeyString = "RaHouPFVOazVSqInoMm8BSO9o/7J493y4cUVofmwXAU="
         guard let privateKeyBytes = Data(base64: privateKeyString) else {return}
         guard let privateKey = try? PrivateKey(type: .P256KeyAgreement, data: privateKeyBytes) else {return}
         let publicKey = privateKey.publicKey
 
-        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig.ShadowServerConfig(serverAddress: "127.0.0.1:1234", serverPrivateKey: privateKey, mode: .DARKSTAR), logger: self.logger) else {return}
+        let serverConfig = try ShadowConfig.ShadowServerConfig(serverAddress: "127.0.0.1:1234", serverPrivateKey: privateKey, mode: .DARKSTAR)
+        
+        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: serverConfig, logger: self.logger) else
+        {
+            XCTFail()
+            return
+        }
 
         let queue = DispatchQueue(label: "Client")
         queue.async
@@ -705,7 +711,9 @@ class ShadowSwiftTests: XCTestCase
             
         }
 
-        let factory = ShadowConnectionFactory(config: ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR), logger: self.logger)
+        let clientConfig = try ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
+        
+        let factory = ShadowConnectionFactory(config: clientConfig, logger: self.logger)
         guard var client = factory.connect(using: .tcp) else {return}
 
         client.stateUpdateHandler={
@@ -724,7 +732,7 @@ class ShadowSwiftTests: XCTestCase
         client.start(queue: queue2)
     }
 
-    func testDarkStarOnlyServer()
+    func testDarkStarOnlyServer() throws
     {
         let sent = XCTestExpectation(description: "Sent!")
         
@@ -741,7 +749,13 @@ class ShadowSwiftTests: XCTestCase
             return
         }
         
-        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: ShadowConfig.ShadowServerConfig(serverAddress: "127.0.0.1:1234", serverPrivateKey: privateKey, mode: .DARKSTAR), logger: self.logger) else {return}
+        let shadowServerConfig = try ShadowConfig.ShadowServerConfig(serverAddress: "127.0.0.1:1234", serverPrivateKey: privateKey, mode: .DARKSTAR)
+        
+        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: shadowServerConfig, logger: self.logger) else
+        {
+            XCTFail()
+            return
+        }
 
         do
         {
