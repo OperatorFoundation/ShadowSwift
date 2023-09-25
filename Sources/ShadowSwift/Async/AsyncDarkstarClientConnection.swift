@@ -125,6 +125,13 @@ public class DarkstarReadable: Readable
         self.network = network
         self.cipher = cipher
     }
+    
+    public func readNonblocking(_ size: Int) async throws -> Data
+    {
+        // FIXME: Not Implemented
+        
+        throw AsyncDarkstarClientConnectionError.notImplemented("readNonblocking")
+    }
 
     public func read() async throws -> Data
     {
@@ -214,4 +221,5 @@ public enum AsyncDarkstarClientConnectionError: Error
     case numberDecodeFailure
     case sendAddressFailed
     case badServerAddress(String)
+    case notImplemented(String)
 }
