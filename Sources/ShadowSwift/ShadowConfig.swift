@@ -211,6 +211,7 @@ public class ShadowConfig
             let configPair = try ShadowConfig.generateNewConfigPair(serverAddress: serverAddress, cipher: cipher)
 
             let encoder = JSONEncoder()
+            encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
             let serverJson = try encoder.encode(configPair.serverConfig)
             let serverConfigFilePath = saveDirectory.appendingPathComponent(ShadowServerConfig.serverConfigFilename).path
             guard FileManager.default.createFile(atPath: serverConfigFilePath, contents: serverJson) else

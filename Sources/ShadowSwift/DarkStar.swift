@@ -120,22 +120,26 @@ public struct DarkStar
     #if os(macOS)
     static public func handleClientEphemeralKey(connection: Connection) -> (SecureEnclave.P256.KeyAgreement.PrivateKey, P256.KeyAgreement.PublicKey)?
     {
-        guard let myEphemeralPrivateKey = try? SecureEnclave.P256.KeyAgreement.PrivateKey() else
-        {
-            print("Darkstar.handleClientEphemeralKey: failed to retrieve a private key.")
-            return nil
+        while true {
+            guard let myEphemeralPrivateKey = try? SecureEnclave.P256.KeyAgreement.PrivateKey() else
+            {
+                print("Darkstar.handleClientEphemeralKey: failed to retrieve a private key.")
+                return nil
+            }
+            
+            let myEphemeralPublicKey = myEphemeralPrivateKey.publicKey
+            let myEphemeralPublicKeyData = myEphemeralPublicKey.compactRepresentation!
+            
+            if myEphemeralPublicKeyData[0] == 2 {
+                guard connection.write(data: myEphemeralPublicKeyData) else
+                {
+                    print("Darkstar.handleClientEphemeralKey: failed to write the ephemeral key data to the connection.")
+                    return nil
+                }
+                
+                return (myEphemeralPrivateKey, myEphemeralPublicKey)
+            }
         }
-        
-        let myEphemeralPublicKey = myEphemeralPrivateKey.publicKey
-        let myEphemeralPublicKeyData = myEphemeralPublicKey.compactRepresentation!
-
-        guard connection.write(data: myEphemeralPublicKeyData) else
-        {
-            print("Darkstar.handleClientEphemeralKey: failed to write the ephemeral key data to the connection.")
-            return nil
-        }
-
-        return (myEphemeralPrivateKey, myEphemeralPublicKey)
     }
     
     static public func generateClientConfirmationCode(connection: Connection, theirPublicKey: P256.KeyAgreement.PublicKey, myPrivateKey: SecureEnclave.P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint, serverPersistentPublicKey: P256.KeyAgreement.PublicKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey) -> Data?
