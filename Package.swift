@@ -7,7 +7,7 @@ let package = Package(
     name: "ShadowSwift",
     platforms: [
         .macOS(.v13),
-        .iOS(.v15)
+        .iOS(.v16)
     ],
     products: [
         .library(

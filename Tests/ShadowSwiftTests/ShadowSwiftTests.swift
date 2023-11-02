@@ -230,16 +230,6 @@ class ShadowSwiftTests: XCTestCase
         wait(for: [ready, sent, received], timeout: 60)  // 30 seconds
     }
     
-    
-    func testConfigFromFile()
-    {
-        guard ShadowConfig.ShadowServerConfig(path: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/Configs/shadowsocksPrivateKey.json").path) != nil else
-        {
-            XCTFail()
-            return
-        }
-    }
-    
     func testShadowConnection() throws
     {
         let connected = expectation(description: "Connection callback called")
@@ -713,6 +703,7 @@ class ShadowSwiftTests: XCTestCase
         }
     }
     
+    #if os(macOS)
     func testCreateNewConfigPair()
     {
         let saveDirectory = FileManager.default.homeDirectoryForCurrentUser
@@ -736,6 +727,16 @@ class ShadowSwiftTests: XCTestCase
             XCTFail()
         }
     }
+    
+    func testConfigFromFile()
+    {
+        guard ShadowConfig.ShadowServerConfig(path: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/Configs/shadowsocksPrivateKey.json").path) != nil else
+        {
+            XCTFail()
+            return
+        }
+    }
+    #endif
     
     func testJSONConfig() throws
     {

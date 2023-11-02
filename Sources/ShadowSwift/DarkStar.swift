@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  DarkStar.swift
+//
 //
 //  Created by Dr. Brandon Wiley on 9/24/21.
 //
@@ -13,7 +13,7 @@ import Transmission
 
 let P256KeySize = 32 // compact format
 let ConfirmationSize = 32
-let NonceSize = 32
+//let NonceSize = 32
 
 let DarkStarString = "DarkStar"
 let ServerString = "server"
