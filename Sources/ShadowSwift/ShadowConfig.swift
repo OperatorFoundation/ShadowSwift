@@ -16,28 +16,44 @@ public class ShadowConfig
     {
         public static let serverConfigFilename = "ShadowServerConfig.json"
         public let serverAddress: String
+        public let serverIP: String
+        public let serverPort: UInt16
         public let serverPrivateKey: PrivateKey
         public let mode: CipherMode
         public var transportName = "shadow"
         
         private enum CodingKeys : String, CodingKey
         {
-            case serverAddress, serverPrivateKey, mode = "cipherName", transportName = "transport"
+            case serverAddress
+            case serverPrivateKey
+            case mode = "cipherName"
+            case transportName = "transport"
         }
         
-        public init(serverAddress: String, serverPrivateKey: PrivateKey, mode: CipherMode)
+        public init(serverAddress: String, serverPrivateKey: PrivateKey, mode: CipherMode) throws
         {
             self.serverAddress = serverAddress
+            
+            let addressStrings = serverAddress.split(separator: ":")
+            self.serverIP = String(addressStrings[0])
+            guard let port = UInt16(addressStrings[1]) else
+            {
+                print("Error decoding ShadowServerConfig data: invalid server port \(addressStrings[1])")
+                throw ShadowConfigError.invalidServerPort(serverAddress: serverAddress)
+            }
+            
+            self.serverPort = port
             self.serverPrivateKey = serverPrivateKey
             self.mode = mode
         }
         
-        init?(from data: Data)
+        public init?(from data: Data)
         {
             let decoder = JSONDecoder()
             do
             {
                 let decoded = try decoder.decode(ShadowServerConfig.self, from: data)
+                
                 self = decoded
             }
             catch
@@ -63,12 +79,34 @@ public class ShadowConfig
                 return nil
             }
         }
+        
+        public init(from decoder: Decoder) throws
+        {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            let address = try container.decode(String.self, forKey: .serverAddress)
+            let addressStrings = address.split(separator: ":")
+            let ipAddress = String(addressStrings[0])
+            guard let port = UInt16(addressStrings[1]) else
+            {
+                print("Error decoding ShadowConfig data: invalid server port")
+                throw ShadowConfigError.invalidJSON
+            }
+            
+            self.serverAddress = address
+            self.serverIP = ipAddress
+            self.serverPort = port
+            self.serverPrivateKey = try container.decode(PrivateKey.self, forKey: .serverPrivateKey)
+            self.mode = try container.decode(CipherMode.self, forKey: .mode)
+            self.transportName = try container.decode(String.self, forKey: .transportName)
+        }
     }
     
     public struct ShadowClientConfig: Codable
     {
         public static let clientConfigFilename = "ShadowClientConfig.json"
         public let serverAddress: String
+        public let serverIP: String
+        public let serverPort: UInt16
         public let serverPublicKey: PublicKey
         public let mode: CipherMode
         public var transportName = "shadow"
@@ -78,9 +116,20 @@ public class ShadowConfig
             case serverAddress, serverPublicKey, mode = "cipherName", transportName = "transport"
         }
         
-        public init(serverAddress: String, serverPublicKey: PublicKey, mode: CipherMode)
+        public init(serverAddress: String, serverPublicKey: PublicKey, mode: CipherMode) throws
         {
             self.serverAddress = serverAddress
+            
+            let addressStrings = serverAddress.split(separator: ":")
+            let ipAddress = String(addressStrings[0])
+            guard let port = UInt16(addressStrings[1]) else
+            {
+                print("Error decoding ShadowConfig data: invalid server port")
+                throw ShadowConfigError.invalidServerPort(serverAddress: serverAddress)
+            }
+            
+            self.serverIP = ipAddress
+            self.serverPort = port
             self.serverPublicKey = serverPublicKey
             self.mode = mode
         }
@@ -116,6 +165,26 @@ public class ShadowConfig
                 return nil
             }
         }
+        
+        public init(from decoder: Decoder) throws
+        {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            let address = try container.decode(String.self, forKey: .serverAddress)
+            let addressStrings = address.split(separator: ":")
+            let ipAddress = String(addressStrings[0])
+            guard let port = UInt16(addressStrings[1]) else
+            {
+                print("Error decoding ShadowConfig data: invalid server port")
+                throw ShadowConfigError.invalidJSON
+            }
+            
+            self.serverAddress = address
+            self.serverIP = ipAddress
+            self.serverPort = port
+            self.serverPublicKey = try container.decode(PublicKey.self, forKey: .serverPublicKey)
+            self.mode = try container.decode(CipherMode.self, forKey: .mode)
+            self.transportName = try container.decode(String.self, forKey: .transportName)
+        }
     }
 
     public static func generateNewConfigPair(serverAddress: String, cipher: CipherMode) throws -> (serverConfig: ShadowServerConfig, clientConfig: ShadowClientConfig)
@@ -123,8 +192,8 @@ public class ShadowConfig
         let privateKey = try PrivateKey(type: .P256KeyAgreement)
         let publicKey = privateKey.publicKey
 
-        let serverConfig = ShadowServerConfig(serverAddress: serverAddress, serverPrivateKey: privateKey, mode: cipher)
-        let clientConfig = ShadowClientConfig(serverAddress: serverAddress, serverPublicKey: publicKey, mode: cipher)
+        let serverConfig = try ShadowServerConfig(serverAddress: serverAddress, serverPrivateKey: privateKey, mode: cipher)
+        let clientConfig = try ShadowClientConfig(serverAddress: serverAddress, serverPublicKey: publicKey, mode: cipher)
         
         return (serverConfig, clientConfig)
     }
@@ -142,6 +211,7 @@ public class ShadowConfig
             let configPair = try ShadowConfig.generateNewConfigPair(serverAddress: serverAddress, cipher: cipher)
 
             let encoder = JSONEncoder()
+            encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
             let serverJson = try encoder.encode(configPair.serverConfig)
             let serverConfigFilePath = saveDirectory.appendingPathComponent(ShadowServerConfig.serverConfigFilename).path
             guard FileManager.default.createFile(atPath: serverConfigFilePath, contents: serverJson) else

@@ -7,7 +7,7 @@ let package = Package(
     name: "ShadowSwift",
     platforms: [
         .macOS(.v13),
-        .iOS(.v15)
+        .iOS(.v16)
     ],
     products: [
         .library(
@@ -15,13 +15,12 @@ let package = Package(
             targets: ["ShadowSwift"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.2"),
-        .package(url: "https://github.com/apple/swift-crypto", from: "2.1.0"),
-        .package(url: "https://github.com/apple/swift-log.git", from: "1.4.2"),
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.3"),
+        .package(url: "https://github.com/apple/swift-crypto", from: "2.5.0"),
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.5.3"),
 
         .package(url: "https://github.com/OperatorFoundation/Chord.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Datable.git", branch: "main"),
-        .package(url: "https://github.com/OperatorFoundation/Keychain", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/KeychainTypes.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Net.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Straw.git", branch: "main"),
@@ -37,7 +36,6 @@ let package = Package(
                 "Net",
                 "Chord",
                 "Datable",
-                "Keychain",
                 "KeychainTypes",
                 "Straw",
                 "Transmission",

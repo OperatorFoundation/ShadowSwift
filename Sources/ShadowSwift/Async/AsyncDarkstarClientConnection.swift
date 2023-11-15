@@ -42,7 +42,7 @@ open class AsyncDarkstarClientConnection: AsyncChannelConnection<DarkstarClientC
         try await self.init(network, config, logger)
     }
 
-    public init(_ network: AsyncTcpSocketConnection, _ config: ShadowConfig.ShadowClientConfig, _ logger: Logger) async throws
+    public init(_ network: AsyncConnection, _ config: ShadowConfig.ShadowClientConfig, _ logger: Logger) async throws
     {
         let channel = try await DarkstarClientChannel(network, config, logger)
 
@@ -124,6 +124,13 @@ public class DarkstarReadable: Readable
     {
         self.network = network
         self.cipher = cipher
+    }
+    
+    public func readNonblocking(_ size: Int) async throws -> Data
+    {
+        // FIXME: Not Implemented
+        
+        throw AsyncDarkstarClientConnectionError.notImplemented("readNonblocking")
     }
 
     public func read() async throws -> Data
@@ -214,4 +221,5 @@ public enum AsyncDarkstarClientConnectionError: Error
     case numberDecodeFailure
     case sendAddressFailed
     case badServerAddress(String)
+    case notImplemented(String)
 }

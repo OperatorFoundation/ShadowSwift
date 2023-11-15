@@ -140,7 +140,13 @@ public class DarkStarServerAuthenticator
         }
         else
         {
-            print("DarkStarServerAuthenticator failed to confirm a client confirmation code.")
+            print("\nDarkStarServerAuthenticator failed to confirm a client confirmation code.")
+            print("data: \(data.hex)")
+            print("code: \(code.hex)")
+            print("theirPublicKey: \(theirPublicKey)")
+            print("myPrivateKey: \(myPrivateKey)")
+            print("srverPersistentPublicKey: \(serverPersistentPublicKey)")
+            print("clientEphemeralPublicKey: \(clientEphemeralPublicKey)\n")
             return false
         }
     }
@@ -172,6 +178,13 @@ public class DarkStarServerAuthenticator
             print("DarkStarServerAuthenticator failed failed to create ephemeral public key data.")
             return nil
         }
+        
+        print("ecdh data (\(ecdhData.count) bytes): \(ecdhData.hex)")
+        print("serverIdentifier: \(serverIdentifier.hex)")
+        print("serverPersistentPublicKey (\(serverPersistentPublicKeyData.count) bytes): \(serverPersistentPublicKeyData.hex)")
+        print("clientEphemeralPublicKey (\(clientEphemeralPublicKeyData) bytes): \(clientEphemeralPublicKeyData.hex)")
+        print("DarkStarString: \(DarkStarString)")
+        print("ClientString: \(ClientString)")
         
         var hash = SHA256()
         hash.update(data: ecdhData)
