@@ -48,7 +48,7 @@ public class AsyncDarkstarListener: AsyncListener
 
     public func close() async throws
     {
-        self.networkListener.close()
+        try await self.networkListener.close()
     }
 }
 
