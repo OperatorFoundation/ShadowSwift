@@ -45,6 +45,11 @@ public class AsyncDarkstarListener: AsyncListener
         let network = try await networkListener.accept()
         return try await AsyncDarkstarServerConnection(network, self.config, self.logger)
     }
+
+    public func close() async throws
+    {
+        self.networkListener.close()
+    }
 }
 
 public enum AsyncDarkstarListenerError: Error
