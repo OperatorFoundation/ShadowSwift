@@ -20,21 +20,8 @@ public class AsyncDarkstarListener: AsyncListener
 
     public init(config: ShadowConfig.ShadowServerConfig, logger: Logger) throws
     {
-        let parts = config.serverAddress.split(separator: ".")
-        guard parts.count == 2 else
-        {
-            throw AsyncDarkstarListenerError.badServerAddress(config.serverAddress)
-        }
-
-        let host = String(parts[0])
-
-        guard let port = Int(String(parts[1])) else
-        {
-            throw AsyncDarkstarListenerError.badServerAddress(config.serverAddress)
-        }
-
-        self.host = host
-        self.port = port
+        self.host = config.serverIP
+        self.port = Int(config.serverPort)
         self.config = config
         self.logger = logger
         self.networkListener = try AsyncTcpSocketListener(host: self.host, port: self.port, self.logger)
