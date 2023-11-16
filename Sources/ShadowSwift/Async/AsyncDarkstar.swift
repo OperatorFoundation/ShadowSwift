@@ -106,12 +106,14 @@ public struct AsyncDarkstar
 
         guard let serverPersistentPublicKeyDarkstarData = myPrivateStaticKey.publicKey.compactRepresentation else
         {
-            throw AsyncDarkstarError.keyAgreementFailed
+            print("Darkstar: Failed to generate the serverPersistentPublicKey data.")
+            return nil
         }
 
         guard let clientEphemeralPublicKeyDarkstarData = theirPublicKey.compactRepresentation else
         {
-            throw AsyncDarkstarError.keyAgreementFailed
+            print("Darkstar: Failed to generate the clientEphemeralPublicKey data.")
+            return nil
         }
 
         var hash = SHA256()
