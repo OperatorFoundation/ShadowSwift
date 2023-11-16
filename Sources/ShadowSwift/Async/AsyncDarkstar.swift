@@ -104,22 +104,12 @@ public struct AsyncDarkstar
             return nil
         }
 
-        guard let serverPersistentPublicKeyKeychainData = myPrivateStaticKey.publicKey.data else
-        {
-            throw AsyncDarkstarError.keyAgreementFailed
-        }
-        let serverPersistentPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(rawRepresentation: serverPersistentPublicKeyKeychainData)
-        guard let serverPersistentPublicKeyDarkstarData = serverPersistentPublicKeyCryptoKit.compactRepresentation else
+        guard let serverPersistentPublicKeyDarkstarData = myPrivateStaticKey.publicKey.compactRepresentation else
         {
             throw AsyncDarkstarError.keyAgreementFailed
         }
 
-        guard let clientEphemeralPublicKeyKeychainData = theirPublicKey.data else
-        {
-            throw AsyncDarkstarError.keyAgreementFailed
-        }
-        let clientEphemeralPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(rawRepresentation: clientEphemeralPublicKeyKeychainData)
-        guard let clientEphemeralPublicKeyDarkstarData = clientEphemeralPublicKeyCryptoKit.compactRepresentation else
+        guard let clientEphemeralPublicKeyDarkstarData = theirPublicKey.compactRepresentation else
         {
             throw AsyncDarkstarError.keyAgreementFailed
         }
