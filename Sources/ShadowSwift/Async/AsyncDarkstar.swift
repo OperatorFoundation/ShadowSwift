@@ -56,14 +56,31 @@ public struct AsyncDarkstar
             throw AsyncDarkstarError.failedToMakeServerIdentifier
         }
 
-        let serverPersistentPublicKeyData = myPrivateStaticKey.publicKey.data!
-        let clientEphemeralPublicKeyData = theirPublicKey.data!
+        guard let serverPersistentPublicKeyKeychainData = myPrivateStaticKey.publicKey.data else
+        {
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
+        let serverPersistentPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(rawRepresentation: serverPersistentPublicKeyKeychainData)
+        guard let serverPersistentPublicKeyDarkstarData = serverPersistentPublicKeyCryptoKit.compactRepresentation else
+        {
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
+
+        guard let clientEphemeralPublicKeyKeychainData = theirPublicKey.data else
+        {
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
+        let clientEphemeralPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(rawRepresentation: clientEphemeralPublicKeyKeychainData)
+        guard let clientEphemeralPublicKeyDarkstarData = clientEphemeralPublicKeyCryptoKit.compactRepresentation else
+        {
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
 
         var hash = SHA256()
         hash.update(data: ecdhData)
         hash.update(data: serverIdentifier)
-        hash.update(data: serverPersistentPublicKeyData)
-        hash.update(data: clientEphemeralPublicKeyData)
+        hash.update(data: serverPersistentPublicKeyDarkstarData)
+        hash.update(data: clientEphemeralPublicKeyDarkstarData)
         hash.update(data: DarkStarString.data)
         hash.update(data: ServerString.data)
         let result = hash.finalize()
@@ -87,14 +104,31 @@ public struct AsyncDarkstar
             return nil
         }
 
-        let serverPersistentPublicKeyData = myPrivateStaticKey.publicKey.compactRepresentation!
-        let clientEphemeralPublicKeyData = theirPublicKey.compactRepresentation!
+        guard let serverPersistentPublicKeyKeychainData = myPrivateStaticKey.publicKey.data else
+        {
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
+        let serverPersistentPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(rawRepresentation: serverPersistentPublicKeyKeychainData)
+        guard let serverPersistentPublicKeyDarkstarData = serverPersistentPublicKeyCryptoKit.compactRepresentation else
+        {
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
+
+        guard let clientEphemeralPublicKeyKeychainData = theirPublicKey.data else
+        {
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
+        let clientEphemeralPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(rawRepresentation: clientEphemeralPublicKeyKeychainData)
+        guard let clientEphemeralPublicKeyDarkstarData = clientEphemeralPublicKeyCryptoKit.compactRepresentation else
+        {
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
 
         var hash = SHA256()
         hash.update(data: ecdhData)
         hash.update(data: serverIdentifier)
-        hash.update(data: serverPersistentPublicKeyData)
-        hash.update(data: clientEphemeralPublicKeyData)
+        hash.update(data: serverPersistentPublicKeyDarkstarData)
+        hash.update(data: clientEphemeralPublicKeyDarkstarData)
         hash.update(data: DarkStarString.data)
         hash.update(data: ServerString.data)
         let result = hash.finalize()
@@ -106,24 +140,40 @@ public struct AsyncDarkstar
 
     static public func handleServerEphemeralKey(connection: AsyncConnection) async throws -> (PrivateKey, PublicKey)
     {
-        let myEphemeralPrivateKey = try PrivateKey(type: .P256KeyAgreement)
+        let myEphemeralPrivateKey = DarkStar.generateEvenKey()
         let myEphemeralPublicKey = myEphemeralPrivateKey.publicKey
-        let myEphemeralPublicKeyData = myEphemeralPublicKey.data!
+
+        guard let myEphemeralPublicKeyData = myEphemeralPublicKey.compactRepresentation else
+        {
+            print("Darkstar.handleServerEphemeralKey: failed to generate a compact representation of our public key")
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
 
         try await connection.write(myEphemeralPublicKeyData)
 
-        return (myEphemeralPrivateKey, myEphemeralPublicKey)
+        let keychainPrivate = try KeychainTypes.PrivateKey(type: .P256KeyAgreement, data: myEphemeralPrivateKey.rawRepresentation)
+        let keychainPublic = try KeychainTypes.PublicKey(type: .P256KeyAgreement, data: myEphemeralPublicKey.rawRepresentation)
+
+        return (keychainPrivate, keychainPublic)
     }
 
     static public func handleClientEphemeralKey(connection: AsyncConnection) async throws -> (PrivateKey, PublicKey)
     {
-        let myEphemeralPrivateKey = try PrivateKey(type: .P256KeyAgreement)
+        let myEphemeralPrivateKey = DarkStar.generateEvenKey()
         let myEphemeralPublicKey = myEphemeralPrivateKey.publicKey
-        let myEphemeralPublicKeyData = myEphemeralPublicKey.data!
+
+        guard let myEphemeralPublicKeyData = myEphemeralPublicKey.compactRepresentation else
+        {
+            print("Darkstar.handleServerEphemeralKey: failed to generate a compact representation of our public key")
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
 
         try await connection.write(myEphemeralPublicKeyData)
 
-        return (myEphemeralPrivateKey, myEphemeralPublicKey)
+        let keychainPrivate = try KeychainTypes.PrivateKey(type: .P256KeyAgreement, data: myEphemeralPrivateKey.rawRepresentation)
+        let keychainPublic = try KeychainTypes.PublicKey(type: .P256KeyAgreement, data: myEphemeralPublicKey.rawRepresentation)
+
+        return (keychainPrivate, keychainPublic)
     }
 
     static public func generateClientConfirmationCode(connection: AsyncConnection, theirPublicKey: PublicKey, myPrivateKey: PrivateKey, host: String, port: Int, serverPersistentPublicKey: PublicKey, clientEphemeralPublicKey: PublicKey) throws -> Data
@@ -133,14 +183,31 @@ public struct AsyncDarkstar
 
         let serverIdentifier = try AsyncDarkstar.makeServerIdentifier(host, port)
 
-        let serverPersistentPublicKeyData = serverPersistentPublicKey.data!
-        let clientEphemeralPublicKeyData = clientEphemeralPublicKey.data!
+        guard let serverPersistentPublicKeyKeychainData = serverPersistentPublicKey.data else
+        {
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
+        let serverPersistentPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(rawRepresentation: serverPersistentPublicKeyKeychainData)
+        guard let serverPersistentPublicKeyDarkstarData = serverPersistentPublicKeyCryptoKit.compactRepresentation else
+        {
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
+
+        guard let clientEphemeralPublicKeyKeychainData = clientEphemeralPublicKey.data else
+        {
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
+        let clientEphemeralPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(rawRepresentation: clientEphemeralPublicKeyKeychainData)
+        guard let clientEphemeralPublicKeyDarkstarData = clientEphemeralPublicKeyCryptoKit.compactRepresentation else
+        {
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
 
         var hash = SHA256()
         hash.update(data: ecdhData)
         hash.update(data: serverIdentifier)
-        hash.update(data: serverPersistentPublicKeyData)
-        hash.update(data: clientEphemeralPublicKeyData)
+        hash.update(data: serverPersistentPublicKeyDarkstarData)
+        hash.update(data: clientEphemeralPublicKeyDarkstarData)
         hash.update(data: DarkStarString.data)
         hash.update(data: ClientString.data)
         let result = hash.finalize()
