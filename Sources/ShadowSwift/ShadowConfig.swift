@@ -34,7 +34,7 @@ public class ShadowConfig
         {
             self.serverAddress = serverAddress
             
-            let addressStrings = serverAddress.split(separator: ":")
+            let addressStrings = serverAddress.replacingOccurrences(of: " ", with: "").split(separator: ":")
             self.serverIP = String(addressStrings[0])
             guard let port = UInt16(addressStrings[1]) else
             {
@@ -84,7 +84,7 @@ public class ShadowConfig
         {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             let address = try container.decode(String.self, forKey: .serverAddress)
-            let addressStrings = address.split(separator: ":")
+            let addressStrings = address.replacingOccurrences(of: " ", with: "").split(separator: ":")
             let ipAddress = String(addressStrings[0])
             guard let port = UInt16(addressStrings[1]) else
             {
@@ -120,7 +120,7 @@ public class ShadowConfig
         {
             self.serverAddress = serverAddress
             
-            let addressStrings = serverAddress.split(separator: ":")
+            let addressStrings = serverAddress.replacingOccurrences(of: " ", with: "").split(separator: ":")
             let ipAddress = String(addressStrings[0])
             guard let port = UInt16(addressStrings[1]) else
             {
@@ -170,7 +170,7 @@ public class ShadowConfig
         {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             let address = try container.decode(String.self, forKey: .serverAddress)
-            let addressStrings = address.split(separator: ":")
+            let addressStrings = address.replacingOccurrences(of: " ", with: "").split(separator: ":")
             let ipAddress = String(addressStrings[0])
             guard let port = UInt16(addressStrings[1]) else
             {
