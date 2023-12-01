@@ -101,7 +101,7 @@ public class ShadowConfig
         }
     }
     
-    public struct ShadowClientConfig: Codable
+    public struct ShadowClientConfig: Codable, Equatable
     {
         public static let clientConfigFilename = "ShadowClientConfig.json"
         public let serverAddress: String
