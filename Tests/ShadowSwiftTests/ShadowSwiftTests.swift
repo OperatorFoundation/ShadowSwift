@@ -7,12 +7,7 @@
 
 import Crypto
 import XCTest
-
-#if os(macOS) || os(iOS)
-import os.log
-#else
 import Logging
-#endif
 
 import Datable
 import Chord
@@ -25,12 +20,7 @@ import XCTest
 
 class ShadowSwiftTests: XCTestCase
 {
-#if os(macOS) || os(iOS)
-    let logger: Logger = Logger()
-#else
-    let logger: Logger = Logger(label: "Shadow Logger")
-#endif
-    
+    let logger: Logger = Logger(label: "Shadow Logger")    
     let testIPString = ""
     let testPort: UInt16 = 2345
     let plainText = Data(array: [0, 1, 2, 3, 4])
