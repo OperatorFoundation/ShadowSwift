@@ -240,8 +240,10 @@ public struct AsyncDarkstar
                 }
             }
         }
-
-        return try PublicKey(type: .P256KeyAgreement, data: theirEphemeralPublicKeyData)
+        
+        let cryptoKitKey = try P256.KeyAgreement.PublicKey(compactRepresentation: theirEphemeralPublicKeyData)
+        
+        return try PublicKey(type: .P256KeyAgreement, data: cryptoKitKey.x963Representation)
     }
 
     static func sharedSecretToData(secret: SharedSecret) -> Data
