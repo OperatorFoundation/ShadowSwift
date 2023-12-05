@@ -210,7 +210,9 @@ public struct AsyncDarkstar
     static public func handleTheirEphemeralPublicKey(connection: AsyncConnection, bloomFilter: BloomFilter<Data>?) async throws -> PublicKey
     {
         // Receive their ephemeral key
+        print("AsyncDarkstar - Attempting to read client key data...")
         let theirEphemeralPublicKeyData = try await connection.readSize(P256KeySize)
+        print("AsyncDarkstar - Read \(theirEphemeralPublicKeyData.count) bytes of client key data.")
 
         if let bloomFilter = bloomFilter // Server
         {
