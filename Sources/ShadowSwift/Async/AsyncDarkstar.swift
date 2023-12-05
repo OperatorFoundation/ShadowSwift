@@ -147,7 +147,7 @@ public struct AsyncDarkstar
         let keychainPrivate = try KeychainTypes.PrivateKey(type: .P256KeyAgreement, data: myEphemeralPrivateKey.rawRepresentation)
         
         print("AsyncDarkstar: Creating a keychain private key...")
-        let keychainPublic = try KeychainTypes.PublicKey(type: .P256KeyAgreement, data: myEphemeralPublicKey.rawRepresentation)
+        let keychainPublic = try KeychainTypes.PublicKey(type: .P256KeyAgreement, data: myEphemeralPublicKey.x963Representation)
         
         print("AsyncDarkstar: Keychain key pair created.")
 
@@ -248,7 +248,7 @@ public struct AsyncDarkstar
         
         let cryptoKitKey = try P256.KeyAgreement.PublicKey(compactRepresentation: theirEphemeralPublicKeyData)
         
-        return try PublicKey(type: .P256KeyAgreement, data: cryptoKitKey.rawRepresentation)
+        return try PublicKey(type: .P256KeyAgreement, data: cryptoKitKey.x963Representation)
     }
 
     static func sharedSecretToData(secret: SharedSecret) -> Data
