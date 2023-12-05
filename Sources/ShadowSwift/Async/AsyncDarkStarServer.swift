@@ -136,8 +136,20 @@ public class AsyncDarkstarServer
         {
             throw AsyncDarkstarServerError.keyToDataFailed
         }
+        
+        let serverPersistentPublicCryptokitKey = try P256.KeyAgreement.PublicKey(x963Representation: serverPersistentPublicKeyData)
+        guard let serverPersistentPublicKeyDarkstarFormat = serverPersistentPublicCryptokitKey.compactRepresentation else
+        {
+            throw AsyncDarkstarServerError.keyToDataFailed
+        }
 
         guard let clientEphemeralPublicKeyData = clientEphemeralPublicKey.data else
+        {
+            throw AsyncDarkstarServerError.keyToDataFailed
+        }
+        
+        let clientEphemeralPublicCryptokitKey = try P256.KeyAgreement.PublicKey(x963Representation: clientEphemeralPublicKeyData)
+        guard let clientEphemeralPublicKeyDarkstarFormat = clientEphemeralPublicCryptokitKey.compactRepresentation else
         {
             throw AsyncDarkstarServerError.keyToDataFailed
         }
@@ -145,8 +157,8 @@ public class AsyncDarkstarServer
         var hash = SHA256()
         hash.update(data: ecdhData)
         hash.update(data: serverIdentifier)
-        hash.update(data: serverPersistentPublicKeyData)
-        hash.update(data: clientEphemeralPublicKeyData)
+        hash.update(data: serverPersistentPublicKeyDarkstarFormat)
+        hash.update(data: clientEphemeralPublicKeyDarkstarFormat)
         hash.update(data: DarkStarString.data)
         hash.update(data: ClientString.data)
         let result = hash.finalize()
