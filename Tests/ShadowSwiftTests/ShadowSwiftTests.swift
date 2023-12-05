@@ -22,7 +22,7 @@ class ShadowSwiftTests: XCTestCase
 {
     let logger: Logger = Logger(label: "Shadow Logger")    
     let testIPString = ""
-    let testPort: UInt16 = 2345
+    let testPort: UInt16 = 1111
     let plainText = Data(array: [0, 1, 2, 3, 4])
 
 #if os(Linux)
@@ -223,7 +223,6 @@ class ShadowSwiftTests: XCTestCase
     func testShadowConnection() throws
     {
         let connected = expectation(description: "Connection callback called")
-        //let sent = expectation(description: "TCP data sent")
         
         let _ = NWEndpoint.Host(testIPString)
         guard let _ = NWEndpoint.Port(rawValue: testPort)
@@ -232,18 +231,13 @@ class ShadowSwiftTests: XCTestCase
             XCTFail()
             return
         }
-
-        let publicKeyString = "6LukZ8KqZLQ7eOdaTVFkBVqMA8NS1AUxwqG17L/kHnQ="
-        guard let publicKeyData = Data(base64: publicKeyString) else
+        let configURL = FileManager.default.homeDirectoryForCurrentUser.appending(path: "ShadowClientConfig.txt")
+        guard let shadowConfig = ShadowConfig.ShadowClientConfig(path: configURL.path) else
         {
             XCTFail()
             return
         }
 
-        let publicKey = try PublicKey(type: .P256KeyAgreement, data: publicKeyData)
-        
-        let shadowConfig = try ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
-        
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
         
         guard var shadowConnection = shadowFactory.connect(using: .tcp)
@@ -288,18 +282,13 @@ class ShadowSwiftTests: XCTestCase
             XCTFail()
             return
         }
-
-        let publicKeyString = "6LukZ8KqZLQ7eOdaTVFkBVqMA8NS1AUxwqG17L/kHnQ="
-        guard let publicKeyData = Data(base64: publicKeyString) else
+        let configURL = FileManager.default.homeDirectoryForCurrentUser.appending(path: "ShadowClientConfig.txt")
+        guard let shadowConfig = ShadowConfig.ShadowClientConfig(path: configURL.path) else
         {
             XCTFail()
             return
         }
 
-        let publicKey = try PublicKey(type: .P256KeyAgreement, data: publicKeyData)
-
-        let shadowConfig = try ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
-        
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
         
         guard var shadowConnection = shadowFactory.connect(using: .tcp)
