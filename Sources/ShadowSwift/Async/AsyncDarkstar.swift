@@ -143,8 +143,8 @@ public struct AsyncDarkstar
 
         try await connection.write(myEphemeralPublicKeyData)
 
-        let keychainPrivate = try KeychainTypes.PrivateKey(type: .P256KeyAgreement, data: myEphemeralPrivateKey.rawRepresentation)
-        let keychainPublic = try KeychainTypes.PublicKey(type: .P256KeyAgreement, data: myEphemeralPublicKey.rawRepresentation)
+        let keychainPrivate = try KeychainTypes.PrivateKey(type: .P256KeyAgreement, data: myEphemeralPrivateKey.x963Representation)
+        let keychainPublic = try KeychainTypes.PublicKey(type: .P256KeyAgreement, data: myEphemeralPublicKey.x963Representation)
 
         return (keychainPrivate, keychainPublic)
     }
