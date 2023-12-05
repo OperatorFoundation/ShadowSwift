@@ -25,7 +25,7 @@ public class DarkStarServerAuthenticator
         // Receive client ephemeral key
         guard let clientEphemeralPublicKey = DarkStar.handleTheirEphemeralPublicKey(connection: connection, bloomFilter: bloomFilter) else
         {
-            print("ShadowSwift: Failed to receive the client ephemeral key 🕳.")
+            print("DarkStarServerAuthenticator: Failed to receive the client ephemeral key 🕳.")
             let transport = TransmissionToTransportConnection({return connection})
             let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
             

@@ -28,63 +28,69 @@ public class AsyncDarkstarServer
         let serverPersistentPublicKey = serverPersistentPrivateKey.publicKey
 
         // Receive client ephemeral key
-        guard let clientEphemeralPublicKey = try? await AsyncDarkstar.handleTheirEphemeralPublicKey(connection: connection, bloomFilter: bloomFilter) else
-        {
-            print("ShadowSwift: Failed to receive the client ephemeral key 🕳.")
-            let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
-            throw AsyncDarkstarServerError.blackHoled
-        }
-
-        // Receive and validate client confirmation code
         do
         {
-            try await AsyncDarkstarServer.handleClientConfirmationCode(connection: connection, theirPublicKey: clientEphemeralPublicKey, myPrivateKey: serverPersistentPrivateKey, host: host, port: port, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey)
+            let clientEphemeralPublicKey = try await AsyncDarkstar.handleTheirEphemeralPublicKey(connection: connection, bloomFilter: bloomFilter)
+            
+            // Receive and validate client confirmation code
+            do
+            {
+                try await AsyncDarkstarServer.handleClientConfirmationCode(connection: connection, theirPublicKey: clientEphemeralPublicKey, myPrivateKey: serverPersistentPrivateKey, host: host, port: port, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey)
+            }
+            catch
+            {
+                print("ShadowSwift: received an invalid client confirmation code 🕳. \(error)")
+                let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
+                throw AsyncDarkstarServerError.blackHoled
+            }
+
+            // Send server ephemeral key
+            guard let (serverEphemeralPrivateKey, _) = try? await AsyncDarkstar.handleServerEphemeralKey(connection: connection) else
+            {
+                print("ShadowSwift: Failed to send the server ephemeral key 🕳.")
+                let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
+                throw AsyncDarkstarServerError.blackHoled
+            }
+
+            // Create shared key
+            guard let serverToClientSharedKey = try? AsyncDarkstarServer.createServerToClientSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, host: host, port: port) else
+            {
+                print("ShadowSwift: Failed to create serverToClientSharedKey 🕳.")
+                let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
+                throw AsyncDarkstarServerError.blackHoled
+            }
+
+            self.serverToClientSharedKey = serverToClientSharedKey
+
+            guard let clientToServerSharedKey = try? AsyncDarkstarServer.createClientToServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, host: host, port: port) else
+            {
+                print("ShadowSwift: Failed to create clientToServerSharedKey 🕳.")
+                let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
+                throw AsyncDarkstarServerError.blackHoled
+            }
+
+            self.clientToServerSharedKey = clientToServerSharedKey
+
+            // Send server confirmation code
+            do
+            {
+                try await AsyncDarkstarServer.handleServerConfirmationCode(connection: connection, host: host, port: port, serverStaticPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey)
+            }
+            catch
+            {
+                print("ShadowSwift: Failed to send the server confirmation code 🕳. \(error)")
+                let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
+                throw AsyncDarkstarServerError.blackHoled
+            }
         }
-        catch
+        catch (let clientEphemeralKeyError)
         {
-            print("ShadowSwift: received an invalid client confirmation code 🕳. \(error)")
+            print("AsyncDarkstarServer: Failed to handle the client ephemeral key: \(clientEphemeralKeyError)")
             let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
             throw AsyncDarkstarServerError.blackHoled
         }
 
-        // Send server ephemeral key
-        guard let (serverEphemeralPrivateKey, _) = try? await AsyncDarkstar.handleServerEphemeralKey(connection: connection) else
-        {
-            print("ShadowSwift: Failed to send the server ephemeral key 🕳.")
-            let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
-            throw AsyncDarkstarServerError.blackHoled
-        }
-
-        // Create shared key
-        guard let serverToClientSharedKey = try? AsyncDarkstarServer.createServerToClientSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, host: host, port: port) else
-        {
-            print("ShadowSwift: Failed to create serverToClientSharedKey 🕳.")
-            let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
-            throw AsyncDarkstarServerError.blackHoled
-        }
-
-        self.serverToClientSharedKey = serverToClientSharedKey
-
-        guard let clientToServerSharedKey = try? AsyncDarkstarServer.createClientToServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, host: host, port: port) else
-        {
-            print("ShadowSwift: Failed to create clientToServerSharedKey 🕳.")
-            let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
-            throw AsyncDarkstarServerError.blackHoled
-        }
-
-        self.clientToServerSharedKey = clientToServerSharedKey
-
-        // Send server confirmation code
-        do
-        {
-            try await AsyncDarkstarServer.handleServerConfirmationCode(connection: connection, host: host, port: port, serverStaticPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey)
-        }
-        catch
-        {
-            print("ShadowSwift: Failed to send the server confirmation code 🕳. \(error)")
-            let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
-            throw AsyncDarkstarServerError.blackHoled
-        }
+        
     }
 
     static public func handleServerConfirmationCode(connection: AsyncConnection, host: String, port: Int, serverStaticPrivateKey: PrivateKey, serverEphemeralPrivateKey: PrivateKey, clientEphemeralPublicKey: PublicKey) async throws
