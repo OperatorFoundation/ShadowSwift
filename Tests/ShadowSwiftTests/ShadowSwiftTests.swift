@@ -762,7 +762,7 @@ class ShadowSwiftTests: XCTestCase
 
         let serverConfig = try ShadowConfig.ShadowServerConfig(serverAddress: "127.0.0.1:1234", serverPrivateKey: privateKey, mode: .DARKSTAR)
         
-        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: serverConfig, logger: self.logger) else
+        guard let server = ShadowServer(config: serverConfig, logger: self.logger) else
         {
             XCTFail()
             return
@@ -827,7 +827,7 @@ class ShadowSwiftTests: XCTestCase
         
         let shadowServerConfig = try ShadowConfig.ShadowServerConfig(serverAddress: "127.0.0.1:1234", serverPrivateKey: privateKey, mode: .DARKSTAR)
         
-        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: shadowServerConfig, logger: self.logger) else
+        guard let server = ShadowServer(config: shadowServerConfig, logger: self.logger) else
         {
             XCTFail()
             return

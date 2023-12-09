@@ -21,7 +21,7 @@ public class ShadowServer: Transmission.Listener
     let endpoint: NWEndpoint
     let bloomFilterURL: URL
     
-    public init?(host: String, port: Int, listener: Transmission.Listener, config: ShadowConfig.ShadowServerConfig, logger: Logger)
+    public init?(listener: Transmission.Listener, config: ShadowConfig.ShadowServerConfig, logger: Logger)
     {
         guard let supportDirectoryURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else
         {
@@ -29,22 +29,22 @@ public class ShadowServer: Transmission.Listener
             return nil
         }
         
-        guard let ipv4Address = IPv4Address(host) else
+        guard let ipv4Address = IPv4Address(config.serverIP) else
         {
-            logger.error("Failed to start the Shadow server: \(host) is not a valid IPV4 address.")
+            logger.error("Failed to start the Shadow server: \(config.serverIP) is not a valid IPV4 address.")
             return nil
         }
             
         self.bloomFilterURL = supportDirectoryURL.appendingPathComponent(bloomFilterFilename)
-        self.endpoint = NWEndpoint.hostPort(host: NWEndpoint.Host.ipv4(ipv4Address), port: NWEndpoint.Port(integerLiteral: UInt16(port)))
+        self.endpoint = NWEndpoint.hostPort(host: NWEndpoint.Host.ipv4(ipv4Address), port: NWEndpoint.Port(integerLiteral: UInt16(config.serverPort)))
         self.listener = listener
         self.config = config
         self.log = logger        
     }
 
-    public init?(host: String, port: Int, config: ShadowConfig.ShadowServerConfig, logger: Logger, bloomFilterURL: URL)
+    public init?(config: ShadowConfig.ShadowServerConfig, logger: Logger, bloomFilterURL: URL)
     {
-        if host == "0.0.0.0"
+        if config.serverIP == "0.0.0.0"
         {
             logger.error("Shadow Server does not allow '0.0.0.0' as a bindhost you must use the actual server IP.")
             return nil
@@ -53,15 +53,15 @@ public class ShadowServer: Transmission.Listener
         self.config = config
         self.log = logger
         
-        guard let ipv4Address = IPv4Address(host) else
+        guard let ipv4Address = IPv4Address(config.serverIP) else
         {
-            logger.error("Failed to start the Shadow server: \(host) is not a valid IPV4 address.")
+            logger.error("Failed to start the Shadow server: \(config.serverIP) is not a valid IPV4 address.")
             return nil
         }
                                                   
-        self.endpoint = NWEndpoint.hostPort(host: NWEndpoint.Host.ipv4(ipv4Address), port: NWEndpoint.Port(integerLiteral: UInt16(port)))
+        self.endpoint = NWEndpoint.hostPort(host: NWEndpoint.Host.ipv4(ipv4Address), port: NWEndpoint.Port(integerLiteral: UInt16(config.serverPort)))
 
-        guard let listener = TransmissionListener(port: port, logger: nil) else
+        guard let listener = TransmissionListener(port: Int(config.serverPort), logger: nil) else
         {
             logger.error("Failed to start the Shadow server: we were unable to get a Transmission listener.")
             return nil
@@ -71,7 +71,7 @@ public class ShadowServer: Transmission.Listener
         self.bloomFilterURL = bloomFilterURL
     }
     
-    public convenience init?(host: String, port: Int, config: ShadowConfig.ShadowServerConfig, logger: Logger)
+    public convenience init?(config: ShadowConfig.ShadowServerConfig, logger: Logger)
     {
         guard let supportDirectoryURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else
         {
@@ -81,7 +81,7 @@ public class ShadowServer: Transmission.Listener
         
         let bloomURL = supportDirectoryURL.appendingPathComponent(bloomFilterFilename)
         
-        self.init(host: host, port: port, config: config, logger: logger, bloomFilterURL: bloomURL)
+        self.init(config: config, logger: logger, bloomFilterURL: bloomURL)
     }
 
     public func accept() throws -> Transmission.Connection
