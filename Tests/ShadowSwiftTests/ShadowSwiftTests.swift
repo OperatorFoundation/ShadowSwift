@@ -7,12 +7,7 @@
 
 import Crypto
 import XCTest
-
-#if os(macOS) || os(iOS)
-import os.log
-#else
 import Logging
-#endif
 
 import Datable
 import Chord
@@ -25,14 +20,9 @@ import XCTest
 
 class ShadowSwiftTests: XCTestCase
 {
-#if os(macOS) || os(iOS)
-    let logger: Logger = Logger()
-#else
-    let logger: Logger = Logger(label: "Shadow Logger")
-#endif
-    
+    let logger: Logger = Logger(label: "Shadow Logger")    
     let testIPString = ""
-    let testPort: UInt16 = 2345
+    let testPort: UInt16 = 1111
     let plainText = Data(array: [0, 1, 2, 3, 4])
 
 #if os(Linux)
@@ -230,20 +220,9 @@ class ShadowSwiftTests: XCTestCase
         wait(for: [ready, sent, received], timeout: 60)  // 30 seconds
     }
     
-    
-    func testConfigFromFile()
-    {
-        guard ShadowConfig.ShadowServerConfig(path: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/Configs/shadowsocksPrivateKey.json").path) != nil else
-        {
-            XCTFail()
-            return
-        }
-    }
-    
     func testShadowConnection() throws
     {
         let connected = expectation(description: "Connection callback called")
-        //let sent = expectation(description: "TCP data sent")
         
         let _ = NWEndpoint.Host(testIPString)
         guard let _ = NWEndpoint.Port(rawValue: testPort)
@@ -252,18 +231,13 @@ class ShadowSwiftTests: XCTestCase
             XCTFail()
             return
         }
-
-        let publicKeyString = "6LukZ8KqZLQ7eOdaTVFkBVqMA8NS1AUxwqG17L/kHnQ="
-        guard let publicKeyData = Data(base64: publicKeyString) else
+        let configURL = FileManager.default.homeDirectoryForCurrentUser.appending(path: "ShadowClientConfig.txt")
+        guard let shadowConfig = ShadowConfig.ShadowClientConfig(path: configURL.path) else
         {
             XCTFail()
             return
         }
 
-        let publicKey = try PublicKey(type: .P256KeyAgreement, data: publicKeyData)
-        
-        let shadowConfig = try ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
-        
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
         
         guard var shadowConnection = shadowFactory.connect(using: .tcp)
@@ -308,18 +282,13 @@ class ShadowSwiftTests: XCTestCase
             XCTFail()
             return
         }
-
-        let publicKeyString = "6LukZ8KqZLQ7eOdaTVFkBVqMA8NS1AUxwqG17L/kHnQ="
-        guard let publicKeyData = Data(base64: publicKeyString) else
+        let configURL = FileManager.default.homeDirectoryForCurrentUser.appending(path: "ShadowClientConfig.txt")
+        guard let shadowConfig = ShadowConfig.ShadowClientConfig(path: configURL.path) else
         {
             XCTFail()
             return
         }
 
-        let publicKey = try PublicKey(type: .P256KeyAgreement, data: publicKeyData)
-
-        let shadowConfig = try ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
-        
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: logger)
         
         guard var shadowConnection = shadowFactory.connect(using: .tcp)
@@ -713,6 +682,7 @@ class ShadowSwiftTests: XCTestCase
         }
     }
     
+    #if os(macOS)
     func testCreateNewConfigPair()
     {
         let saveDirectory = FileManager.default.homeDirectoryForCurrentUser
@@ -736,6 +706,16 @@ class ShadowSwiftTests: XCTestCase
             XCTFail()
         }
     }
+    
+    func testConfigFromFile()
+    {
+        guard ShadowConfig.ShadowServerConfig(path: FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/Configs/shadowsocksPrivateKey.json").path) != nil else
+        {
+            XCTFail()
+            return
+        }
+    }
+    #endif
     
     func testJSONConfig() throws
     {
@@ -782,7 +762,7 @@ class ShadowSwiftTests: XCTestCase
 
         let serverConfig = try ShadowConfig.ShadowServerConfig(serverAddress: "127.0.0.1:1234", serverPrivateKey: privateKey, mode: .DARKSTAR)
         
-        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: serverConfig, logger: self.logger) else
+        guard let server = ShadowServer(config: serverConfig, logger: self.logger) else
         {
             XCTFail()
             return
@@ -847,7 +827,7 @@ class ShadowSwiftTests: XCTestCase
         
         let shadowServerConfig = try ShadowConfig.ShadowServerConfig(serverAddress: "127.0.0.1:1234", serverPrivateKey: privateKey, mode: .DARKSTAR)
         
-        guard let server = ShadowServer(host: "127.0.0.1", port: 1234, config: shadowServerConfig, logger: self.logger) else
+        guard let server = ShadowServer(config: shadowServerConfig, logger: self.logger) else
         {
             XCTFail()
             return

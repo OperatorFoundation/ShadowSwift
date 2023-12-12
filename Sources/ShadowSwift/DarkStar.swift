@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  DarkStar.swift
+//
 //
 //  Created by Dr. Brandon Wiley on 9/24/21.
 //
@@ -13,7 +13,7 @@ import Transmission
 
 let P256KeySize = 32 // compact format
 let ConfirmationSize = 32
-let NonceSize = 32
+//let NonceSize = 32
 
 let DarkStarString = "DarkStar"
 let ServerString = "server"
@@ -54,8 +54,17 @@ public struct DarkStar
             return nil
         }
         
-        let serverPersistentPublicKeyData = myPrivateStaticKey.publicKey.compactRepresentation!
-        let clientEphemeralPublicKeyData = theirPublicKey.compactRepresentation!
+        guard let serverPersistentPublicKeyData = myPrivateStaticKey.publicKey.compactRepresentation else
+        {
+            print("Darkstar: failed to get a compact representation of serverPersistentPublicKeyData.")
+            return nil
+        }
+        
+        guard let clientEphemeralPublicKeyData = theirPublicKey.compactRepresentation else
+        {
+            print("Darkstar: failed to get a compact representation of clientEphemeralPublicKeyData.")
+            return nil
+        }
 
         var hash = SHA256()
         hash.update(data: ecdhData)
@@ -85,8 +94,17 @@ public struct DarkStar
             return nil
         }
         
-        let serverPersistentPublicKeyData = myPrivateStaticKey.publicKey.compactRepresentation!
-        let clientEphemeralPublicKeyData = theirPublicKey.compactRepresentation!
+        guard let serverPersistentPublicKeyData = myPrivateStaticKey.publicKey.compactRepresentation else
+        {
+            print("Darkstar: failed to get a compact representation of serverPersistentPublicKeyData.")
+            return nil
+        }
+        
+        guard let clientEphemeralPublicKeyData = theirPublicKey.compactRepresentation else
+        {
+            print("Darkstar: failed to get a compact representation of clientEphemeralPublicKeyData.")
+            return nil
+        }
 
         var hash = SHA256()
         hash.update(data: ecdhData)
@@ -104,9 +122,14 @@ public struct DarkStar
     
     static public func handleServerEphemeralKey(connection: Connection) -> (P256.KeyAgreement.PrivateKey, P256.KeyAgreement.PublicKey)?
     {
-        let myEphemeralPrivateKey = P256.KeyAgreement.PrivateKey()
+        let myEphemeralPrivateKey = DarkStar.generateEvenKey()
         let myEphemeralPublicKey = myEphemeralPrivateKey.publicKey
-        let myEphemeralPublicKeyData = myEphemeralPublicKey.compactRepresentation!
+        
+        guard let myEphemeralPublicKeyData = myEphemeralPublicKey.compactRepresentation else
+        {
+            print("Darkstar.handleServerEphemeralKey: failed to generate a compact representation of our public key")
+            return nil
+        }
 
         guard connection.write(data: myEphemeralPublicKeyData) else
         {
@@ -115,6 +138,27 @@ public struct DarkStar
         }
 
         return (myEphemeralPrivateKey, myEphemeralPublicKey)
+    }
+    
+    static public func generateEvenKey() -> P256.KeyAgreement.PrivateKey
+    {
+        // Keep generating keys until we get an even one
+        while true
+        {
+            let privateKey = P256.KeyAgreement.PrivateKey()
+            let publicKeyCompressed = privateKey.publicKey.compressedRepresentation
+            
+            if publicKeyCompressed[0] == 2
+            {
+                // Make sure a compact representation is possible
+                guard let _ = privateKey.publicKey.compactRepresentation else
+                {
+                    continue
+                }
+                
+                return privateKey
+            }
+        }
     }
 
     #if os(macOS)
@@ -158,8 +202,17 @@ public struct DarkStar
             return nil
         }
         
-        let serverPersistentPublicKeyData = serverPersistentPublicKey.compactRepresentation!
-        let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation!
+        guard let serverPersistentPublicKeyData = serverPersistentPublicKey.compactRepresentation else
+        {
+            print("Failed to get a compact representation of serverPersistentPublicKey")
+            return nil
+        }
+        
+        guard let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation else
+        {
+            print("Failed to get a compact representation of clientEphemeralPublicKey")
+            return nil
+        }
 
         var hash = SHA256()
         hash.update(data: ecdhData)

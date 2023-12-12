@@ -75,22 +75,11 @@ public class DarkstarServerChannel: Channel
             throw AsyncDarkstarClientConnectionError.badEncryptionMode
         }
 
-        let parts = config.serverAddress.split(separator: ":")
-        guard parts.count == 2 else
-        {
-            throw AsyncDarkstarClientConnectionError.badServerAddress(config.serverAddress)
-        }
-        let host = String(parts[0])
-        guard let port = Int(String(parts[1])) else
-        {
-            throw AsyncDarkstarClientConnectionError.badServerAddress(config.serverAddress)
-        }
-
         // FIXME - move private key to keychain
-        let server = try await AsyncDarkstarServer(serverPersistentPrivateKey: config.serverPrivateKey, host: host, port: port, connection: self.network, bloomFilter: DarkStarServerConnection.bloomFilter)
+        let server = try await AsyncDarkstarServer(serverPersistentPrivateKey: config.serverPrivateKey, host: config.serverIP, port: Int(config.serverPort), connection: self.network, bloomFilter: DarkStarServerConnection.bloomFilter)
 
-        let eCipher = try AsyncDarkstarCipher(key: server.serverToClientSharedKey, host: host, port: port, isServerConnection: true, logger: self.logger)
-        let dCipher = try AsyncDarkstarCipher(key: server.clientToServerSharedKey, host: host, port: port, isServerConnection: true, logger: self.logger)
+        let eCipher = try AsyncDarkstarCipher(key: server.serverToClientSharedKey, host: config.serverIP, port: Int(config.serverPort), isServerConnection: true, logger: self.logger)
+        let dCipher = try AsyncDarkstarCipher(key: server.clientToServerSharedKey, host: config.serverIP, port: Int(config.serverPort), isServerConnection: true, logger: self.logger)
 
         self.encryptingCipher = eCipher
         self.decryptingCipher = dCipher
