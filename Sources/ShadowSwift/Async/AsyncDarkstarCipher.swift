@@ -269,10 +269,17 @@ public class AsyncDarkstarCipher
         {
             guard let nonce = self.decryptNonce else
             {
-                log.error("\nDarkStarCipher - failed to decrypt the nonce.")
+                log.error("\nAsyncDarkStarCipher - failed to decrypt the nonce.")
                 return nil
             }
-
+            
+            print("\n~~> AsyncDarkStarCipher Decrypt <~~")
+            print("Ciphertext (\(encrypted.count) bytes): \(encrypted.hex)")
+            print("nonce (\(nonce.data.count) bytes): \(nonce.data.hex)")
+            print("tag (\(tag.count) bytes): \(tag.hex)")
+            print("tag (\(self.key.data.count) bytes): \(self.key.data.hex)")
+            print("~~> AsyncDarkStarCipher Decrypt <~~\n")
+            
             let sealedBox = try AES.GCM.SealedBox(nonce: nonce, ciphertext: encrypted, tag: tag)
             let plaintext = try AES.GCM.open(sealedBox, using: self.key)
 
@@ -280,7 +287,7 @@ public class AsyncDarkstarCipher
         }
         catch let decryptError
         {
-            log.error("\nDarkStarCipher - Error running AESGCM decryption: \(decryptError.localizedDescription)")
+            log.error("\nAsyncDarkStarCipher - Error running AESGCM decryption: \(decryptError.localizedDescription)")
             return nil
         }
     }
