@@ -277,7 +277,7 @@ public class AsyncDarkstarCipher
             print("Ciphertext (\(encrypted.count) bytes): \(encrypted.hex)")
             print("nonce (\(nonce.data.count) bytes): \(nonce.data.hex)")
             print("tag (\(tag.count) bytes): \(tag.hex)")
-            print("tag (\(self.key.data.count) bytes): \(self.key.data.hex)")
+            print("key (\(self.key.data.count) bytes): \(self.key.data.hex)")
             print("~~> AsyncDarkStarCipher Decrypt <~~\n")
             
             let sealedBox = try AES.GCM.SealedBox(nonce: nonce, ciphertext: encrypted, tag: tag)
