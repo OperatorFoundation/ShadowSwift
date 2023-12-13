@@ -102,19 +102,49 @@ public class AsyncDarkstarServer
         let ecdh = try serverStaticPrivateKey.sharedSecretFromKeyAgreement(with: clientEphemeralPublicKey)
         let ecdhData = AsyncDarkstar.sharedSecretToData(secret: ecdh)
         let serverIdentifier = try AsyncDarkstar.makeServerIdentifier(host, port)
-        let serverPersistentPublicKeyData = serverStaticPrivateKey.publicKey.data!
-        let clientEphemeralPublicKeyData = clientEphemeralPublicKey.data!
+//        let serverPersistentPublicKeyData = serverStaticPrivateKey.publicKey.data!
+//        let clientEphemeralPublicKeyData = clientEphemeralPublicKey.data!
+        
+        guard let serverPersistentPublicKeyData = serverStaticPrivateKey.publicKey.data else
+        {
+            throw AsyncDarkstarServerError.keyToDataFailed
+        }
+        
+        let serverPersistentPublicCryptokitKey = try P256.KeyAgreement.PublicKey(x963Representation: serverPersistentPublicKeyData)
+        guard let serverPersistentPublicKeyDarkstarFormat = serverPersistentPublicCryptokitKey.compactRepresentation else
+        {
+            throw AsyncDarkstarServerError.keyToDataFailed
+        }
+
+        guard let clientEphemeralPublicKeyData = clientEphemeralPublicKey.data else
+        {
+            throw AsyncDarkstarServerError.keyToDataFailed
+        }
+        
+        let clientEphemeralPublicCryptokitKey = try P256.KeyAgreement.PublicKey(x963Representation: clientEphemeralPublicKeyData)
+        guard let clientEphemeralPublicKeyDarkstarFormat = clientEphemeralPublicCryptokitKey.compactRepresentation else
+        {
+            throw AsyncDarkstarServerError.keyToDataFailed
+        }
 
         var hash = SHA256()
         hash.update(data: ecdhData)
         hash.update(data: serverIdentifier)
-        hash.update(data: serverPersistentPublicKeyData)
-        hash.update(data: clientEphemeralPublicKeyData)
+        hash.update(data: serverPersistentPublicKeyDarkstarFormat)
+        hash.update(data: clientEphemeralPublicKeyDarkstarFormat)
         hash.update(data: DarkStarString.data)
         hash.update(data: ServerString.data)
         let result = hash.finalize()
 
         let data = Data(result)
+        
+        print("~~> handleServerConfirmationCode <~~")
+        print("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
+        print("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
+        print("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
+        print("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
+        print("client confirmation code server copy (\(data.count) bytes): \(data.hex)")
+        print("~~> handleServerConfirmationCode <~~")
 
         try await connection.write(data)
     }
@@ -157,7 +187,7 @@ public class AsyncDarkstarServer
         {
             throw AsyncDarkstarServerError.keyToDataFailed
         }
-
+        
         var hash = SHA256()
         hash.update(data: ecdhData)
         hash.update(data: serverIdentifier)
@@ -166,8 +196,17 @@ public class AsyncDarkstarServer
         hash.update(data: DarkStarString.data)
         hash.update(data: ClientString.data)
         let result = hash.finalize()
-
-        return Data(result)
+        let resultData = Data(result)
+        
+        print("~~> generateClientConfirmationCode <~~")
+        print("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
+        print("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
+        print("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
+        print("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
+        print("client confirmation code server copy (\(resultData.count) bytes): \(resultData.hex)")
+        print("~~> generateClientConfirmationCode <~~")
+        
+        return resultData
     }
 
     static public func createServerToClientSharedKey(serverPersistentPrivateKey: PrivateKey, serverEphemeralPrivateKey: PrivateKey, clientEphemeralPublicKey: PublicKey, host: String, port: Int) throws -> SymmetricKey
