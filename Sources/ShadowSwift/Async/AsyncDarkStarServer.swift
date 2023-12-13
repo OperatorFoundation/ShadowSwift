@@ -102,8 +102,6 @@ public class AsyncDarkstarServer
         let ecdh = try serverStaticPrivateKey.sharedSecretFromKeyAgreement(with: clientEphemeralPublicKey)
         let ecdhData = AsyncDarkstar.sharedSecretToData(secret: ecdh)
         let serverIdentifier = try AsyncDarkstar.makeServerIdentifier(host, port)
-//        let serverPersistentPublicKeyData = serverStaticPrivateKey.publicKey.data!
-//        let clientEphemeralPublicKeyData = clientEphemeralPublicKey.data!
         
         guard let serverPersistentPublicKeyData = serverStaticPrivateKey.publicKey.data else
         {
@@ -143,7 +141,7 @@ public class AsyncDarkstarServer
         print("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
         print("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
         print("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
-        print("client confirmation code server copy (\(data.count) bytes): \(data.hex)")
+        print("server confirmation code server copy (\(data.count) bytes): \(data.hex)")
         print("~~> handleServerConfirmationCode <~~")
 
         try await connection.write(data)
@@ -225,18 +223,38 @@ public class AsyncDarkstarServer
         let ephemeralECDHData = DarkStar.sharedSecretToData(secret: ephemeralECDH)
         let persistentECDH = try serverPersistentPrivateKey.sharedSecretFromKeyAgreement(with: clientEphemeralPublicKey)
         let persistentECDHData = DarkStar.sharedSecretToData(secret: persistentECDH)
-        let clientEphemeralPublicKeyData = clientEphemeralPublicKey.data!
-        let serverEphemeralPublicKey = serverEphemeralPrivateKey.publicKey
-        let serverEphemeralPublicKeyData = serverEphemeralPublicKey.data!
+        
         let serverIdentifier = try AsyncDarkstar.makeServerIdentifier(host, port)
+        
+        guard let serverEphemeralPublicKeyData = serverEphemeralPrivateKey.publicKey.data else
+        {
+            throw AsyncDarkstarServerError.keyToDataFailed
+        }
+        
+        let serverEphemeralPublicCryptokitKey = try P256.KeyAgreement.PublicKey(x963Representation: serverEphemeralPublicKeyData)
+        guard let serverEphemeralPublicKeyDarkstarFormat = serverEphemeralPublicCryptokitKey.compactRepresentation else
+        {
+            throw AsyncDarkstarServerError.keyToDataFailed
+        }
+
+        guard let clientEphemeralPublicKeyData = clientEphemeralPublicKey.data else
+        {
+            throw AsyncDarkstarServerError.keyToDataFailed
+        }
+        
+        let clientEphemeralPublicCryptokitKey = try P256.KeyAgreement.PublicKey(x963Representation: clientEphemeralPublicKeyData)
+        guard let clientEphemeralPublicKeyDarkstarFormat = clientEphemeralPublicCryptokitKey.compactRepresentation else
+        {
+            throw AsyncDarkstarServerError.keyToDataFailed
+        }
 
         var hash = SHA256()
 
         hash.update(data: ephemeralECDHData)
         hash.update(data: persistentECDHData)
         hash.update(data: serverIdentifier)
-        hash.update(data: clientEphemeralPublicKeyData)
-        hash.update(data: serverEphemeralPublicKeyData)
+        hash.update(data: clientEphemeralPublicKeyDarkstarFormat)
+        hash.update(data: serverEphemeralPublicKeyDarkstarFormat)
         hash.update(data: DarkStarString.data)
         hash.update(data: personalizationString.data) // Destination
 

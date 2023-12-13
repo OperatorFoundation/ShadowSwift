@@ -28,7 +28,10 @@ public class AsyncDarkstarClient
         let ecdhData = AsyncDarkstar.sharedSecretToData(secret: ecdh)
 
         let serverIdentifier = try AsyncDarkstar.makeServerIdentifier(host, port)
-
+        
+        
+        // FIXME: INCORRECT KEY FORMAT
+        // FIXME: USE DARKSTAR KEY FORMAT
         let clientEphemeralPublicKeyData = clientEphemeralPrivateKey.publicKey.typedData!
         let serverStaticPublicKeyData = serverStaticPublicKey.typedData!
 
@@ -72,16 +75,34 @@ public class AsyncDarkstarClient
         let persistentECDH = try clientEphemeralPrivateKey.sharedSecretFromKeyAgreement(with: serverPersistentPublicKey)
         let persistentECDHData = DarkStar.sharedSecretToData(secret: persistentECDH)
         let clientEphemeralPublicKey = clientEphemeralPrivateKey.publicKey
-        let clientEphemeralPublicKeyData = clientEphemeralPublicKey.data!
-        let serverEphemeralPublicKeyData = serverEphemeralPublicKey.data!
         let serverIdentifier = try AsyncDarkstar.makeServerIdentifier(host, port)
+        
+        guard let serverEphemeralPublicKeyKeychainData = serverEphemeralPublicKey.data else
+        {
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
+        let serverEphemeralPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(rawRepresentation: serverEphemeralPublicKeyKeychainData)
+        guard let serverEphemeralPublicKeyDarkstarData = serverEphemeralPublicKeyCryptoKit.compactRepresentation else
+        {
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
+
+        guard let clientEphemeralPublicKeyKeychainData = clientEphemeralPublicKey.data else
+        {
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
+        let clientEphemeralPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(rawRepresentation: clientEphemeralPublicKeyKeychainData)
+        guard let clientEphemeralPublicKeyDarkstarData = clientEphemeralPublicKeyCryptoKit.compactRepresentation else
+        {
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
 
         var hash = SHA256()
         hash.update(data: ephemeralECDHData)
         hash.update(data: persistentECDHData)
         hash.update(data: serverIdentifier)
-        hash.update(data: clientEphemeralPublicKeyData)
-        hash.update(data: serverEphemeralPublicKeyData)
+        hash.update(data: clientEphemeralPublicKeyDarkstarData)
+        hash.update(data: serverEphemeralPublicKeyDarkstarData)
         hash.update(data: DarkStarString.data)
         hash.update(data: personalizationString.data) // Destination
         let hashed = hash.finalize()
