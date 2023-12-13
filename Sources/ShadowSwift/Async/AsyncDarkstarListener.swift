@@ -18,13 +18,13 @@ public class AsyncDarkstarListener: AsyncListener
     let logger: Logger
     let networkListener: AsyncListener
 
-    public init(config: ShadowConfig.ShadowServerConfig, logger: Logger) throws
+    public init(config: ShadowConfig.ShadowServerConfig, logger: Logger, verbose: Bool = false) throws
     {
         self.host = config.serverIP
         self.port = Int(config.serverPort)
         self.config = config
         self.logger = logger
-        self.networkListener = try AsyncTcpSocketListener(host: self.host, port: self.port, self.logger)
+        self.networkListener = try AsyncTcpSocketListener(host: self.host, port: self.port, self.logger, verbose: verbose)
     }
 
     public func accept() async throws -> AsyncConnection
