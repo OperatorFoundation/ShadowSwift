@@ -136,13 +136,13 @@ public class AsyncDarkstarServer
 
         let data = Data(result)
         
-        print("~~> handleServerConfirmationCode <~~")
-        print("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
-        print("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
-        print("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
-        print("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
-        print("server confirmation code server copy (\(data.count) bytes): \(data.hex)")
-        print("~~> handleServerConfirmationCode <~~")
+//        print("~~> handleServerConfirmationCode <~~")
+//        print("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
+//        print("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
+//        print("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
+//        print("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
+//        print("server confirmation code server copy (\(data.count) bytes): \(data.hex)")
+//        print("~~> handleServerConfirmationCode <~~")
 
         try await connection.write(data)
     }
@@ -196,13 +196,13 @@ public class AsyncDarkstarServer
         let result = hash.finalize()
         let resultData = Data(result)
         
-        print("~~> generateClientConfirmationCode <~~")
-        print("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
-        print("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
-        print("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
-        print("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
-        print("client confirmation code server copy (\(resultData.count) bytes): \(resultData.hex)")
-        print("~~> generateClientConfirmationCode <~~")
+//        print("~~> generateClientConfirmationCode <~~")
+//        print("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
+//        print("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
+//        print("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
+//        print("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
+//        print("client confirmation code server copy (\(resultData.count) bytes): \(resultData.hex)")
+//        print("~~> generateClientConfirmationCode <~~")
         
         return resultData
     }
