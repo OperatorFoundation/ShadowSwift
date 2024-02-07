@@ -60,7 +60,7 @@ public struct AsyncDarkstar
         {
             throw AsyncDarkstarError.keyAgreementFailed
         }
-        let serverPersistentPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(rawRepresentation: serverPersistentPublicKeyKeychainData)
+        let serverPersistentPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(x963Representation: serverPersistentPublicKeyKeychainData)
         guard let serverPersistentPublicKeyDarkstarData = serverPersistentPublicKeyCryptoKit.compactRepresentation else
         {
             throw AsyncDarkstarError.keyAgreementFailed
@@ -70,7 +70,7 @@ public struct AsyncDarkstar
         {
             throw AsyncDarkstarError.keyAgreementFailed
         }
-        let clientEphemeralPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(rawRepresentation: clientEphemeralPublicKeyKeychainData)
+        let clientEphemeralPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(x963Representation: clientEphemeralPublicKeyKeychainData)
         guard let clientEphemeralPublicKeyDarkstarData = clientEphemeralPublicKeyCryptoKit.compactRepresentation else
         {
             throw AsyncDarkstarError.keyAgreementFailed
@@ -184,7 +184,7 @@ public struct AsyncDarkstar
         {
             throw AsyncDarkstarError.keyAgreementFailed
         }
-        let serverPersistentPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(rawRepresentation: serverPersistentPublicKeyKeychainData)
+        let serverPersistentPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(x963Representation: serverPersistentPublicKeyKeychainData)
         guard let serverPersistentPublicKeyDarkstarData = serverPersistentPublicKeyCryptoKit.compactRepresentation else
         {
             throw AsyncDarkstarError.keyAgreementFailed
@@ -194,7 +194,7 @@ public struct AsyncDarkstar
         {
             throw AsyncDarkstarError.keyAgreementFailed
         }
-        let clientEphemeralPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(rawRepresentation: clientEphemeralPublicKeyKeychainData)
+        let clientEphemeralPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(x963Representation: clientEphemeralPublicKeyKeychainData)
         guard let clientEphemeralPublicKeyDarkstarData = clientEphemeralPublicKeyCryptoKit.compactRepresentation else
         {
             throw AsyncDarkstarError.keyAgreementFailed
