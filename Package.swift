@@ -23,7 +23,7 @@ let package = Package(
         .package(url: "https://github.com/OperatorFoundation/Datable", from: "4.0.0"),
         .package(url: "https://github.com/OperatorFoundation/KeychainTypes", branch: "release"),
         .package(url: "https://github.com/OperatorFoundation/Net", branch: "release"),
-        .package(url: "https://github.com/OperatorFoundation/Straw", branch: "release"),
+        .package(url: "https://github.com/OperatorFoundation/Straw", branch: "1.0.0"),
         .package(url: "https://github.com/OperatorFoundation/Transmission", branch: "release"),
         .package(url: "https://github.com/OperatorFoundation/TransmissionAsync", branch: "release"),
         .package(url: "https://github.com/OperatorFoundation/TransmissionTransport", branch: "release"),
