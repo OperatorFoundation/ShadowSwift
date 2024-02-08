@@ -32,14 +32,28 @@ public class AsyncDarkstarClient
         
         // FIXME: INCORRECT KEY FORMAT
         // FIXME: USE DARKSTAR KEY FORMAT
-        let clientEphemeralPublicKeyData = clientEphemeralPrivateKey.publicKey.typedData!
-        let serverStaticPublicKeyData = serverStaticPublicKey.typedData!
+        guard let serverStaticPublicKeyKeychainData = serverStaticPublicKey.data else
+        {
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
+        let serverStaticPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(x963Representation: serverStaticPublicKeyKeychainData)
+        
+        guard let clientEphemeralPublicKeyKeychainData = clientEphemeralPrivateKey.publicKey.data else
+        {
+            throw AsyncDarkstarError.keyAgreementFailed
+        }
+        let clientEphemeralPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(x963Representation: clientEphemeralPublicKeyKeychainData)
+        
+        
+        let clientEphemeralPublicKeyDarkstarData = clientEphemeralPublicKeyCryptoKit.compactRepresentation!
+        let serverStaticPublicKeyDarkstarData = serverStaticPublicKeyCryptoKit.compactRepresentation!
+        
 
         var hash = SHA256()
         hash.update(data: ecdhData)
         hash.update(data: serverIdentifier)
-        hash.update(data: serverStaticPublicKeyData)
-        hash.update(data: clientEphemeralPublicKeyData)
+        hash.update(data: serverStaticPublicKeyDarkstarData)
+        hash.update(data: clientEphemeralPublicKeyDarkstarData)
         hash.update(data: DarkStarString.data)
         hash.update(data: ServerString.data)
         let result = hash.finalize()
