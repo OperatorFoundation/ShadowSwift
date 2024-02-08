@@ -29,6 +29,7 @@ import Logging
 import Chord
 import Datable
 import Net
+import Straw
 import Transmission
 import TransmissionAsync
 import Transport
@@ -119,6 +120,7 @@ public class DarkstarReadable: Readable
 {
     let network: AsyncConnection
     let cipher: AsyncDarkstarCipher
+    let straw = UnsafeStraw()
 
     public init(_ network: AsyncConnection, _ cipher: AsyncDarkstarCipher)
     {
@@ -134,11 +136,6 @@ public class DarkstarReadable: Readable
     }
 
     public func read() async throws -> Data
-    {
-        return try await self.read(1024)
-    }
-
-    public func read(_ size: Int) async throws -> Data
     {
         // Get our encrypted length first
         let encryptedLengthSize = Cipher.lengthSize + Cipher.tagSize
@@ -171,6 +168,18 @@ public class DarkstarReadable: Readable
         }
 
         return decrypted
+    }
+
+    public func read(_ size: Int) async throws -> Data
+    {
+        while straw.count < size
+        {
+            let received = try await self.read()
+            
+            straw.write(received)
+        }
+        
+        return try straw.read(size: size)
     }
 }
 
