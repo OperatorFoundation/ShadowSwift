@@ -16,6 +16,7 @@ public class AsyncDarkstarListener: AsyncListener
     let port: Int
     let config: ShadowConfig.ShadowServerConfig
     let logger: Logger
+    var verbose: Bool = false
     let networkListener: AsyncListener
 
     public convenience init(config: ShadowConfig.ShadowServerConfig, logger: Logger, verbose: Bool = false) throws
@@ -30,12 +31,19 @@ public class AsyncDarkstarListener: AsyncListener
         self.port = Int(config.serverPort)
         self.config = config
         self.logger = logger
+        self.verbose = verbose
         self.networkListener = listener
     }
 
     public func accept() async throws -> AsyncConnection
     {
         let network = try await networkListener.accept()
+        
+        if verbose
+        {
+            print("AsyncDarkstarListener accepted a new connection.")
+        }
+        
         return try await AsyncDarkstarServerConnection(network, self.config, self.logger)
     }
 
