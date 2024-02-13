@@ -5,20 +5,12 @@
 //  Created by Dr. Brandon Wiley on 7/6/23.
 //
 
-import Foundation
-
-//
-//  File.swift
-//
-//
-//  Created by Dr. Brandon Wiley on 9/24/21.
-//
 import Crypto
+import Foundation
+import Net
 
 import Datable
-import Foundation
 import KeychainTypes
-import Net
 import TransmissionAsync
 
 let AsyncP256KeySize = 32 // compact format
@@ -137,20 +129,14 @@ public struct AsyncDarkstar
 
         guard let myEphemeralPublicKeyData = myEphemeralPublicKey.compactRepresentation else
         {
-            print("Darkstar.handleServerEphemeralKey: failed to generate a compact representation of our public key")
             throw AsyncDarkstarError.keyAgreementFailed
         }
 
         try await connection.write(myEphemeralPublicKeyData)
         
-        print("AsyncDarkstar: Creating a keychain private key...")
         let keychainPrivate = try KeychainTypes.PrivateKey(type: .P256KeyAgreement, data: myEphemeralPrivateKey.rawRepresentation)
-        
-        print("AsyncDarkstar: Creating a keychain private key...")
         let keychainPublic = try KeychainTypes.PublicKey(type: .P256KeyAgreement, data: myEphemeralPublicKey.x963Representation)
         
-        print("AsyncDarkstar: Keychain key pair created.")
-
         return (keychainPrivate, keychainPublic)
     }
 
@@ -215,9 +201,7 @@ public struct AsyncDarkstar
     static public func handleTheirEphemeralPublicKey(connection: AsyncConnection, bloomFilter: BloomFilter<Data>?) async throws -> PublicKey
     {
         // Receive their ephemeral key
-        print("AsyncDarkstar - Attempting to read client key data...")
         let theirEphemeralPublicKeyData = try await connection.readSize(P256KeySize)
-        print("AsyncDarkstar - Read \(theirEphemeralPublicKeyData.count) bytes of client key data.")
 
         if let bloomFilter = bloomFilter // Server
         {
