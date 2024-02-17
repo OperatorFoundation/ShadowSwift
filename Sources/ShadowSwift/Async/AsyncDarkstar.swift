@@ -17,6 +17,7 @@ let AsyncP256KeySize = 32 // compact format
 
 public struct AsyncDarkstar
 {
+    // FIXME: force unwrap
     var encryptKey: SymmetricKey!
     var decryptKey: SymmetricKey!
 
@@ -79,6 +80,8 @@ public struct AsyncDarkstar
 
         return Data(result)
     }
+    // FIXME: Check Key Format for Linux
+    // FIXME: Why not throw?
 #else
     static public func generateServerConfirmationCode(theirPublicKey: P256.KeyAgreement.PublicKey, myPrivateEphemeralKey: P256.KeyAgreement.PrivateKey, myPrivateStaticKey: P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint) -> Data?
     {

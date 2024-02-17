@@ -198,42 +198,31 @@ public class ShadowConfig
         return (serverConfig, clientConfig)
     }
 
-    // FIXME: Make this function signature more Swifty (return types)
-    public static func createNewConfigFiles(inDirectory saveDirectory: URL, serverAddress: String, cipher: CipherMode) -> (saved: Bool, error: Error?)
+    public static func createNewConfigFiles(inDirectory saveDirectory: URL, serverAddress: String, cipher: CipherMode) throws
     {
         guard saveDirectory.isDirectory else
         {
-            return(false, ShadowConfigError.urlIsNotDirectory)
+            throw ShadowConfigError.urlIsNotDirectory
         }
 
-        do
+        let configPair = try ShadowConfig.generateNewConfigPair(serverAddress: serverAddress, cipher: cipher)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
+        
+        let serverJson = try encoder.encode(configPair.serverConfig)
+        let serverConfigFilePath = saveDirectory.appendingPathComponent(ShadowServerConfig.serverConfigFilename).path
+        
+        guard FileManager.default.createFile(atPath: serverConfigFilePath, contents: serverJson) else
         {
-            let configPair = try ShadowConfig.generateNewConfigPair(serverAddress: serverAddress, cipher: cipher)
-
-            let encoder = JSONEncoder()
-            encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
-            let serverJson = try encoder.encode(configPair.serverConfig)
-            let serverConfigFilePath = saveDirectory.appendingPathComponent(ShadowServerConfig.serverConfigFilename).path
-            guard FileManager.default.createFile(atPath: serverConfigFilePath, contents: serverJson) else
-            {
-                return (false, ShadowConfigError.failedToSaveFile(filePath: serverConfigFilePath))
-            }
-
-            let clientJson = try encoder.encode(configPair.clientConfig)
-            
-            let clientConfigFilePath = saveDirectory.appendingPathComponent(ShadowClientConfig.clientConfigFilename).path
-
-            guard FileManager.default.createFile(atPath: clientConfigFilePath, contents: clientJson) else
-            {
-                return (false, ShadowConfigError.failedToSaveFile(filePath: clientConfigFilePath))
-            }
-
-            return (true, nil)
+            throw ShadowConfigError.failedToSaveFile(filePath: serverConfigFilePath)
         }
-        catch
+
+        let clientJson = try encoder.encode(configPair.clientConfig)
+        let clientConfigFilePath = saveDirectory.appendingPathComponent(ShadowClientConfig.clientConfigFilename).path
+
+        guard FileManager.default.createFile(atPath: clientConfigFilePath, contents: clientJson) else
         {
-            print(error)
-            return (false, error)
+            throw ShadowConfigError.failedToSaveFile(filePath: clientConfigFilePath)
         }
     }
 

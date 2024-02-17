@@ -207,7 +207,8 @@ public class DarkStarServerAuthenticator
     {
         return createServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: serverEndpoint, personalizationString: ServerString)
     }
-
+    
+    // FIXME: Darkstar Format
     static func createServerSharedKey(serverPersistentPrivateKey: P256.KeyAgreement.PrivateKey, serverEphemeralPrivateKey: P256.KeyAgreement.PrivateKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey, serverEndpoint: NWEndpoint, personalizationString: String) -> SymmetricKey?
     {
         guard let ephemeralECDH = try? serverEphemeralPrivateKey.sharedSecretFromKeyAgreement(with: clientEphemeralPublicKey) else
@@ -233,7 +234,6 @@ public class DarkStarServerAuthenticator
         }
         
         var hash = SHA256()
-        
         hash.update(data: ephemeralECDHData)
         hash.update(data: persistentECDHData)
         hash.update(data: serverIdentifier)
@@ -248,5 +248,4 @@ public class DarkStarServerAuthenticator
         return SymmetricKey(data: hashedData)
     }
 
-    // TODO: Logging
 }

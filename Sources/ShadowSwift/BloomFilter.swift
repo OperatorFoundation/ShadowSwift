@@ -118,7 +118,7 @@ public class BloomFilter<filterData: Hashable>: Codable
     }
     
     // hashes returns an array of integers.
-    // TODO: read the comment section of Swift.Hashing for more info
+    // read the comment section of Swift.Hashing for more info
     private func hashes(for salt: filterData) -> [Int]
     {
         return seeds.map(

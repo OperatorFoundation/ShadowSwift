@@ -104,7 +104,7 @@ open class DarkStarClientConnection: Transport.Connection
                 serverPersistentPublicKey = publicKey
 
             default:
-                print("Wrong public key type")
+                log.error("DarkStarClientConnection - Wrong public key type")
                 return nil
         }
 

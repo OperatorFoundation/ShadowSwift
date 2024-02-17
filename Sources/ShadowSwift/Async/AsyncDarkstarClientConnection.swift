@@ -129,9 +129,7 @@ public class DarkstarReadable: Readable
     }
     
     public func readNonblocking(_ size: Int) async throws -> Data
-    {
-        // FIXME: Not Implemented
-        
+    {        
         throw AsyncDarkstarClientConnectionError.notImplemented("readNonblocking")
     }
 
