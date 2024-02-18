@@ -78,7 +78,7 @@ extension JsonConfig
         }
         catch
         {
-            print(error)
+            print("Failed to decode a JSON config: \(error)")
             return nil
         }
     }
@@ -116,7 +116,7 @@ extension ServerConfig
         }
         catch
         {
-            print(error)
+            // print(error)
             return nil
         }
     }

@@ -17,10 +17,6 @@ let AsyncP256KeySize = 32 // compact format
 
 public struct AsyncDarkstar
 {
-    // FIXME: force unwrap
-    var encryptKey: SymmetricKey!
-    var decryptKey: SymmetricKey!
-
     static public func randomBytes(size: Int) -> Data
     {
         var dataArray = [Data.Element]()
@@ -80,14 +76,12 @@ public struct AsyncDarkstar
 
         return Data(result)
     }
-    // FIXME: Check Key Format for Linux
-    // FIXME: Why not throw?
 #else
     static public func generateServerConfirmationCode(theirPublicKey: P256.KeyAgreement.PublicKey, myPrivateEphemeralKey: P256.KeyAgreement.PrivateKey, myPrivateStaticKey: P256.KeyAgreement.PrivateKey, endpoint: NWEndpoint) -> Data?
     {
         guard let ecdh = try? myPrivateStaticKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else
         {
-            print("Darkstar: Failed to generate the shared secret.")
+            // print("Darkstar: Failed to generate the shared secret.")
             return nil
         }
 
@@ -95,19 +89,19 @@ public struct AsyncDarkstar
 
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
         {
-            print("Darkstar: Failed to generate the server identifier.")
+            // print("Darkstar: Failed to generate the server identifier.")
             return nil
         }
 
         guard let serverPersistentPublicKeyDarkstarData = myPrivateStaticKey.publicKey.compactRepresentation else
         {
-            print("Darkstar: Failed to generate the serverPersistentPublicKey data.")
+            // print("Darkstar: Failed to generate the serverPersistentPublicKey data.")
             return nil
         }
 
         guard let clientEphemeralPublicKeyDarkstarData = theirPublicKey.compactRepresentation else
         {
-            print("Darkstar: Failed to generate the clientEphemeralPublicKey data.")
+            // print("Darkstar: Failed to generate the clientEphemeralPublicKey data.")
             return nil
         }
 

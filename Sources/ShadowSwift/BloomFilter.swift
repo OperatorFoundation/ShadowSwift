@@ -44,7 +44,7 @@ public class BloomFilter<filterData: Hashable>: Codable
         {
             guard self.save(pathURL: saveURL) else
             {
-                print("Failed to initialize and save a new BloomFilter at \(saveURL.path)")
+                // print("Failed to initialize and save a new BloomFilter at \(saveURL.path)")
                 return
             }
         }
@@ -52,13 +52,13 @@ public class BloomFilter<filterData: Hashable>: Codable
         {
             guard let bloomFilterURL = getBloomFileURL() else
             {
-                print("Could not save a new bloom filter, we could not find the application support directory.")
+                // print("Could not save a new bloom filter, we could not find the application support directory.")
                 return
             }
             
             guard self.save(pathURL: bloomFilterURL) else
             {
-                print("Failed to initialize and save a new BloomFilter at \(bloomFilterURL.path)")
+                // print("Failed to initialize and save a new BloomFilter at \(bloomFilterURL.path)")
                 return
             }
         }
@@ -82,9 +82,9 @@ public class BloomFilter<filterData: Hashable>: Codable
                 self.saveURL = URL(fileURLWithPath: filePath)
                 
             }
-            catch (let jsonDecodeError)
+            catch
             {
-                print("Failed to decode Bloom from JSON: \(jsonDecodeError)")
+                // print("Failed to decode Bloom from JSON: \(error)")
                 return nil
             }
             
@@ -92,7 +92,6 @@ public class BloomFilter<filterData: Hashable>: Codable
         else
         {
             // Otherwise make a new one
-            // TODO: This initializer will save the new instance to disk, but not at the filepath passed in to this function
             self.init(saveURL: URL(fileURLWithPath: filePath))
         }
     }
@@ -176,9 +175,9 @@ public class BloomFilter<filterData: Hashable>: Codable
             try data.write(to: fileURL)
             
         }
-        catch (let jsonEncodeError)
+        catch
         {
-            print("Failed to encode Bloom as JSON: \(jsonEncodeError)")
+            // print("Failed to encode Bloom as JSON: \(error)")
             return false
         }
         
@@ -195,7 +194,7 @@ public class BloomFilter<filterData: Hashable>: Codable
         {
             guard let supportDirectoryURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else
             {
-                print("Could not get application support directory path.")
+                // print("Could not get application support directory path.")
                 
                 return nil
             }

@@ -25,7 +25,7 @@ public class DarkStarServerAuthenticator
         // Receive client ephemeral key
         guard let clientEphemeralPublicKey = DarkStar.handleTheirEphemeralPublicKey(connection: connection, bloomFilter: bloomFilter) else
         {
-            print("DarkStarServerAuthenticator: Failed to receive the client ephemeral key 🕳.")
+//            print("DarkStarServerAuthenticator: Failed to receive the client ephemeral key 🕳.")
             let transport = TransmissionToTransportConnection({return connection})
             let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
             
@@ -35,7 +35,7 @@ public class DarkStarServerAuthenticator
         // Receive and validate client confirmation code
         guard DarkStarServerAuthenticator.handleClientConfirmationCode(connection: connection, theirPublicKey: clientEphemeralPublicKey, myPrivateKey: serverPersistentPrivateKey, endpoint: endpoint, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else
         {
-            print("ShadowSwift: received an invalid client confirmation code 🕳.")
+//            print("ShadowSwift: received an invalid client confirmation code 🕳.")
             let transport = TransmissionToTransportConnection({return connection})
             let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
             
@@ -45,7 +45,7 @@ public class DarkStarServerAuthenticator
         // Send server ephemeral key
         guard let (serverEphemeralPrivateKey, _) = DarkStar.handleServerEphemeralKey(connection: connection) else
         {
-            print("ShadowSwift: Failed to send the server ephemeral key 🕳.")
+//            print("ShadowSwift: Failed to send the server ephemeral key 🕳.")
             let transport = TransmissionToTransportConnection({return connection})
             let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
             
@@ -55,7 +55,7 @@ public class DarkStarServerAuthenticator
         // Create shared key
         guard let serverToClientSharedKey = DarkStarServerAuthenticator.createServerToClientSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: endpoint) else
         {
-            print("ShadowSwift: Failed to create serverToClientSharedKey 🕳.")
+//            print("ShadowSwift: Failed to create serverToClientSharedKey 🕳.")
             let transport = TransmissionToTransportConnection({return connection})
             let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
             
@@ -66,7 +66,7 @@ public class DarkStarServerAuthenticator
 
         guard let clientToServerSharedKey = DarkStarServerAuthenticator.createClientToServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: endpoint) else
         {
-            print("ShadowSwift: Failed to create clientToServerSharedKey 🕳.")
+//            print("ShadowSwift: Failed to create clientToServerSharedKey 🕳.")
             let transport = TransmissionToTransportConnection({return connection})
             let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
             
@@ -78,7 +78,7 @@ public class DarkStarServerAuthenticator
         // Send server confirmation code
         guard DarkStarServerAuthenticator.handleServerConfirmationCode(connection: connection, endpoint: endpoint, serverStaticPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey) else
         {
-            print("ShadowSwift: Failed to send the server confirmation code 🕳.")
+//            print("ShadowSwift: Failed to send the server confirmation code 🕳.")
             let transport = TransmissionToTransportConnection({return connection})
             let _ = BlackHole(timeoutDelaySeconds: 30, socket: transport)
             
@@ -90,7 +90,7 @@ public class DarkStarServerAuthenticator
     {
         guard let ecdh = try? serverStaticPrivateKey.sharedSecretFromKeyAgreement(with: clientEphemeralPublicKey) else
         {
-            print("DarkStarServerAuthenticator failed to generate a shared secret.")
+//            print("DarkStarServerAuthenticator failed to generate a shared secret.")
             return false
         }
         
@@ -98,7 +98,7 @@ public class DarkStarServerAuthenticator
 
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
         {
-            print("DarkStarServerAuthenticator failed to generate the server identifier.")
+//            print("DarkStarServerAuthenticator failed to generate the server identifier.")
             return false
         }
         
@@ -123,14 +123,14 @@ public class DarkStarServerAuthenticator
     {
         guard let data = connection.read(size: ConfirmationSize) else
         {
-            print("DarkStarServerAuthenticator failed to read confirmation data.")
+//            print("DarkStarServerAuthenticator failed to read confirmation data.")
             return false
         }
 
         guard let code = generateClientConfirmationCode(connection: connection, theirPublicKey: theirPublicKey, myPrivateKey: myPrivateKey, endpoint: endpoint, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey)
         else
         {
-            print("DarkStarServerAuthenticator failed to generate a client confirmation code.")
+//            print("DarkStarServerAuthenticator failed to generate a client confirmation code.")
             return false
         }
         
@@ -140,13 +140,13 @@ public class DarkStarServerAuthenticator
         }
         else
         {
-            print("\nDarkStarServerAuthenticator failed to confirm a client confirmation code.")
-            print("data: \(data.hex)")
-            print("code: \(code.hex)")
-            print("theirPublicKey: \(theirPublicKey)")
-            print("myPrivateKey: \(myPrivateKey)")
-            print("srverPersistentPublicKey: \(serverPersistentPublicKey)")
-            print("clientEphemeralPublicKey: \(clientEphemeralPublicKey)\n")
+//            print("\nDarkStarServerAuthenticator failed to confirm a client confirmation code.")
+//            print("data: \(data.hex)")
+//            print("code: \(code.hex)")
+//            print("theirPublicKey: \(theirPublicKey)")
+//            print("myPrivateKey: \(myPrivateKey)")
+//            print("srverPersistentPublicKey: \(serverPersistentPublicKey)")
+//            print("clientEphemeralPublicKey: \(clientEphemeralPublicKey)\n")
             return false
         }
     }
@@ -155,7 +155,7 @@ public class DarkStarServerAuthenticator
     {
         guard let ecdh = try? myPrivateKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else
         {
-            print("DarkStarServerAuthenticator failed to generate a shared secret.")
+//            print("DarkStarServerAuthenticator failed to generate a shared secret.")
             return nil
         }
         
@@ -163,28 +163,28 @@ public class DarkStarServerAuthenticator
         
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
         {
-            print("DarkStarServerAuthenticator failed to make a server identifier.")
+//            print("DarkStarServerAuthenticator failed to make a server identifier.")
             return nil
         }
                         
         guard let serverPersistentPublicKeyData = serverPersistentPublicKey.compactRepresentation else
         {
-            print("DarkStarServerAuthenticator failed to get public key data.")
+//            print("DarkStarServerAuthenticator failed to get public key data.")
             return nil
         }
                 
         guard let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation else
         {
-            print("DarkStarServerAuthenticator failed failed to create ephemeral public key data.")
+//            print("DarkStarServerAuthenticator failed failed to create ephemeral public key data.")
             return nil
         }
         
-        print("ecdh data (\(ecdhData.count) bytes): \(ecdhData.hex)")
-        print("serverIdentifier: \(serverIdentifier.hex)")
-        print("serverPersistentPublicKey (\(serverPersistentPublicKeyData.count) bytes): \(serverPersistentPublicKeyData.hex)")
-        print("clientEphemeralPublicKey (\(clientEphemeralPublicKeyData) bytes): \(clientEphemeralPublicKeyData.hex)")
-        print("DarkStarString: \(DarkStarString)")
-        print("ClientString: \(ClientString)")
+//        print("ecdh data (\(ecdhData.count) bytes): \(ecdhData.hex)")
+//        print("serverIdentifier: \(serverIdentifier.hex)")
+//        print("serverPersistentPublicKey (\(serverPersistentPublicKeyData.count) bytes): \(serverPersistentPublicKeyData.hex)")
+//        print("clientEphemeralPublicKey (\(clientEphemeralPublicKeyData) bytes): \(clientEphemeralPublicKeyData.hex)")
+//        print("DarkStarString: \(DarkStarString)")
+//        print("ClientString: \(ClientString)")
         
         var hash = SHA256()
         hash.update(data: ecdhData)
@@ -208,7 +208,6 @@ public class DarkStarServerAuthenticator
         return createServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, serverEndpoint: serverEndpoint, personalizationString: ServerString)
     }
     
-    // FIXME: Darkstar Format
     static func createServerSharedKey(serverPersistentPrivateKey: P256.KeyAgreement.PrivateKey, serverEphemeralPrivateKey: P256.KeyAgreement.PrivateKey, clientEphemeralPublicKey: P256.KeyAgreement.PublicKey, serverEndpoint: NWEndpoint, personalizationString: String) -> SymmetricKey?
     {
         guard let ephemeralECDH = try? serverEphemeralPrivateKey.sharedSecretFromKeyAgreement(with: clientEphemeralPublicKey) else
@@ -224,9 +223,16 @@ public class DarkStarServerAuthenticator
         }
 
         let persistentECDHData = DarkStar.sharedSecretToData(secret: persistentECDH)
-        let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation!
+        guard let clientEphemeralPublicKeyData = clientEphemeralPublicKey.compactRepresentation else
+        {
+            return nil
+        }
+        
         let serverEphemeralPublicKey = serverEphemeralPrivateKey.publicKey
-        let serverEphemeralPublicKeyData = serverEphemeralPublicKey.compactRepresentation!
+        guard let serverEphemeralPublicKeyData = serverEphemeralPublicKey.compactRepresentation else
+        {
+            return nil
+        }
 
         guard let serverIdentifier = DarkStar.makeServerIdentifier(serverEndpoint) else
         {

@@ -199,7 +199,7 @@ public class DarkstarWritable: Writable
         {
             throw AsyncDarkstarClientConnectionError.encryptionFailure
         }
-
+        
         try await self.network.write(encrypted)
     }
 

@@ -240,8 +240,6 @@ open class DarkStarClientConnection: Transport.Connection
         self.receive(minimumIncompleteLength: 1, maximumLength: Cipher.maxPayloadSize, completion: completion)
     }
 
-
-    // TODO: Introduce buffer to honor the requested read size from the application
     // Decrypts the received content before passing it along
     public func receive(minimumIncompleteLength: Int,
                         maximumLength: Int,
@@ -271,7 +269,6 @@ open class DarkStarClientConnection: Transport.Connection
             // use decryptingCipher counter to see if this is the first time we have received something from the server
             if decryptingCipher.decryptCounter == 1
             {
-                // TODO: if it is the first time and decryption fails, hang up and try again
                 cancel()
                 completion(nil, .defaultMessage, false, NWError.posix(POSIXErrorCode.EBADF))
                 return
