@@ -41,7 +41,7 @@ open class BlackHole
     
     func startHoleTimer(timeOutSeconds: Int, socket: Transport.Connection)
     {
-        print("ShadowSwift.Someone got put in timeout...")
+        // print("ShadowSwift.Someone got put in timeout...")
         
         DispatchQueue.main.asyncAfter(deadline: .now() + DispatchTimeInterval.seconds(timeOutSeconds))
         {

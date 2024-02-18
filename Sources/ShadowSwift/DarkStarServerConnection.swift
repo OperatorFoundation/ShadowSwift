@@ -132,7 +132,7 @@ open class DarkStarServerConnection: Transport.Connection
                 serverPersistentPrivateKey = privateKey
 
             default:
-                print("Wrong private key type")
+//                print("Invalid private key type")
                 return nil
         }
 
@@ -274,8 +274,6 @@ open class DarkStarServerConnection: Transport.Connection
         self.receive(minimumIncompleteLength: 1, maximumLength: Cipher.maxPayloadSize, completion: completion)
     }
 
-
-    // TODO: Introduce buffer to honor the requested read size from the application
     // Decrypts the received content before passing it along
     public func receive(minimumIncompleteLength: Int,
                         maximumLength: Int,

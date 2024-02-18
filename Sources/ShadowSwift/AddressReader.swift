@@ -6,7 +6,6 @@
 //
 
 import Foundation
-// FIXME: Logger
 
 class AddressReader
 {

@@ -16,11 +16,10 @@ import Transmission
 import Transport
 import Straw
 
-// TODO: FIX THE LOG MESSAGES
 public class ShadowTransmissionClientConnection: Transmission.Connection
 {
     public var viabilityUpdateHandler: ((Bool) -> Void)?
-    public var log: Logger
+    public var logger: Logger
 
     let networkQueue = DispatchQueue(label: "DarkStarClientConnectionQueue")
     let encryptingCipher: DarkStarCipher
@@ -50,10 +49,10 @@ public class ShadowTransmissionClientConnection: Transmission.Connection
 
     public init?(connection: Transmission.Connection, host: String, port: Int, config: ShadowConfig.ShadowClientConfig, logger: Logger)
     {
-        self.log = logger
+        self.logger = logger
         guard let ipvHost = IPv4Address(host) else
         {
-            log.error("\nDarkStarClientConnection - unable to resolve \(host) as a valid IPV4 address.")
+            logger.error("\nDarkStarClientConnection - unable to resolve \(host) as a valid IPV4 address.")
             return nil
         }
         
@@ -63,7 +62,7 @@ public class ShadowTransmissionClientConnection: Transmission.Connection
 
         guard config.mode == .DARKSTAR else
         {
-            log.error("\nDarkStarClientConnection - Attempted a connection with \(config.mode.rawValue), Currently DarkStar is the only supported shadow mode.")
+            logger.error("\nDarkStarClientConnection - Attempted a connection with \(config.mode.rawValue), Currently DarkStar is the only supported shadow mode.")
             return nil
         }
         
@@ -74,25 +73,25 @@ public class ShadowTransmissionClientConnection: Transmission.Connection
                 serverPersistentPublicKey = publicKey
 
             default:
-                print("Wrong public key type")
+                logger.error("Failed to initialize a ShadowTransmissionClientConnection: Incorrect public key type in config.")
                 return nil
         }
 
         guard let client = DarkStarClient(serverPersistentPublicKey: serverPersistentPublicKey, endpoint: endpoint, connection: connection) else
         {
-            log.error("\nDarkStarClientConnection - handshake failed.")
+            logger.error("\nDarkStarClientConnection - handshake failed.")
             return nil
         }
 
-        guard let eCipher = DarkStarCipher(key: client.clientToServerSharedKey, endpoint: endpoint, isServerConnection: false, logger: self.log) else
+        guard let eCipher = DarkStarCipher(key: client.clientToServerSharedKey, endpoint: endpoint, isServerConnection: false, logger: self.logger) else
         {
-            log.error("\nDarkStarClientConnection - failed to make an encryption cipher.")
+            logger.error("\nDarkStarClientConnection - failed to make an encryption cipher.")
             return nil
         }
         
-        guard let dCipher = DarkStarCipher(key: client.serverToClientSharedKey, endpoint: endpoint, isServerConnection: false, logger: self.log) else
+        guard let dCipher = DarkStarCipher(key: client.serverToClientSharedKey, endpoint: endpoint, isServerConnection: false, logger: self.logger) else
         {
-            log.error("\nDarkStarClientConnection - failed to make a decryption cipher.")
+            logger.error("\nDarkStarClientConnection - failed to make a decryption cipher.")
             return nil
         }
 
@@ -189,7 +188,7 @@ public class ShadowTransmissionClientConnection: Transmission.Connection
 
         guard let encrypted = encryptingCipher.pack(plaintext: data) else
         {
-            log.error("\nDarkStarClientConnection - Failed to encrypt send content.")
+            logger.error("\nDarkStarClientConnection - Failed to encrypt send content.")
             return false
         }
 
@@ -225,15 +224,15 @@ public class ShadowTransmissionClientConnection: Transmission.Connection
         
         guard let someData = maybeData else
         {
-            self.log.error("\nDarkStarClientConnection - receive called, but there was no data.")
+            self.logger.error("\nDarkStarClientConnection - receive called, but there was no data.")
             self.close()
             return false
         }
         
         guard someData.count == encryptedLengthSize else
         {
-            self.log.error("\nDarkStarClientConnection - receive(min:max:) called, but the encrypted length data was the wrong size.")
-            self.log.error("\nDarkStarClientConnection - required size: \(encryptedLengthSize), received size: \(someData.count)")
+            self.logger.error("\nDarkStarClientConnection - receive(min:max:) called, but the encrypted length data was the wrong size.")
+            self.logger.error("\nDarkStarClientConnection - required size: \(encryptedLengthSize), received size: \(someData.count)")
             self.close()
             return false
         }
@@ -257,7 +256,7 @@ public class ShadowTransmissionClientConnection: Transmission.Connection
 
         guard let lengthUInt16 = lengthData.maybeNetworkUint16 else
         {
-            self.log.error("\nDarkStarClientConnection - Failed to get encrypted data's expected length. Length data could not be converted to UInt16")
+            self.logger.error("\nDarkStarClientConnection - Failed to get encrypted data's expected length. Length data could not be converted to UInt16")
             self.close()
             return false
         }
@@ -269,15 +268,15 @@ public class ShadowTransmissionClientConnection: Transmission.Connection
                 
         guard let nextData = nextMaybeData else
         {
-            self.log.error("\nDarkStarClientConnection - receive called, but there was no data.")
+            self.logger.error("\nDarkStarClientConnection - receive called, but there was no data.")
             self.close()
             return false
         }
         
         guard nextData.count == expectedLength else
         {
-            self.log.error("\nDarkStarClientConnection - receive(min:max:) called, but the encrypted length data was the wrong size.")
-            self.log.error("\nDarkStarClientConnection - required size: \(encryptedLengthSize), received size: \(someData.count)")
+            self.logger.error("\nDarkStarClientConnection - receive(min:max:) called, but the encrypted length data was the wrong size.")
+            self.logger.error("\nDarkStarClientConnection - required size: \(encryptedLengthSize), received size: \(someData.count)")
             self.close()
             return false
         }
