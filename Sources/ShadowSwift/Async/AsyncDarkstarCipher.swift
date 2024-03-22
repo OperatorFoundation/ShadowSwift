@@ -48,7 +48,7 @@ public class AsyncDarkstarCipher
     let log: Logger
     static let lengthSize = 2
     static let tagSize = 16
-    static let maxPayloadSize = 16417
+    public static let maxPayloadSize = 16417
     static let overhead = Cipher.lengthSize + Cipher.tagSize + Cipher.tagSize
     static let maxRead = Cipher.maxPayloadSize + Cipher.overhead
     static let minRead = 1 + Cipher.overhead

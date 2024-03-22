@@ -269,6 +269,43 @@ class ShadowSwiftTests: XCTestCase
         wait(for: [connected], timeout: 3000)
     }
     
+    func testShadowToEchoServer()
+    {
+        let message = "Hello".data
+        let logger = Logger(label: "ShadowToEcho")
+        let shadowClientConfigPath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("ShadowClientConfig.json")
+        
+        guard let shadowClientConfig = ShadowConfig.ShadowClientConfig(path: shadowClientConfigPath.path) else
+        {
+            XCTFail()
+            return
+        }
+        
+        let shadowConnectionFactory = ShadowConnectionFactory(config: shadowClientConfig, logger: logger)
+        
+        guard let shadowConnect = shadowConnectionFactory.connect(using: .tcp) else
+        {
+            XCTFail()
+            return
+        }
+        
+        shadowConnect.send(content: message, contentContext: .defaultMessage, isComplete: true, completion: NWConnection.SendCompletion.contentProcessed(
+            {
+                (error) in
+                
+                if let errorMessage = error
+                {
+                    print("Error: \(errorMessage)")
+                    XCTFail()
+                    return
+                }
+                else
+                {
+                    print("Send successful.")
+                }
+            }))
+    }
+    
     func testShadowSend() throws
     {
         let shadowQueue = DispatchQueue(label: "ShadowQueue")
