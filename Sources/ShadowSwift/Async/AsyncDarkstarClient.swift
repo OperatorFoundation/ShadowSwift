@@ -58,6 +58,14 @@ public class AsyncDarkstarClient
         
         let result = hash.finalize()
         let code = Data(result)
+        
+        print("~~> handleServerConfirmationCode <~~")
+        print("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
+        print("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
+        print("serverStaticPublicKeyDarkstarData (\(serverStaticPublicKeyDarkstarData.count) bytes): \(serverStaticPublicKeyDarkstarData.hex)")
+        print("clientEphemeralPublicKeyDarkstarData (\(clientEphemeralPublicKeyDarkstarData.count) bytes): \(clientEphemeralPublicKeyDarkstarData.hex)")
+        print("client confirmation code server copy (\(code.count) bytes): \(code.hex)")
+        print("~~> handleServerConfirmationCode <~~")
 
         guard data == code else
         {

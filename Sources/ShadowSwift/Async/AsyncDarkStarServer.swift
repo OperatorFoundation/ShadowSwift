@@ -195,13 +195,13 @@ public class AsyncDarkstarServer
         let result = hash.finalize()
         let resultData = Data(result)
         
-//        logger.debug("~~> generateClientConfirmationCode <~~")
-//        logger.debug("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
-//        logger.debug("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
-//        logger.debug("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
-//        logger.debug("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
-//        logger.debug("client confirmation code server copy (\(resultData.count) bytes): \(resultData.hex)")
-//        logger.debug("~~> generateClientConfirmationCode <~~")
+        print("~~> generateClientConfirmationCode <~~")
+        print("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
+        print("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
+        print("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
+        print("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
+        print("client confirmation code server copy (\(resultData.count) bytes): \(resultData.hex)")
+        print("~~> generateClientConfirmationCode <~~")
         
         return resultData
     }
