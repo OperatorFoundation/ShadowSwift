@@ -64,6 +64,7 @@ public class AsyncDarkstarClient
         print("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
         print("serverStaticPublicKeyDarkstarData (\(serverStaticPublicKeyDarkstarData.count) bytes): \(serverStaticPublicKeyDarkstarData.hex)")
         print("clientEphemeralPublicKeyDarkstarData (\(clientEphemeralPublicKeyDarkstarData.count) bytes): \(clientEphemeralPublicKeyDarkstarData.hex)")
+        print("data (\(data.count) bytes: \(data.hex)")
         print("client confirmation code server copy (\(code.count) bytes): \(code.hex)")
         print("~~> handleServerConfirmationCode <~~")
 
@@ -76,6 +77,11 @@ public class AsyncDarkstarClient
     static public func handleClientConfirmationCode(connection: AsyncConnection, theirPublicKey: PublicKey, myPrivateKey: PrivateKey, host: String, port: Int, serverPersistentPublicKey: PublicKey, clientEphemeralPublicKey: PublicKey) async throws
     {
         let data = try AsyncDarkstar.generateClientConfirmationCode(connection: connection, theirPublicKey: theirPublicKey, myPrivateKey: myPrivateKey, host: host, port: port, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey)
+        
+        print("~~> handleClientConfirmationCode <~~")
+        print("data (\(data.count) bytes: \(data.hex)")
+        print("~~> handleClientConfirmationCode <~~")
+        
         try await connection.write(data)
     }
 
