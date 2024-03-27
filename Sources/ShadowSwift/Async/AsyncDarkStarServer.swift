@@ -135,13 +135,13 @@ public class AsyncDarkstarServer
 
         let data = Data(result)
         
-//        logger.debug("~~> handleServerConfirmationCode <~~")
-//        logger.debug("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
-//        logger.debug("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
-//        logger.debug("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
-//        logger.debug("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
-//        logger.debug("server confirmation code server copy (\(data.count) bytes): \(data.hex)")
-//        logger.debug("~~> handleServerConfirmationCode <~~")
+        print("~~> handleServerConfirmationCode <~~")
+        print("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
+        print("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
+        print("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
+        print("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
+        print("server confirmation code server copy (\(data.count) bytes): \(data.hex)")
+        print("~~> handleServerConfirmationCode <~~")
 
         try await connection.write(data)
     }
