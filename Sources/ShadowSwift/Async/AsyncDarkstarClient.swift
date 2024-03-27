@@ -70,6 +70,8 @@ public class AsyncDarkstarClient
 
         guard data == code else
         {
+            print("ConfirmationCodeData: \(data.count) bytes : \(data.hex)")
+            print("ConfirmationCodeCode: \(code.count) bytes : \(code.hex)")
             throw AsyncDarkstarClientError.invalidServerConfirmationCode
         }
     }
