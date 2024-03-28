@@ -199,6 +199,7 @@ public struct AsyncDarkstar
     {
         // Receive their ephemeral key
         let theirEphemeralPublicKeyData = try await connection.readSize(P256KeySize)
+        print("theirEphemeralPublicKeyData: Size: \(theirEphemeralPublicKeyData.count) Hex: \(theirEphemeralPublicKeyData.hex) ASCII: \(String(data: theirEphemeralPublicKeyData, encoding: .utf8) ?? "<Unknown>")")
 
         if let bloomFilter = bloomFilter // Server
         {
