@@ -1,4 +1,4 @@
-# The Operator Foundation
+### The Operator Foundation
 
 [Operator](https://operatorfoundation.org) makes usable tools to help people around the world with censorship, security, and privacy.
 
