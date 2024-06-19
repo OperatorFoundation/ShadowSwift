@@ -7,11 +7,7 @@
 
 import Crypto
 import Foundation
-#if os(macOS)
-import os.log
-#else
 import Logging
-#endif
 
 import Datable
 import KeychainTypes
@@ -22,9 +18,12 @@ public class AsyncDarkstarServer
 {
     let serverToClientSharedKey: SymmetricKey
     let clientToServerSharedKey: SymmetricKey
+    let logger: Logger
 
-    public init(serverPersistentPrivateKey: PrivateKey, host: String, port: Int, connection: AsyncConnection, bloomFilter: BloomFilter<Data>) async throws
+    public init(serverPersistentPrivateKey: PrivateKey, host: String, port: Int, connection: AsyncConnection, bloomFilter: BloomFilter<Data>, logger: Logger) async throws
     {
+        self.logger = logger
+        
         let serverPersistentPublicKey = serverPersistentPrivateKey.publicKey
 
         // Receive client ephemeral key
@@ -39,7 +38,7 @@ public class AsyncDarkstarServer
             }
             catch
             {
-                print("AsyncDarkstarServer: received an invalid client confirmation code 🕳. \(error)")
+                logger.error("AsyncDarkstarServer: received an invalid client confirmation code 🕳. \(error)")
                 let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
                 throw AsyncDarkstarServerError.blackHoled
             }
@@ -52,7 +51,7 @@ public class AsyncDarkstarServer
                 // Create shared key
                 guard let serverToClientSharedKey = try? AsyncDarkstarServer.createServerToClientSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, host: host, port: port) else
                 {
-                    print("AsyncDarkstarServer: Failed to create serverToClientSharedKey 🕳.")
+                    logger.error("AsyncDarkstarServer: Failed to create serverToClientSharedKey 🕳.")
                     let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
                     throw AsyncDarkstarServerError.blackHoled
                 }
@@ -61,7 +60,7 @@ public class AsyncDarkstarServer
 
                 guard let clientToServerSharedKey = try? AsyncDarkstarServer.createClientToServerSharedKey(serverPersistentPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, host: host, port: port) else
                 {
-                    print("AsyncDarkstarServer: Failed to create clientToServerSharedKey 🕳.")
+                    logger.error("AsyncDarkstarServer: Failed to create clientToServerSharedKey 🕳.")
                     let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
                     throw AsyncDarkstarServerError.blackHoled
                 }
@@ -75,21 +74,21 @@ public class AsyncDarkstarServer
                 }
                 catch
                 {
-                    print("AsyncDarkstarServer: Failed to send the server confirmation code 🕳. \(error)")
+                    logger.error("AsyncDarkstarServer: Failed to send the server confirmation code 🕳. \(error)")
                     let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
                     throw AsyncDarkstarServerError.blackHoled
                 }
             }
             catch (let serverEphemeralError)
             {
-                print("AsyncDarkstarServer: Failed to send the server ephemeral key 🕳. Error: \(serverEphemeralError)")
+                logger.error("AsyncDarkstarServer: Failed to send the server ephemeral key 🕳. Error: \(serverEphemeralError)")
                 let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
                 throw AsyncDarkstarServerError.blackHoled
             }
         }
         catch (let clientEphemeralKeyError)
         {
-            print("AsyncDarkstarServer: Failed to handle the client ephemeral key: \(clientEphemeralKeyError)")
+            logger.error("AsyncDarkstarServer: Failed to handle the client ephemeral key: \(clientEphemeralKeyError)")
             let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
             throw AsyncDarkstarServerError.blackHoled
         }
@@ -136,13 +135,13 @@ public class AsyncDarkstarServer
 
         let data = Data(result)
         
-//        print("~~> handleServerConfirmationCode <~~")
-//        print("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
-//        print("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
-//        print("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
-//        print("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
-//        print("server confirmation code server copy (\(data.count) bytes): \(data.hex)")
-//        print("~~> handleServerConfirmationCode <~~")
+        print("~~> handleServerConfirmationCode <~~")
+        print("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
+        print("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
+        print("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
+        print("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
+        print("server confirmation code server copy (\(data.count) bytes): \(data.hex)")
+        print("~~> handleServerConfirmationCode <~~")
 
         try await connection.write(data)
     }
@@ -196,13 +195,13 @@ public class AsyncDarkstarServer
         let result = hash.finalize()
         let resultData = Data(result)
         
-//        print("~~> generateClientConfirmationCode <~~")
-//        print("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
-//        print("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
-//        print("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
-//        print("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
-//        print("client confirmation code server copy (\(resultData.count) bytes): \(resultData.hex)")
-//        print("~~> generateClientConfirmationCode <~~")
+        print("~~> generateClientConfirmationCode <~~")
+        print("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
+        print("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
+        print("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
+        print("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
+        print("client confirmation code server copy (\(resultData.count) bytes): \(resultData.hex)")
+        print("~~> generateClientConfirmationCode <~~")
         
         return resultData
     }
@@ -223,7 +222,6 @@ public class AsyncDarkstarServer
         let ephemeralECDHData = DarkStar.sharedSecretToData(secret: ephemeralECDH)
         let persistentECDH = try serverPersistentPrivateKey.sharedSecretFromKeyAgreement(with: clientEphemeralPublicKey)
         let persistentECDHData = DarkStar.sharedSecretToData(secret: persistentECDH)
-        
         let serverIdentifier = try AsyncDarkstar.makeServerIdentifier(host, port)
         
         guard let serverEphemeralPublicKeyData = serverEphemeralPrivateKey.publicKey.data else
@@ -249,7 +247,6 @@ public class AsyncDarkstarServer
         }
 
         var hash = SHA256()
-
         hash.update(data: ephemeralECDHData)
         hash.update(data: persistentECDHData)
         hash.update(data: serverIdentifier)

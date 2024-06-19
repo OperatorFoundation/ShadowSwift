@@ -134,7 +134,7 @@ class ShadowSwiftTests: XCTestCase
         let sent = XCTestExpectation(description: "Sent!")
         let received = XCTestExpectation(description: "Received")
         
-        // TODO: Enter your server public key.
+        // MARK: Enter your actual server public key.
         let publicKeyString = "6LukZ8KqZLQ7eOdaTVFkBVqMA8NS1AUxwqG17L/kHnQ="
         guard let publicKeyData = Data(base64: publicKeyString) else
         {
@@ -144,7 +144,7 @@ class ShadowSwiftTests: XCTestCase
 
         let publicKey = try PublicKey(type: .P256KeyAgreement, data: publicKeyData)
         
-        // TODO: Enter your server IP and Port.
+        // MARK: Enter your actual server IP and Port.
         let shadowConfig = try ShadowConfig.ShadowClientConfig(serverAddress: "127.0.0.1:1234", serverPublicKey: publicKey, mode: .DARKSTAR)
         let shadowFactory = ShadowConnectionFactory(config: shadowConfig, logger: self.logger)
         let httpRequestData = Data("GET / HTTP/1.0\r\nConnection: close\r\n\r\n")
@@ -267,6 +267,43 @@ class ShadowSwiftTests: XCTestCase
         
         //let godot = expectation(description: "forever")
         wait(for: [connected], timeout: 3000)
+    }
+    
+    func testShadowToEchoServer()
+    {
+        let message = "Hello".data
+        let logger = Logger(label: "ShadowToEcho")
+        let shadowClientConfigPath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("ShadowClientConfig.json")
+        
+        guard let shadowClientConfig = ShadowConfig.ShadowClientConfig(path: shadowClientConfigPath.path) else
+        {
+            XCTFail()
+            return
+        }
+        
+        let shadowConnectionFactory = ShadowConnectionFactory(config: shadowClientConfig, logger: logger)
+        
+        guard let shadowConnect = shadowConnectionFactory.connect(using: .tcp) else
+        {
+            XCTFail()
+            return
+        }
+        
+        shadowConnect.send(content: message, contentContext: .defaultMessage, isComplete: true, completion: NWConnection.SendCompletion.contentProcessed(
+            {
+                (error) in
+                
+                if let errorMessage = error
+                {
+                    print("Error: \(errorMessage)")
+                    XCTFail()
+                    return
+                }
+                else
+                {
+                    print("Send successful.")
+                }
+            }))
     }
     
     func testShadowSend() throws
@@ -686,23 +723,15 @@ class ShadowSwiftTests: XCTestCase
     func testCreateNewConfigPair()
     {
         let saveDirectory = FileManager.default.homeDirectoryForCurrentUser
-        let result = ShadowConfig.createNewConfigFiles(inDirectory: saveDirectory, serverAddress: "127.0.0.1:1234", cipher: .DARKSTAR)
         
-        if result.saved
+        do
         {
+            let _ = try ShadowConfig.createNewConfigFiles(inDirectory: saveDirectory, serverAddress: "127.0.0.1:1234", cipher: .DARKSTAR)
             print("New config files have been saved to \(saveDirectory)")
         }
-        else
+        catch
         {
-            if let error = result.error
-            {
-                print("Failed to create or save new a new ShadowConfig pair. Error: \(error)")
-            }
-            else
-            {
-                print("Failed to create or save new a new ShadowConfig pair. No error information was provided.")
-            }
-            
+            print("Failed to create or save new a new ShadowConfig pair. Error: \(error)")
             XCTFail()
         }
     }
@@ -992,6 +1021,5 @@ class ShadowSwiftTests: XCTestCase
         }
     }
     
-    // TODO: func testBlackHole()
 }
 

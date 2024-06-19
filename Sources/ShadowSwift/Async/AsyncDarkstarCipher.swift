@@ -48,7 +48,7 @@ public class AsyncDarkstarCipher
     let log: Logger
     static let lengthSize = 2
     static let tagSize = 16
-    static let maxPayloadSize = 16417
+    public static let maxPayloadSize = 16417
     static let overhead = Cipher.lengthSize + Cipher.tagSize + Cipher.tagSize
     static let maxRead = Cipher.maxPayloadSize + Cipher.overhead
     static let minRead = 1 + Cipher.overhead
@@ -273,12 +273,12 @@ public class AsyncDarkstarCipher
                 return nil
             }
             
-//            print("\n~~> AsyncDarkStarCipher Decrypt <~~")
-//            print("Ciphertext (\(encrypted.count) bytes): \(encrypted.hex)")
-//            print("nonce (\(nonce.data.count) bytes): \(nonce.data.hex)")
-//            print("tag (\(tag.count) bytes): \(tag.hex)")
-//            print("key (\(self.key.data.count) bytes): \(self.key.data.hex)")
-//            print("~~> AsyncDarkStarCipher Decrypt <~~\n")
+//            logger.debug("\n~~> AsyncDarkStarCipher Decrypt <~~")
+//            logger.debug("Ciphertext (\(encrypted.count) bytes): \(encrypted.hex)")
+//            logger.debug("nonce (\(nonce.data.count) bytes): \(nonce.data.hex)")
+//            logger.debug("tag (\(tag.count) bytes): \(tag.hex)")
+//            logger.debug("key (\(self.key.data.count) bytes): \(self.key.data.hex)")
+//            logger.debug("~~> AsyncDarkStarCipher Decrypt <~~\n")
             
             let sealedBox = try AES.GCM.SealedBox(nonce: nonce, ciphertext: encrypted, tag: tag)
             let plaintext = try AES.GCM.open(sealedBox, using: self.key)

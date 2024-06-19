@@ -75,8 +75,7 @@ public class DarkstarServerChannel: Channel
             throw AsyncDarkstarClientConnectionError.badEncryptionMode
         }
 
-        // FIXME - move private key to keychain
-        let server = try await AsyncDarkstarServer(serverPersistentPrivateKey: config.serverPrivateKey, host: config.serverIP, port: Int(config.serverPort), connection: self.network, bloomFilter: DarkStarServerConnection.bloomFilter)
+        let server = try await AsyncDarkstarServer(serverPersistentPrivateKey: config.serverPrivateKey, host: config.serverIP, port: Int(config.serverPort), connection: self.network, bloomFilter: DarkStarServerConnection.bloomFilter, logger: logger)
 
         let eCipher = try AsyncDarkstarCipher(key: server.serverToClientSharedKey, host: config.serverIP, port: Int(config.serverPort), isServerConnection: true, logger: self.logger)
         let dCipher = try AsyncDarkstarCipher(key: server.clientToServerSharedKey, host: config.serverIP, port: Int(config.serverPort), isServerConnection: true, logger: self.logger)

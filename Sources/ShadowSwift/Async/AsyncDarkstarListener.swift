@@ -18,18 +18,26 @@ public class AsyncDarkstarListener: AsyncListener
     let logger: Logger
     let networkListener: AsyncListener
 
-    public init(config: ShadowConfig.ShadowServerConfig, logger: Logger, verbose: Bool = false) throws
+    public convenience init(config: ShadowConfig.ShadowServerConfig, logger: Logger) throws
+    {
+        let asyncTcpSocketListener = try AsyncTcpSocketListener(host: config.serverIP, port: Int(config.serverPort), logger)
+        self.init(config: config, listener: asyncTcpSocketListener, logger: logger)
+    }
+    
+    public init(config: ShadowConfig.ShadowServerConfig, listener: AsyncListener, logger: Logger)
     {
         self.host = config.serverIP
         self.port = Int(config.serverPort)
         self.config = config
         self.logger = logger
-        self.networkListener = try AsyncTcpSocketListener(host: self.host, port: self.port, self.logger, verbose: verbose)
+        self.networkListener = listener
     }
 
     public func accept() async throws -> AsyncConnection
     {
         let network = try await networkListener.accept()
+        logger.debug("AsyncDarkstarListener accepted a new connection.")
+        
         return try await AsyncDarkstarServerConnection(network, self.config, self.logger)
     }
 

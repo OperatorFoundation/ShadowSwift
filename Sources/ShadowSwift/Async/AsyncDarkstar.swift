@@ -5,29 +5,18 @@
 //  Created by Dr. Brandon Wiley on 7/6/23.
 //
 
-import Foundation
-
-//
-//  File.swift
-//
-//
-//  Created by Dr. Brandon Wiley on 9/24/21.
-//
 import Crypto
+import Foundation
+import Net
 
 import Datable
-import Foundation
 import KeychainTypes
-import Net
 import TransmissionAsync
 
 let AsyncP256KeySize = 32 // compact format
 
 public struct AsyncDarkstar
 {
-    var encryptKey: SymmetricKey!
-    var decryptKey: SymmetricKey!
-
     static public func randomBytes(size: Int) -> Data
     {
         var dataArray = [Data.Element]()
@@ -60,7 +49,7 @@ public struct AsyncDarkstar
         {
             throw AsyncDarkstarError.keyAgreementFailed
         }
-        let serverPersistentPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(rawRepresentation: serverPersistentPublicKeyKeychainData)
+        let serverPersistentPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(x963Representation: serverPersistentPublicKeyKeychainData)
         guard let serverPersistentPublicKeyDarkstarData = serverPersistentPublicKeyCryptoKit.compactRepresentation else
         {
             throw AsyncDarkstarError.keyAgreementFailed
@@ -70,7 +59,7 @@ public struct AsyncDarkstar
         {
             throw AsyncDarkstarError.keyAgreementFailed
         }
-        let clientEphemeralPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(rawRepresentation: clientEphemeralPublicKeyKeychainData)
+        let clientEphemeralPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(x963Representation: clientEphemeralPublicKeyKeychainData)
         guard let clientEphemeralPublicKeyDarkstarData = clientEphemeralPublicKeyCryptoKit.compactRepresentation else
         {
             throw AsyncDarkstarError.keyAgreementFailed
@@ -92,7 +81,7 @@ public struct AsyncDarkstar
     {
         guard let ecdh = try? myPrivateStaticKey.sharedSecretFromKeyAgreement(with: theirPublicKey) else
         {
-            print("Darkstar: Failed to generate the shared secret.")
+            // print("Darkstar: Failed to generate the shared secret.")
             return nil
         }
 
@@ -100,19 +89,19 @@ public struct AsyncDarkstar
 
         guard let serverIdentifier = DarkStar.makeServerIdentifier(endpoint) else
         {
-            print("Darkstar: Failed to generate the server identifier.")
+            // print("Darkstar: Failed to generate the server identifier.")
             return nil
         }
 
         guard let serverPersistentPublicKeyDarkstarData = myPrivateStaticKey.publicKey.compactRepresentation else
         {
-            print("Darkstar: Failed to generate the serverPersistentPublicKey data.")
+            // print("Darkstar: Failed to generate the serverPersistentPublicKey data.")
             return nil
         }
 
         guard let clientEphemeralPublicKeyDarkstarData = theirPublicKey.compactRepresentation else
         {
-            print("Darkstar: Failed to generate the clientEphemeralPublicKey data.")
+            // print("Darkstar: Failed to generate the clientEphemeralPublicKey data.")
             return nil
         }
 
@@ -137,20 +126,14 @@ public struct AsyncDarkstar
 
         guard let myEphemeralPublicKeyData = myEphemeralPublicKey.compactRepresentation else
         {
-            print("Darkstar.handleServerEphemeralKey: failed to generate a compact representation of our public key")
             throw AsyncDarkstarError.keyAgreementFailed
         }
 
         try await connection.write(myEphemeralPublicKeyData)
         
-        print("AsyncDarkstar: Creating a keychain private key...")
         let keychainPrivate = try KeychainTypes.PrivateKey(type: .P256KeyAgreement, data: myEphemeralPrivateKey.rawRepresentation)
-        
-        print("AsyncDarkstar: Creating a keychain private key...")
         let keychainPublic = try KeychainTypes.PublicKey(type: .P256KeyAgreement, data: myEphemeralPublicKey.x963Representation)
         
-        print("AsyncDarkstar: Keychain key pair created.")
-
         return (keychainPrivate, keychainPublic)
     }
 
@@ -168,7 +151,7 @@ public struct AsyncDarkstar
         try await connection.write(myEphemeralPublicKeyData)
 
         let keychainPrivate = try KeychainTypes.PrivateKey(type: .P256KeyAgreement, data: myEphemeralPrivateKey.rawRepresentation)
-        let keychainPublic = try KeychainTypes.PublicKey(type: .P256KeyAgreement, data: myEphemeralPublicKey.rawRepresentation)
+        let keychainPublic = try KeychainTypes.PublicKey(type: .P256KeyAgreement, data: myEphemeralPublicKey.x963Representation)
 
         return (keychainPrivate, keychainPublic)
     }
@@ -184,7 +167,7 @@ public struct AsyncDarkstar
         {
             throw AsyncDarkstarError.keyAgreementFailed
         }
-        let serverPersistentPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(rawRepresentation: serverPersistentPublicKeyKeychainData)
+        let serverPersistentPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(x963Representation: serverPersistentPublicKeyKeychainData)
         guard let serverPersistentPublicKeyDarkstarData = serverPersistentPublicKeyCryptoKit.compactRepresentation else
         {
             throw AsyncDarkstarError.keyAgreementFailed
@@ -194,7 +177,7 @@ public struct AsyncDarkstar
         {
             throw AsyncDarkstarError.keyAgreementFailed
         }
-        let clientEphemeralPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(rawRepresentation: clientEphemeralPublicKeyKeychainData)
+        let clientEphemeralPublicKeyCryptoKit = try P256.KeyAgreement.PublicKey(x963Representation: clientEphemeralPublicKeyKeychainData)
         guard let clientEphemeralPublicKeyDarkstarData = clientEphemeralPublicKeyCryptoKit.compactRepresentation else
         {
             throw AsyncDarkstarError.keyAgreementFailed
@@ -215,9 +198,8 @@ public struct AsyncDarkstar
     static public func handleTheirEphemeralPublicKey(connection: AsyncConnection, bloomFilter: BloomFilter<Data>?) async throws -> PublicKey
     {
         // Receive their ephemeral key
-        print("AsyncDarkstar - Attempting to read client key data...")
         let theirEphemeralPublicKeyData = try await connection.readSize(P256KeySize)
-        print("AsyncDarkstar - Read \(theirEphemeralPublicKeyData.count) bytes of client key data.")
+        print("theirEphemeralPublicKeyData: Size: \(theirEphemeralPublicKeyData.count) Hex: \(theirEphemeralPublicKeyData.hex) ASCII: \(String(data: theirEphemeralPublicKeyData, encoding: .utf8) ?? "<Unknown>")")
 
         if let bloomFilter = bloomFilter // Server
         {
