@@ -29,16 +29,16 @@ public class AsyncDarkstarServer
         // Receive client ephemeral key
         do
         {
-            let clientEphemeralPublicKey = try await AsyncDarkstar.handleTheirEphemeralPublicKey(connection: connection, bloomFilter: bloomFilter)
+            let clientEphemeralPublicKey = try await AsyncDarkstar.handleTheirEphemeralPublicKey(connection: connection, bloomFilter: bloomFilter, logger: logger)
             
             // Receive and validate client confirmation code
             do
             {
-                try await AsyncDarkstarServer.handleClientConfirmationCode(connection: connection, theirPublicKey: clientEphemeralPublicKey, myPrivateKey: serverPersistentPrivateKey, host: host, port: port, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey)
+                try await AsyncDarkstarServer.handleClientConfirmationCode(connection: connection, theirPublicKey: clientEphemeralPublicKey, myPrivateKey: serverPersistentPrivateKey, host: host, port: port, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey, logger: logger)
             }
             catch
             {
-                logger.error("AsyncDarkstarServer: received an invalid client confirmation code 🕳. \(error)")
+                logger.info("AsyncDarkstarServer: received an invalid client confirmation code 🕳. \(error)")
                 let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
                 throw AsyncDarkstarServerError.blackHoled
             }
@@ -70,33 +70,31 @@ public class AsyncDarkstarServer
                 // Send server confirmation code
                 do
                 {
-                    try await AsyncDarkstarServer.handleServerConfirmationCode(connection: connection, host: host, port: port, serverStaticPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey)
+                    try await AsyncDarkstarServer.handleServerConfirmationCode(connection: connection, host: host, port: port, serverStaticPrivateKey: serverPersistentPrivateKey, serverEphemeralPrivateKey: serverEphemeralPrivateKey, clientEphemeralPublicKey: clientEphemeralPublicKey, logger: logger)
                 }
                 catch
                 {
-                    logger.error("AsyncDarkstarServer: Failed to send the server confirmation code 🕳. \(error)")
+                    logger.error("AsyncDarkstarServer: Failed to send the server confirmation code 🕳. Reason: \(error)")
                     let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
                     throw AsyncDarkstarServerError.blackHoled
                 }
             }
             catch (let serverEphemeralError)
             {
-                logger.error("AsyncDarkstarServer: Failed to send the server ephemeral key 🕳. Error: \(serverEphemeralError)")
+                logger.error("AsyncDarkstarServer: Failed to send the server ephemeral key 🕳. Reason: \(serverEphemeralError)")
                 let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
                 throw AsyncDarkstarServerError.blackHoled
             }
         }
         catch (let clientEphemeralKeyError)
         {
-            logger.error("AsyncDarkstarServer: Failed to handle the client ephemeral key: \(clientEphemeralKeyError)")
+            logger.info("AsyncDarkstarServer: Failed to handle the client ephemeral key: \(clientEphemeralKeyError)")
             let _ = AsyncBlackHole(timeoutDelaySeconds: 30, socket: connection)
             throw AsyncDarkstarServerError.blackHoled
         }
-
-        
     }
 
-    static public func handleServerConfirmationCode(connection: AsyncConnection, host: String, port: Int, serverStaticPrivateKey: PrivateKey, serverEphemeralPrivateKey: PrivateKey, clientEphemeralPublicKey: PublicKey) async throws
+    static public func handleServerConfirmationCode(connection: AsyncConnection, host: String, port: Int, serverStaticPrivateKey: PrivateKey, serverEphemeralPrivateKey: PrivateKey, clientEphemeralPublicKey: PublicKey, logger: Logger) async throws
     {
         let ecdh = try serverStaticPrivateKey.sharedSecretFromKeyAgreement(with: clientEphemeralPublicKey)
         let ecdhData = AsyncDarkstar.sharedSecretToData(secret: ecdh)
@@ -135,21 +133,21 @@ public class AsyncDarkstarServer
 
         let data = Data(result)
         
-        print("~~> handleServerConfirmationCode <~~")
-        print("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
-        print("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
-        print("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
-        print("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
-        print("server confirmation code server copy (\(data.count) bytes): \(data.hex)")
-        print("~~> handleServerConfirmationCode <~~")
+        logger.debug("~~> handleServerConfirmationCode <~~")
+        logger.debug("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
+        logger.debug("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
+        logger.debug("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
+        logger.debug("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
+        logger.debug("server confirmation code server copy (\(data.count) bytes): \(data.hex)")
+        logger.debug("~~> handleServerConfirmationCode <~~")
 
         try await connection.write(data)
     }
 
-    static public func handleClientConfirmationCode(connection: AsyncConnection, theirPublicKey: PublicKey, myPrivateKey: PrivateKey, host: String, port: Int, serverPersistentPublicKey: PublicKey, clientEphemeralPublicKey: PublicKey) async throws
+    static public func handleClientConfirmationCode(connection: AsyncConnection, theirPublicKey: PublicKey, myPrivateKey: PrivateKey, host: String, port: Int, serverPersistentPublicKey: PublicKey, clientEphemeralPublicKey: PublicKey, logger: Logger) async throws
     {
         let data = try await connection.readSize(ConfirmationSize)
-        let code = try generateClientConfirmationCode(connection: connection, theirPublicKey: theirPublicKey, myPrivateKey: myPrivateKey, host: host, port: port, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey)
+        let code = try generateClientConfirmationCode(connection: connection, theirPublicKey: theirPublicKey, myPrivateKey: myPrivateKey, host: host, port: port, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey, logger: logger)
 
         guard data == code else
         {
@@ -157,7 +155,7 @@ public class AsyncDarkstarServer
         }
     }
 
-    static public func generateClientConfirmationCode(connection: AsyncConnection, theirPublicKey: PublicKey, myPrivateKey:PrivateKey, host: String, port: Int, serverPersistentPublicKey: PublicKey, clientEphemeralPublicKey: PublicKey) throws -> Data
+    static public func generateClientConfirmationCode(connection: AsyncConnection, theirPublicKey: PublicKey, myPrivateKey:PrivateKey, host: String, port: Int, serverPersistentPublicKey: PublicKey, clientEphemeralPublicKey: PublicKey, logger: Logger) throws -> Data
     {
         let ecdh = try myPrivateKey.sharedSecretFromKeyAgreement(with: theirPublicKey)
         let ecdhData = DarkStar.sharedSecretToData(secret: ecdh)
@@ -195,13 +193,13 @@ public class AsyncDarkstarServer
         let result = hash.finalize()
         let resultData = Data(result)
         
-        print("~~> generateClientConfirmationCode <~~")
-        print("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
-        print("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
-        print("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
-        print("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
-        print("client confirmation code server copy (\(resultData.count) bytes): \(resultData.hex)")
-        print("~~> generateClientConfirmationCode <~~")
+        logger.debug("~~> generateClientConfirmationCode <~~")
+        logger.debug("ecdhData (\(ecdhData.count) bytes): \(ecdhData.hex)")
+        logger.debug("serverIdentifier (\(serverIdentifier.count) bytes): \(serverIdentifier.hex)")
+        logger.debug("serverPersistentPublicKey (\(serverPersistentPublicKeyDarkstarFormat.count) bytes): \(serverPersistentPublicKeyDarkstarFormat.hex)")
+        logger.debug("clientEphemeralPublicKeyData (\(clientEphemeralPublicKeyDarkstarFormat.count) bytes): \(clientEphemeralPublicKeyDarkstarFormat.hex)")
+        logger.debug("client confirmation code server copy (\(resultData.count) bytes): \(resultData.hex)")
+        logger.debug("~~> generateClientConfirmationCode <~~")
         
         return resultData
     }

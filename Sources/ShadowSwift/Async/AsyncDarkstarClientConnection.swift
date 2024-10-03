@@ -101,7 +101,7 @@ public class DarkstarClientChannel: Channel
             throw AsyncDarkstarClientConnectionError.badServerAddress(config.serverAddress)
         }
 
-        let client = try await AsyncDarkstarClient(serverPersistentPublicKey: config.serverPublicKey, host: host, port: port, connection: self.network)
+        let client = try await AsyncDarkstarClient(serverPersistentPublicKey: config.serverPublicKey, host: host, port: port, connection: self.network, logger: logger)
 
         let eCipher = try AsyncDarkstarCipher(key: client.clientToServerSharedKey, host: host, port: port, isServerConnection: false, logger: self.logger)
         let dCipher = try AsyncDarkstarCipher(key: client.serverToClientSharedKey, host: host, port: port, isServerConnection: false, logger: self.logger)

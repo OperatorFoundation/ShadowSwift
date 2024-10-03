@@ -8,6 +8,7 @@
 
 import Crypto
 import Foundation
+import Logging
 
 import Datable
 import KeychainTypes
@@ -18,6 +19,7 @@ public class AsyncDarkstarClient
 {
     let clientToServerSharedKey: SymmetricKey
     let serverToClientSharedKey: SymmetricKey
+    let logger: Logger
 
     static public func handleServerConfirmationCode(connection: AsyncConnection, host: String, port: Int, serverStaticPublicKey: PublicKey, clientEphemeralPrivateKey: PrivateKey) async throws
     {
@@ -141,7 +143,7 @@ public class AsyncDarkstarClient
         return SymmetricKey(data: hashedData)
     }
 
-    public init(serverPersistentPublicKey: PublicKey, host: String, port: Int, connection: AsyncConnection) async throws
+    public init(serverPersistentPublicKey: PublicKey, host: String, port: Int, connection: AsyncConnection, logger: Logger) async throws
     {
         // Send client ephemeral key
         let (clientEphemeralPrivateKey, clientEphemeralPublicKey) = try await AsyncDarkstar.handleClientEphemeralKey(connection: connection)
@@ -150,7 +152,7 @@ public class AsyncDarkstarClient
         try await AsyncDarkstarClient.handleClientConfirmationCode(connection: connection, theirPublicKey: serverPersistentPublicKey, myPrivateKey: clientEphemeralPrivateKey, host: host, port: port, serverPersistentPublicKey: serverPersistentPublicKey, clientEphemeralPublicKey: clientEphemeralPublicKey)
 
         // Receive server ephemeral key
-        let serverEphemeralPublicKey = try await AsyncDarkstar.handleTheirEphemeralPublicKey(connection: connection, bloomFilter: nil)
+        let serverEphemeralPublicKey = try await AsyncDarkstar.handleTheirEphemeralPublicKey(connection: connection, bloomFilter: nil, logger: logger)
 
         // Create shared key
         let clientToServerSharedKey = try AsyncDarkstarClient.createClientToServerSharedKey(clientEphemeralPrivateKey: clientEphemeralPrivateKey, serverEphemeralPublicKey: serverEphemeralPublicKey, serverPersistentPublicKey: serverPersistentPublicKey, host: host, port: port)
@@ -163,6 +165,8 @@ public class AsyncDarkstarClient
 
         // Receive and validate server confirmation code
         try await AsyncDarkstarClient.handleServerConfirmationCode(connection: connection, host: host, port: port, serverStaticPublicKey: serverPersistentPublicKey, clientEphemeralPrivateKey: clientEphemeralPrivateKey)
+        
+        self.logger = logger
     }
 }
 

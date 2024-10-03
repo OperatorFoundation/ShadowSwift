@@ -7,6 +7,7 @@
 
 import Crypto
 import Foundation
+import Logging
 import Net
 
 import Datable
@@ -195,11 +196,12 @@ public struct AsyncDarkstar
         return Data(result)
     }
 
-    static public func handleTheirEphemeralPublicKey(connection: AsyncConnection, bloomFilter: BloomFilter<Data>?) async throws -> PublicKey
+    static public func handleTheirEphemeralPublicKey(connection: AsyncConnection, bloomFilter: BloomFilter<Data>?, logger: Logger) async throws -> PublicKey
     {
         // Receive their ephemeral key
         let theirEphemeralPublicKeyData = try await connection.readSize(P256KeySize)
-        print("theirEphemeralPublicKeyData: Size: \(theirEphemeralPublicKeyData.count) Hex: \(theirEphemeralPublicKeyData.hex) ASCII: \(String(data: theirEphemeralPublicKeyData, encoding: .utf8) ?? "<Unknown>")")
+        
+        logger.debug("Read EphemeralPublicKeyData: \nSize: \(theirEphemeralPublicKeyData.count) \nHex: \(theirEphemeralPublicKeyData.hex) \nASCII: \(String(data: theirEphemeralPublicKeyData, encoding: .utf8) ?? "<Unknown>")")
 
         if let bloomFilter = bloomFilter // Server
         {
@@ -218,12 +220,12 @@ public struct AsyncDarkstar
                     let filterSaved = bloomFilter.save(pathURL: bloomFilterURL)
                     if !filterSaved
                     {
-                        print("Warning: Failed to save the updated BloomFilter")
+                        logger.warning("Warning: Failed to save the updated BloomFilter")
                     }
                 }
                 else
                 {
-                    print("Warning: Unable to save BloomFilter. Unabale to resolve the directory URL.")
+                    logger.warning("Warning: Unable to save BloomFilter. Unable to resolve the directory URL.")
                 }
             }
         }
