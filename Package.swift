@@ -19,15 +19,15 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-crypto", from: "3.3.0"),
         .package(url: "https://github.com/apple/swift-log", from: "1.5.3"),
 
-        .package(url: "https://github.com/OperatorFoundation/Chord", from: "0.1.5"),
+        .package(url: "https://github.com/OperatorFoundation/Chord", from: "0.1.6"),
         .package(url: "https://github.com/OperatorFoundation/Datable", from: "4.0.1"),
         .package(url: "https://github.com/OperatorFoundation/KeychainTypes", from: "1.0.2"),
-        .package(url: "https://github.com/OperatorFoundation/Net", from: "0.0.10"),
-        .package(url: "https://github.com/OperatorFoundation/Straw", from: "1.0.4"),
-        .package(url: "https://github.com/OperatorFoundation/Transmission", from: "1.2.12"),
-        .package(url: "https://github.com/OperatorFoundation/TransmissionAsync", from: "0.1.5"),
-        .package(url: "https://github.com/OperatorFoundation/TransmissionTransport", from: "1.1.7"),
-        .package(url: "https://github.com/OperatorFoundation/Transport", from: "2.3.13"),
+        .package(url: "https://github.com/OperatorFoundation/Net", from: "0.0.11"),
+        .package(url: "https://github.com/OperatorFoundation/Straw", from: "1.0.6"),
+        .package(url: "https://github.com/OperatorFoundation/Transmission", from: "1.2.13"),
+        .package(url: "https://github.com/OperatorFoundation/TransmissionAsync", from: "0.1.6"),
+        .package(url: "https://github.com/OperatorFoundation/TransmissionTransport", from: "1.1.9"),
+        .package(url: "https://github.com/OperatorFoundation/Transport", from: "2.3.14"),
     ],
     targets: [
         .target(
